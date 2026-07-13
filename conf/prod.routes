@@ -1,3 +1,3 @@
 # Add all the application routes to the app.routes file
-->         /carf-reporting-frontend              app.Routes
-->         /                          health.Routes
+->        /send-a-cryptoasset-report        app.Routes
+->        /                                 health.Routes
