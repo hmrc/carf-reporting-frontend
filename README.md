@@ -1,7 +1,88 @@
 
 # carf-reporting-frontend
 
-This is a placeholder README.md for a new repository
+This is the Frontend repository for the Crypto Asset Reporting Framework (CARF) team's file upload journey.
+
+## What this service does
+
+This service allows registered users to upload files to submit data for their RCASPs (Reporting Crypto Asset Service Providers).
+
+### Running the service locally
+
+Prerequisites:
+- Java 21
+- SBT
+- MongoDB
+- Service Manager
+- Node Version manager (nvm)
+- NodeJs
+
+Commands:
+
+Start CARF services in service manager. (frontend,backend, any other services needed to run locally)
+
+```
+sm2 --start CARF_ALL
+```
+Stop this service from service manager.
+
+```
+sm2 --stop CARF_REPORTING_FRONTEND 
+```
+Run CARF_REPORTING_FRONTEND locally using sbt to test any non-merged changes with:
+
+```
+sbt run
+```
+
+### Service manager and port info
+
+Service manager: CARF_ALL
+
+Port: 17004
+
+### How to test a journey locally and on staging
+
+Local:
+http://localhost:9949/auth-login-stub/gg-sign-in?continue=http://localhost:17004/send-a-cryptoasset-report
+
+Staging:
+https://www.staging.tax.service.gov.uk/auth-login-stub/gg-sign-in?continue=%2Fsend-a-cryptoasset-report
+
+In both cases, a user must have a carf registration.
+
+To add this, you must scroll down to the enrolments section and add the following:
+Enrolment Key: HMRC-CARF-ORG
+Identifier Name: CARFID
+Identifier Value: 1111
+
+To test different starting parameters, please refer to the carf testing area on our confluence page, or our stubs repository
+
+### Running the service in test only mode
+```
+sm2 --start CARF_ALL
+```
+```
+sm2 --stop CARF_REPORTING_FRONTEND
+```
+Starts service locally with test-only routes enabled.
+```
+sbt "run -Dapplication.router=testOnlyDoNotUseInAppConf.routes"
+```
+
+### Running tests
+Run unit tests:
+```
+sbt test
+```
+Run Integration Tests:
+```
+sbt it/test
+```
+Run Unit and Integration Tests with coverage report:
+```
+sbt clean compile scalafmtAll coverage test it/test coverageReport 
+```
 
 ### License
 
