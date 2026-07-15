@@ -45,8 +45,7 @@ class KeepAliveControllerSpec extends SpecBase {
           val result = route(application, request).value
 
           status(result) mustEqual OK
-          // TODO: Uncomment when KeepAliveController has been implemented with identify and getData (CARF-574)
-          // verify(mockSessionRepository, times(1)).keepAlive(emptyUserAnswers.id)
+          verify(mockSessionRepository, times(1)).keepAlive(emptyUserAnswers.id)
         }
       }
     }

@@ -16,20 +16,21 @@
 
 package controllers
 
+import controllers.actions.IdentifierAction
+import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.HelloWorldPage
+import views.html.IndexView
 
-import javax.inject.Inject
-
-class HelloWorldController @Inject() (
+class IndexController @Inject() (
     val controllerComponents: MessagesControllerComponents,
-    helloWorldPage: HelloWorldPage
+    identify: IdentifierAction,
+    view: IndexView
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def helloWorld: Action[AnyContent] = Action { implicit request =>
-    Ok(helloWorldPage())
+  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
+    Ok(view())
   }
 }

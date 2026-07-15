@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,30 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-    layout: templates.Layout,
-    govukButton: GovukButton
-)
+package models.requests
 
-@()(implicit request: Request[_], messages: Messages)
+import play.api.mvc.{Request, WrappedRequest}
+import models.UserAnswers
 
-@layout(
-    pageTitle    = titleNoForm(messages("signedOut.title")),
-    showBackLink = false,
-    timeout      = false,
-    showSignOut  = false
-) {
+case class OptionalDataRequest[A](request: Request[A], userId: String, userAnswers: Option[UserAnswers])
+    extends WrappedRequest[A](request)
 
-    <h1 class="govuk-heading-l">@messages("signedOut.heading")</h1>
-
-    <p class="govuk-body">@messages("signedOut.guidance")</p>
-
-    <p class="govuk-body">
-        @govukButton(
-            ButtonViewModel(messages("site.signIn"))
-                .asLink(routes.IndexController.onPageLoad().url)
-        )
-    </p>
-}
+case class DataRequest[A](request: Request[A], userId: String, userAnswers: UserAnswers)
+    extends WrappedRequest[A](request)

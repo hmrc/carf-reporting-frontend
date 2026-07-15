@@ -27,6 +27,10 @@ error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem
 
+index.title = carf-reporting-frontend
+index.heading = carf-reporting-frontend
+index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
+
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
 journeyRecovery.continue.guidance = [Add content to explain how to proceed.]

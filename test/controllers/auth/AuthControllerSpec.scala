@@ -49,8 +49,7 @@ class AuthControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual expectedRedirectUrl
 
-        // TODO: Uncomment with AuthController is implemented with IdentifierAction (CARF-574)
-        // verify(mockSessionRepository, times(1)).clear(eqTo(userAnswersId))
+        verify(mockSessionRepository, times(1)).clear(eqTo(userAnswersId))
       }
     }
   }
@@ -76,8 +75,7 @@ class AuthControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual expectedRedirectUrl
 
-        // TODO: Uncomment with AuthController is implemented with IdentifierAction (CARF-574)
-        // verify(mockSessionRepository, times(1)).clear(eqTo(userAnswersId))
+        verify(mockSessionRepository, times(1)).clear(eqTo(userAnswersId))
       }
     }
   }

@@ -104,7 +104,7 @@
         mainContentLayout = Some(variableWidthContent)
     ),
     serviceURLs = ServiceURLs(
-        serviceUrl = Some(controllers.routes.HelloWorldController.helloWorld.url), // TODO: Update url
+        serviceUrl = Some(routes.IndexController.onPageLoad().url),
         signOutUrl = if(showSignOut) Some(controllers.auth.routes.AuthController.signOut().url) else None
     ),
     banners = Banners(
