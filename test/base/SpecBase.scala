@@ -17,6 +17,7 @@
 package base
 
 import common.TestData
+import controllers.actions.*
 import models.{RichJsObject, UserAnswers}
 import org.mockito.Mockito.reset
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -71,6 +72,9 @@ trait SpecBase
   ): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
         bind[SessionRepository].toInstance(mockSessionRepository)
       )
 
