@@ -19,7 +19,7 @@ package controllers.auth
 import base.SpecBase
 import config.FrontendAppConfig
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{reset, times, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 
@@ -27,6 +27,9 @@ import java.net.URLEncoder
 import scala.concurrent.Future
 
 class AuthControllerSpec extends SpecBase {
+
+  override def afterEach(): Unit =
+    reset(mockSessionRepository)
 
   "signOut" - {
 

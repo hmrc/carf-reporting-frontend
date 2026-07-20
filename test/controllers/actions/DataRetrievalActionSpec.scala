@@ -28,7 +28,9 @@ import scala.concurrent.Future
 
 class DataRetrievalActionSpec extends SpecBase {
 
-  class Harness(sessionRepository: SessionRepository) extends DataRetrievalActionImpl(sessionRepository) {
+  private def fakeRequest = FakeRequest("", "")
+
+  class Harness(sessionRepository: SessionRepository) extends DataRetrievalActionProvider(sessionRepository) {
     def callTransform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 
@@ -38,11 +40,12 @@ class DataRetrievalActionSpec extends SpecBase {
 
       "must set userAnswers to 'None' in the request" in {
 
-        val sessionRepository = mock[SessionRepository]
-        when(sessionRepository.get("id")) thenReturn Future(None)
-        val action            = new Harness(sessionRepository)
+        when(mockSessionRepository.get("id")) thenReturn Future(None)
+        val action = new Harness(mockSessionRepository)
 
-        val result = action.callTransform(IdentifierRequest(FakeRequest(), "id")).futureValue
+        val result = action
+          .callTransform(IdentifierRequest(fakeRequest, "id", carfId = testCarfId))
+          .futureValue
 
         result.userAnswers must not be defined
       }
@@ -52,14 +55,19 @@ class DataRetrievalActionSpec extends SpecBase {
 
       "must build a userAnswers object and add it to the request" in {
 
-        val sessionRepository = mock[SessionRepository]
-        when(sessionRepository.get("id")) thenReturn Future(Some(UserAnswers("id")))
-        val action            = new Harness(sessionRepository)
+        when(mockSessionRepository.get("id")) thenReturn Future(
+          Some(UserAnswers("id"))
+        )
+        val action = new Harness(mockSessionRepository)
 
-        val result = action.callTransform(IdentifierRequest(FakeRequest(), "id")).futureValue
+        val result =
+          action
+            .callTransform(IdentifierRequest(fakeRequest, "id", carfId = testCarfId))
+            .futureValue
 
         result.userAnswers mustBe defined
       }
     }
   }
+
 }

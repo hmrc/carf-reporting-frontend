@@ -59,10 +59,11 @@ trait SpecBase
 
   def injectedParsers: PlayBodyParsers = app.injector.instanceOf[PlayBodyParsers]
 
-  final val mockSessionRepository: SessionRepository = mock[SessionRepository]
+  final val mockSessionRepository: SessionRepository     = mock[SessionRepository]
+  final val mockDataRetrievalAction: DataRetrievalAction = mock[DataRetrievalAction]
 
   override def beforeEach(): Unit = {
-    reset(mockSessionRepository)
+    reset(mockSessionRepository, mockDataRetrievalAction)
     super.beforeEach()
   }
 
@@ -73,8 +74,8 @@ trait SpecBase
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(injectedParsers)),
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalActionProvider(userAnswers)),
         bind[SessionRepository].toInstance(mockSessionRepository)
       )
 

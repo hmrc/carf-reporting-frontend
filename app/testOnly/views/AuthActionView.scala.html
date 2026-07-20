@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,23 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package models.requests
+@import viewmodels.InputWidth.*
 
-import models.UserAnswers
-import play.api.mvc.{Request, WrappedRequest}
+@this()
 
-case class OptionalDataRequest[A](
-    request: Request[A],
-    userId: String,
-    userAnswers: Option[UserAnswers],
-    carfId: String
-) extends WrappedRequest[A](request)
+@(values: String)(implicit request: Request[_], messages: Messages)
 
-case class DataRequest[A](
-    request: Request[A],
-    userId: String,
-    userAnswers: UserAnswers,
-    carfId: String
-) extends WrappedRequest[A](request)
+@messages(values)
