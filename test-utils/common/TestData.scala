@@ -23,7 +23,9 @@ import java.time.{Clock, Instant, ZoneId}
 
 trait TestData extends Generators {
 
-  val userAnswersId: String = "id"
+  val userAnswersId: String  = "id"
+  val testInternalId: String = "12345"
+  val testCarfId: String     = "XE0000123456789"
 
   private val utcZoneId     = "UTC"
   implicit val clock: Clock = Clock.fixed(Instant.parse("2020-05-20T12:34:56.789012Z"), ZoneId.of(utcZoneId))

@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package models.requests
+package models
 
-import models.UserAnswers
-import play.api.mvc.{Request, WrappedRequest}
+object IdentifierType {
+  val ABROADFLAG = "AbroadFlag"
 
-case class OptionalDataRequest[A](
-    request: Request[A],
-    userId: String,
-    userAnswers: Option[UserAnswers],
-    carfId: String
-) extends WrappedRequest[A](request)
+  val CARFID = "CARFID"
 
-case class DataRequest[A](
-    request: Request[A],
-    userId: String,
-    userAnswers: UserAnswers,
-    carfId: String
-) extends WrappedRequest[A](request)
+  val NINO = "NINO"
+}

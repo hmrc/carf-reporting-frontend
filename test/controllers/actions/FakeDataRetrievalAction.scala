@@ -22,16 +22,39 @@ import play.api.mvc.ActionTransformer
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import models.UserAnswers
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+class FakeDataRetrievalActionProvider(dataToReturn: Option[UserAnswers]) extends DataRetrievalAction {
 
-import scala.concurrent.{ExecutionContext, Future}
+  def apply(): ActionTransformer[IdentifierRequest, OptionalDataRequest] =
+    new FakeDataRetrievalAction(dataToReturn)
 
-class FakeDataRetrievalAction(dataToReturn: Option[UserAnswers]) extends DataRetrievalAction {
+}
+
+class FakeDataRetrievalAction(dataToReturn: Option[UserAnswers] = None)
+    extends ActionTransformer[IdentifierRequest, OptionalDataRequest] {
 
   override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
-    Future(OptionalDataRequest(request.request, request.userId, dataToReturn))
+    dataToReturn match {
+      case None              =>
+        Future(
+          OptionalDataRequest(
+            request.request,
+            request.userId,
+            None,
+            request.carfId
+          )
+        )
+      case Some(userAnswers) =>
+        Future(
+          OptionalDataRequest(
+            request.request,
+            request.userId,
+            Some(userAnswers),
+            request.carfId
+          )
+        )
+    }
 
-  override protected implicit val executionContext: ExecutionContext =
+  implicit override protected val executionContext: ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
+
 }
