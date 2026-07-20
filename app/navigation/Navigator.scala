@@ -26,11 +26,9 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class Navigator @Inject() {
 
-  private val normalRoutes: Page => UserAnswers => Call = _ =>
-    _ => routes.IndexController.onPageLoad()
+  private val normalRoutes: Page => UserAnswers => Call = _ => _ => routes.IndexController.onPageLoad()
 
-  private val changeRoutes: Page => UserAnswers => Call = _ =>
-    _ => routes.JourneyRecoveryController.onPageLoad()
+  private val changeRoutes: Page => UserAnswers => Call = _ => _ => routes.JourneyRecoveryController.onPageLoad()
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
     case NormalMode =>

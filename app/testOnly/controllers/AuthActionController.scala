@@ -19,7 +19,6 @@ package testOnly.controllers
 import controllers.actions.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import testOnly.views.html.AuthActionView
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
@@ -29,13 +28,12 @@ class AuthActionController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
-    val controllerComponents: MessagesControllerComponents,
-    view: AuthActionView
+    val controllerComponents: MessagesControllerComponents
 ) extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify() andThen getData()).async { implicit request =>
-    val carfIdAndEnrolment: String = s"CARF-ID = ${request.carfId}"
-    Future.successful(Ok(view(carfIdAndEnrolment)))
+    val carfId: String = s"CARF-ID = ${request.carfId}"
+    Future.successful(Ok(carfId))
   }
 }
