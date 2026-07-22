@@ -31,9 +31,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val carfReportingBaseUrl: String = s"$carfReportingHost/carf-reporting"
 
-  private val carfManagementHost: String = servicesConfig.baseUrl("carf-management")
+  private val carfManagementHost: String  = servicesConfig.baseUrl("carf-management")
   val manageCryptoassetReportsUrl: String = s"$carfManagementHost/manage-cryptoasset-reports"
-  
+
   private val contactHost                  = configuration.get[String]("contact-frontend.host")
   private val contactFormServiceIdentifier = "carf-reporting-frontend"
 
