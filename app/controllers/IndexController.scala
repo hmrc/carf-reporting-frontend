@@ -17,21 +17,38 @@
 package controllers
 
 import controllers.actions.IdentifierAction
+import forms.UploadXMLFormProvider
+import models.upscan.{Reference, UpscanInitiateResponse}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.IndexView
+import views.html.{IndexView, UploadXMLView}
 
 import javax.inject.Inject
 
 class IndexController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     identify: IdentifierAction,
-    view: IndexView
+    formProvider: UploadXMLFormProvider,
+    view: UploadXMLView
 ) extends FrontendBaseController
     with I18nSupport {
 
+  val upscanInitiateResponse = UpscanInitiateResponse(
+    fileReference = Reference("abc"),
+    postTarget = "http://localhost:17004/send-a-cryptoasset-report/report/sleep",
+    formFields = Map.empty
+  )
+
+  val form = formProvider()
+
   def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
-    Ok(view())
+    Ok(view(form, upscanInitiateResponse))
+  }
+
+  def sleep(): Action[AnyContent] = identify() { implicit request =>
+    Thread.sleep(5000)
+    println("AAAAAAAAAAAA")
+    Ok(view(form, upscanInitiateResponse))
   }
 }

@@ -1,20 +1,80 @@
-/*
-    Styling in this and other .scss files will be compiled by the sbt-sass-compiler plugin: https://github.com/hmrc/sbt-sass-compiler
-    If you encounter any issue with Sass compilation using the plugin, please reach out to the PlatUI team.
- */
+$govuk-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/govuk-frontend/govuk/assets/";
+$hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-frontend/hmrc/assets";
+@import "partials/spinner";
 
 .js-visible {
   display: none !important;
 }
-
 .js-enabled .js-visible {
   display: inline-block !important;
 }
+.code--slim {
+    border: 1px solid #DFE0E7;
+    border-radius: 4px;
+    padding: 2px 4px;
+    display: inline-block;
+    background-color: #F7F7F7;
+    line-height: 1.1em;
+    font-family: Consolas,Monaco,"Andale Mono","Ubuntu Mono",monospace;
+    color: #0b0c0c;
+    font-size: 14px;
+    }
 
-.long-word {
-  word-wrap: break-word;
+.data-errors-table .govuk-table__cell--numeric{
+    width: 5%;
 }
 
-.long-word-legend {
-  word-break: break-word;
+.header1{
+    width: 5%;
+}
+
+.no-border-bottom {
+    border-bottom: 0 !important;
+}
+
+.govuk-summary-list__key {
+    width: 40%;
+}
+
+.govuk-summary-list__value {
+    width: 40%;
+}
+
+.govuk-summary-checking-file__key {
+    width: 15% !important;
+}
+
+.govuk-file-confirmation__key {
+    width: 15% !important;
+}
+
+.rules-error-table table div {
+    word-break: break-word;
+ }
+.rules-error-table   table div:not(:last-child) {
+    padding-bottom: 1em;
+ }
+.rules-error-table  table ul {
+    margin-bottom: 0.4em !important;
+  }
+.rules-error-table table p:last-child {
+    margin-bottom: 0;
+ }
+.rules-error-table p {
+    word-break: break-word;
+    margin-bottom: 0.4em;
+}
+
+.rules-error-table .govuk-body,
+.rules-error-table .govuk-list {
+    margin-bottom: 0.4em;
+}
+
+.rules-error-table .doc-ref-ids .govuk-body {
+    margin-bottom: 1em;
+}
+
+.rules-error-table td > .govuk-body:last-child,
+.rules-error-table td > .govuk-list:last-child {
+    margin-bottom: 0;
 }
