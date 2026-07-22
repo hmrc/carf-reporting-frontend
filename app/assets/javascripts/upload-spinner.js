@@ -3,8 +3,8 @@
 // =====================================================
 $("#uploadForm").submit(function (e) {
     e.preventDefault();
-    const fileLength = $("#file-upload")[0].files.length;
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    const fileLength = $("#file-upload-input")[0].files.length;
+    var errorRequestId = $("[name='x-amz-meta-request-id']").val();
 
     if (fileLength === 0) {
         var errorUrl = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=filenotselected&errorRequestId=" + errorRequestId;
@@ -14,13 +14,14 @@ $("#uploadForm").submit(function (e) {
         window.location = errorUrl;
     } else if (isFileNameInvalidLength()) {
         var errorUrl = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=invalidfilenamelength&errorRequestId=" + errorRequestId;
+        console.log(errorUrl);
         window.location = errorUrl;
     } else if (isFileNameContainsDisallowedCharacters()) {
         var errorUrl = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=disallowedcharacters&errorRequestId=" + errorRequestId;
         window.location = errorUrl;
     } else {
         function disableFileUpload() {
-            $("#file-upload").attr('disabled', 'disabled')
+            $("#file-upload-input").attr('disabled', 'disabled')
         }
 
         function addUploadSpinner() {
@@ -42,7 +43,7 @@ $("#uploadForm").submit(function (e) {
 });
 
 function isFileNameInvalidLength() {
-    var fileName = $("#file-upload")[0].files[0].name;
+    var fileName = $("#file-upload-input")[0].files[0].name;
     var trimmedFileName = fileName.replace(/\.xml$/i, "");
     if (trimmedFileName.length > 100) {
         return true;
@@ -51,13 +52,13 @@ function isFileNameInvalidLength() {
 }
 
 function isFileNameContainsDisallowedCharacters() {
-    var fileName = $("#file-upload")[0].files[0].name;
+    var fileName = $("#file-upload-input")[0].files[0].name;
     var trimmedFileName = fileName.replace(/\.xml$/i, "");
     return /[<>:"'&\/\\|?*]/.test(trimmedFileName);
 }
 
 function isFileEmpty() {
-    var fileSize = $("#file-upload")[0].files[0].size;
+    var fileSize = $("#file-upload-input")[0].files[0].size;
     return fileSize === 0;
 }
 

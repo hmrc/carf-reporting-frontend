@@ -19,19 +19,21 @@ package controllers.upload
 import config.FrontendAppConfig
 import controllers.actions.*
 import forms.UploadXmlFormProvider
-import models.upscan.{Reference, UploadId, UpscanInitiateResponse}
-import play.api.data.Form
-
-import javax.inject.Inject
+import models.ErrorCode.{InvalidArgument, OctetStream, VirusFile}
+import models.InvalidArgumentErrorMessage.{DisallowedCharacters, FileIsEmpty, InvalidFileNameLength, TypeMismatch}
+import models.upscan.{Reference, UpscanInitiateResponse}
+import models.{ErrorCode, InvalidArgumentErrorMessage}
 import org.apache.pekko
 import org.apache.pekko.actor.ActorSystem
+import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.upload.UploadXmlView
 
+import javax.inject.Inject
 import scala.concurrent.Future
-import scala.concurrent.duration.DurationInt
 
 class UploadXmlController @Inject() (
     override val messagesApi: MessagesApi,
@@ -44,8 +46,10 @@ class UploadXmlController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     view: UploadXmlView
 ) extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
+  // TODO: Remove when implementing Upscan functionality (CARF-578, CARF-579)
   val upscanInitiateResponse = UpscanInitiateResponse(
     fileReference = Reference("abc"),
     postTarget = "http://localhost:17004/send-a-cryptoasset-report/report/sleep",
@@ -58,55 +62,31 @@ class UploadXmlController @Inject() (
     Ok(view(form, upscanInitiateResponse))
   }
 
+  // TODO: Remove when implementing Upscan functionality (CARF-578, CARF-579)
   def sleep(): Action[AnyContent] = (identify() andThen getData()) { implicit request =>
     Thread.sleep(5000)
     Ok(view(form, upscanInitiateResponse))
   }
 
-//  def onSubmit(): Action[AnyContent] =
-//    (identify() andThen getData() andThen requireData).async { implicit request =>
-//
-//    }
-//
+  def showError(errorCode: String, errorMessage: String, errorRequestId: String): Action[AnyContent] =
+    (identify() andThen getData()).async { implicit request =>
 
-//  def getStatus(uploadId: UploadId): Action[AnyContent] = (identify() andThen getData() andThen requireData).async {
-//    implicit request =>
-//      // Delay the call to make sure the backend db has been populated by the upscan callback first
-//      pekko.pattern.after(config.upscanCallbackDelayInSeconds.seconds, actorSystem.scheduler) {
-//        upscanConnector.getUploadStatus(uploadId) map {
-//          case Some(uploadedSuccessfully: UploadedSuccessfully) =>
-//            if (isFileNameInValid(uploadedSuccessfully.name)) {
-//              Redirect(routes.IndexController.showError(InvalidArgument.code, InvalidFileNameLength.message, "").url)
-//            } else if (isFileEmpty(uploadedSuccessfully.size)) {
-//              Redirect(routes.IndexController.showError(InvalidArgument.code, FileIsEmpty.message, "").url)
-//            } else {
-//              Redirect(routes.FileValidationController.onPageLoad().url)
-//            }
-//          case Some(r: UploadRejected)                          =>
-//            if (r.details.message.contains("octet-stream")) {
-//              logger.warn(s"Show errorForm on rejection $r")
-//              val errorReason = r.details.failureReason
-//              Redirect(routes.IndexController.showError(OctetStream.code, errorReason.toLowerCase, "").url)
-//            } else {
-//              logger.warn(s"Upload rejected. Error details: ${r.details}")
-//              Redirect(routes.IndexController.showError(InvalidArgument.code, TypeMismatch.message, "").url)
-//            }
-//          case Some(Quarantined)                                =>
-//            Redirect(routes.IndexController.showError(VirusFile.code, "", "").url)
-//          case Some(Failed)                                     =>
-//            logger.warn("File upload returned failed status")
-//            Redirect(routes.IndexController.showError("UploadFailed", "", "").url)
-//          case Some(_)                                          =>
-//            Redirect(routes.IndexController.getStatus(uploadId).url)
-//          case None                                             =>
-//            logger.error("Unable to retrieve file upload status from Upscan")
-//            Redirect(routes.IndexController.showError("UploadFailed", "", "").url)
-//        }
-//      }
-//  }
-
-  private def isFileNameInValid(name: String): Boolean =
-    name.stripSuffix(".xml").length > config.upscanMaxFileNameLength
-
-  private def isFileEmpty(size: Long): Boolean = size == 0L
+      val formWithErrors: Form[String] = ErrorCode.fromCode(errorCode) match {
+        case Some(ErrorCode.EntityTooLarge)      => form.withError("file-upload", "uploadXml.error.file.size.large")
+        case Some(VirusFile)                     => form.withError("file-upload", "uploadXml.error.file.content.virus")
+        case Some(InvalidArgument | OctetStream) =>
+          InvalidArgumentErrorMessage.fromMessage(errorMessage) match {
+            case Some(InvalidFileNameLength) => form.withError("file-upload", "uploadXml.error.file.name.length")
+            case Some(DisallowedCharacters)  =>
+              form.withError("file-upload", "uploadXml.error.file.name.disallowed.characters")
+            case Some(TypeMismatch)          => form.withError("file-upload", "uploadXml.error.file.type.invalid")
+            case Some(FileIsEmpty)           => form.withError("file-upload", "uploadXml.error.file.content.empty")
+            case None                        => form.withError("file-upload", "uploadXml.error.file.select")
+          }
+        case _                                   =>
+          logger.warn(s"Upscan error $errorCode: $errorMessage, requestId is $errorRequestId")
+          form.withError("file-upload", "uploadXml.error.file.content.unknown")
+      }
+      Future.successful(Ok(view(formWithErrors, upscanInitiateResponse)))
+    }
 }

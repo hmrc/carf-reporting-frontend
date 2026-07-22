@@ -19,4 +19,5 @@ GET         /account/signed-out             controllers.auth.SignedOutController
 GET         /unauthorised                   controllers.UnauthorisedController.onPageLoad()
 
 GET         /report/upload-file             controllers.upload.UploadXmlController.onPageLoad()
+GET         /report/error                   controllers.upload.UploadXmlController.showError(errorCode: String, errorMessage: String, errorRequestId: String)
 POST        /report/sleep                   controllers.upload.UploadXmlController.sleep()
