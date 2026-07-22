@@ -19,7 +19,7 @@ package controllers.upload
 import config.FrontendAppConfig
 import controllers.actions.*
 import forms.UploadXmlFormProvider
-import models.upscan.UploadId
+import models.upscan.{Reference, UploadId, UpscanInitiateResponse}
 import play.api.data.Form
 
 import javax.inject.Inject
@@ -30,6 +30,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.upload.UploadXmlView
 
+import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
 class UploadXmlController @Inject() (
@@ -45,15 +46,21 @@ class UploadXmlController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
+  val upscanInitiateResponse = UpscanInitiateResponse(
+    fileReference = Reference("abc"),
+    postTarget = "http://localhost:17004/send-a-cryptoasset-report/report/sleep",
+    formFields = Map.empty
+  )
+
   val form: Form[String] = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (identify() andThen getData()) { implicit request =>
-    Ok(view(form))
+  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()) { implicit request =>
+    Ok(view(form, upscanInitiateResponse))
   }
 
-  def sleep: Action[AnyContent] = (identify() andThen getData()) { implicit request =>
+  def sleep(): Action[AnyContent] = (identify() andThen getData()) { implicit request =>
     Thread.sleep(5000)
-    Ok(view(form))
+    Ok(view(form, upscanInitiateResponse))
   }
 
 //  def onSubmit(): Action[AnyContent] =

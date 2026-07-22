@@ -2,10 +2,9 @@
 // UpScan upload
 // =====================================================
 $("#uploadForm").submit(function (e) {
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     e.preventDefault();
     const fileLength = $("#file-upload")[0].files.length;
-    var errorRequestId = $("[name='x-amz-meta-request-id']").val();
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
     if (fileLength === 0) {
         var errorUrl = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=filenotselected&errorRequestId=" + errorRequestId;
