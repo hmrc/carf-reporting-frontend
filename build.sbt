@@ -55,7 +55,9 @@ lazy val microservice = (project in file("."))
       "javascripts/application.js" ->
         group(
           Seq(
-            "javascripts/app.js"
+            "javascripts/app.js",
+            "javascripts/upload-spinner.js",
+            "javascripts/jquery-3.6.0.min.js"
           )
         )
     ),

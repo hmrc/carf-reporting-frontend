@@ -44,3 +44,11 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+uploadXml.title = Upload an XML file
+uploadXml.heading = Upload an XML file
+uploadXml.hint = The selected file must be 250MB or less.
+uploadXml.paragraph = We’ll automatically check the formatting of the file and send you to another page once completed.
+uploadXml.error.noFile = Select a file
+uploadXml.error.maximumLength = File name must be 100 characters or less and match the MessageRefId in the file
+uploadXml.error.invalid = File name can only include letters a to z, numbers 0 to 9, underscore (_), hyphens and full stops
