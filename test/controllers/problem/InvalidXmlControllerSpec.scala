@@ -37,7 +37,7 @@ class InvalidXmlControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[InvalidXmlView]
 
         status(result)          mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view("filename.xml")(request, messages(application)).toString
       }
     }
   }

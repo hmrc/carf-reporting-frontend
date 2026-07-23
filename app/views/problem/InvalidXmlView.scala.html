@@ -22,13 +22,13 @@
         appConfig: config.FrontendAppConfig
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(fileName: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("invalidXml.title"))) {
 
     <h1 class="govuk-heading-l long-word">@messages("invalidXml.heading")</h1>
 
-    <p class="govuk-body">@messages("invalidXml.p1")</p>
+    <p class="govuk-body">@messages("invalidXml.p1", fileName)</p>
 
     <p class="govuk-body govuk-!-margin-bottom-2">@messages("invalidXml.p2")</p>
     <ul class="govuk-list govuk-list--bullet">

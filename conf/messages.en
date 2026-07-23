@@ -47,7 +47,7 @@ unauthorised.heading = You can’t access this service with this account
 
 invalidXml.title = There is a problem with the formatting of your file
 invalidXml.heading = There is a problem with the formatting of your file
-invalidXml.p1 = We cannot accept the file filename.xml because there is a problem with its formatting.
+invalidXml.p1 = We cannot accept the file {0} because there is a problem with its formatting.
 invalidXml.p2 = Check that all:
 invalidXml.bullet.1 = element names are correct
 invalidXml.bullet.2 = elements have an opening and a closing tag
