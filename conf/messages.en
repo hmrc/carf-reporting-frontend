@@ -56,3 +56,5 @@ uploadXml.error.file.size.large = The selected file must be 250MB or less
 uploadXml.error.file.content.virus = The selected file contains a virus
 uploadXml.error.file.type.invalid = The selected file must be an XML
 uploadXml.error.file.content.empty = The selected file is empty
+uploadXml.error.file.content.unknown = The selected file could not be uploaded
+uploadXml.processing = We are checking your file

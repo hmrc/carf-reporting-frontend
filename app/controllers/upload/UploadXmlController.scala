@@ -52,7 +52,7 @@ class UploadXmlController @Inject() (
   // TODO: Remove when implementing Upscan functionality (CARF-578, CARF-579)
   val upscanInitiateResponse = UpscanInitiateResponse(
     fileReference = Reference("abc"),
-    postTarget = "http://localhost:17004/send-a-cryptoasset-report/report/sleep",
+    postTarget = "http://localhost:17004/send-a-cryptoasset-report/report/upload-file",
     formFields = Map.empty
   )
 
@@ -62,10 +62,14 @@ class UploadXmlController @Inject() (
     Ok(view(form, upscanInitiateResponse))
   }
 
-  // TODO: Remove when implementing Upscan functionality (CARF-578, CARF-579)
-  def sleep(): Action[AnyContent] = (identify() andThen getData()) { implicit request =>
-    Thread.sleep(5000)
-    Ok(view(form, upscanInitiateResponse))
+  // TODO: Update when implementing Upscan functionality (CARF-578, CARF-579)
+  def onSubmit(): Action[AnyContent] = (identify() andThen getData()) { implicit request =>
+    Thread.sleep(1000)
+    Redirect(
+      controllers.routes.PlaceholderController.onPageLoad(
+        "Should redirect based on upscan checks: CARF-578, CARF-579"
+      )
+    )
   }
 
   def showError(errorCode: String, errorMessage: String, errorRequestId: String): Action[AnyContent] =
