@@ -24,7 +24,7 @@
 
 @(fileName: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("invalidXml.title"))) {
+@layout(pageTitle = titleNoForm(messages("invalidXml.title")), showBackLink = false) {
 
     <h1 class="govuk-heading-l long-word">@messages("invalidXml.heading")</h1>
 
