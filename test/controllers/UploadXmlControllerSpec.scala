@@ -20,6 +20,7 @@ import base.SpecBase
 import forms.UploadXmlFormProvider
 import models.upscan.{Reference, UpscanInitiateResponse}
 import play.api.data.Form
+import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import views.html.upload.UploadXmlView
@@ -42,7 +43,7 @@ class UploadXmlControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
-          val request = FakeRequest(GET, upload.routes.UploadXmlController.onPageLoad().url)
+          val request = FakeRequest(GET, upload.routes.UploadXmlController.onPageLoad().url).withCSRFToken
 
           val result = route(application, request).value
 
@@ -58,7 +59,8 @@ class UploadXmlControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
-          val request = FakeRequest(GET, upload.routes.UploadXmlController.showError("EntityTooLarge", "", "").url)
+          val request =
+            FakeRequest(GET, upload.routes.UploadXmlController.showError("EntityTooLarge", "", "").url).withCSRFToken
 
           val result = route(application, request).value
 
@@ -72,7 +74,8 @@ class UploadXmlControllerSpec extends SpecBase {
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-        val request = FakeRequest(GET, upload.routes.UploadXmlController.showError("octetstream", "rejected", "").url)
+        val request =
+          FakeRequest(GET, upload.routes.UploadXmlController.showError("octetstream", "rejected", "").url).withCSRFToken
         val result  = route(application, request).value
 
         status(result)     mustEqual OK
@@ -83,7 +86,8 @@ class UploadXmlControllerSpec extends SpecBase {
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-        val request = FakeRequest(GET, upload.routes.UploadXmlController.showError("VirusFile", "", "").url)
+        val request =
+          FakeRequest(GET, upload.routes.UploadXmlController.showError("VirusFile", "", "").url).withCSRFToken
         val result  = route(application, request).value
 
         status(result)     mustEqual OK
@@ -97,7 +101,7 @@ class UploadXmlControllerSpec extends SpecBase {
         val request = FakeRequest(
           GET,
           upload.routes.UploadXmlController.showError("InvalidArgument", "InvalidFileNameLength", "").url
-        )
+        ).withCSRFToken
         val result  = route(application, request).value
 
         status(result)     mustEqual OK
@@ -113,7 +117,7 @@ class UploadXmlControllerSpec extends SpecBase {
         val request = FakeRequest(
           GET,
           upload.routes.UploadXmlController.showError("InvalidArgument", "disallowedcharacters", "").url
-        )
+        ).withCSRFToken
         val result  = route(application, request).value
 
         status(result)     mustEqual OK
@@ -127,7 +131,10 @@ class UploadXmlControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         val request =
-          FakeRequest(GET, upload.routes.UploadXmlController.showError("InvalidArgument", "FileIsEmpty", "").url)
+          FakeRequest(
+            GET,
+            upload.routes.UploadXmlController.showError("InvalidArgument", "FileIsEmpty", "").url
+          ).withCSRFToken
         val result  = route(application, request).value
 
         status(result)     mustEqual OK
@@ -139,7 +146,10 @@ class UploadXmlControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         val request =
-          FakeRequest(GET, upload.routes.UploadXmlController.showError("InvalidArgument", "typeMismatch", "").url)
+          FakeRequest(
+            GET,
+            upload.routes.UploadXmlController.showError("InvalidArgument", "typeMismatch", "").url
+          ).withCSRFToken
         val result  = route(application, request).value
 
         status(result)     mustEqual OK
@@ -150,7 +160,8 @@ class UploadXmlControllerSpec extends SpecBase {
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-        val request = FakeRequest(GET, upload.routes.UploadXmlController.showError("InvalidArgument", "", "").url)
+        val request =
+          FakeRequest(GET, upload.routes.UploadXmlController.showError("InvalidArgument", "", "").url).withCSRFToken
         val result  = route(application, request).value
 
         status(result)     mustEqual OK
@@ -161,7 +172,8 @@ class UploadXmlControllerSpec extends SpecBase {
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-        val request = FakeRequest(GET, upload.routes.UploadXmlController.showError("UnknownError", "", "").url)
+        val request =
+          FakeRequest(GET, upload.routes.UploadXmlController.showError("UnknownError", "", "").url).withCSRFToken
         val result  = route(application, request).value
 
         status(result)     mustEqual OK
