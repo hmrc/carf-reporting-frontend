@@ -14,11 +14,10 @@
  * limitations under the License.
  *@
 
-@import views.html.helper.CSPNonce
-
 @this(
         layout: templates.Layout,
         link: components.Link,
+        printLink: components.PrintLink,
         appConfig: config.FrontendAppConfig
 )
 
@@ -45,7 +44,7 @@
     <p class="govuk-body">
         @messages("invalidXml.p4")
         @link(
-            href = controllers.routes.PlaceholderController.onPageLoad(" TODO: Technical guidance for XML files link CARF-595").url,
+            href = controllers.routes.PlaceholderController.onPageLoad("TODO: Technical guidance for XML files link CARF-595").url,
             key = "invalidXml.p4.linkText",
             fullStop = true
         )
@@ -53,8 +52,7 @@
 
     <ul class="govuk-list govuk-!-display-none-print">
         <li>
-            <span class="js-hidden">@messages("invalidXml.p5.linkText")</span>
-            <a href="#" class="govuk-link js-visible" id="print-link">@messages("invalidXml.p5.linkText")</a>
+            @printLink(key = "invalidXml.p5.linkText", id = Some("print-link"))
         </li>
         <li>
             @link(
@@ -69,16 +67,4 @@
             )
         </li>
     </ul>
-
-    <script @CSPNonce.attr>
-        document.addEventListener('DOMContentLoaded', function () {
-            var printLink = document.getElementById('print-link');
-            if (printLink) {
-                printLink.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    window.print();
-                });
-            }
-        });
-    </script>
 }
