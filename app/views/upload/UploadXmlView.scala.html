@@ -29,7 +29,7 @@
 @layout(pageTitle = titleNoForm(messages("uploadXml.title"))) {
 
     <form action="@upscanInitiateResponse.postTarget"  method="post" id="uploadForm" enctype="multipart/form-data" novalidate>
-        @helper.CSRF.formField
+
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
