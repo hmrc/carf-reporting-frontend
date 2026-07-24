@@ -1,0 +1,55 @@
+@media screen {
+  .showPrint {
+    display: none;
+  }
+}
+
+@media print {
+
+  .govuk-main-wrapper > .govuk-grid-row > div[class*='govuk-grid-column-'] {
+    width: 100%;
+  }
+
+  /* Hide unnecessary elements */
+  .cbanner-govuk-cookie-banner,
+  .govuk-skip-link,
+  .govuk-footer,
+  .govuk-button,
+  .hmrc-sign-out-nav__link,
+  .govuk-phase-banner,
+  .govuk-back-link,
+  .govuk-caption-xl,
+  .attorneyBanner,
+  .print-hidden {
+    display: none;
+  }
+
+  a[href]:after {
+    content: "" !important;
+    display: none !important;
+  }
+
+  a {
+    text-decoration: none !important;
+    color: black !important;
+    pointer-events: none;
+  }
+
+  a.print-url[href]::after {
+    content: " (" attr(href) ")" !important;
+    display: inline !important;
+  }
+
+  .manage-reports-link-print-hidden {
+    display: none !important;
+  }
+
+  #secondary-nav {
+    display: none;
+  }
+
+  .showPrint {
+    display: block;
+  }
+
+}
