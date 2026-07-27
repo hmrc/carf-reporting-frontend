@@ -76,7 +76,7 @@ invalidXml.p7.linkText = Back to manage your cryptoasset reports
 
 rcaspNotMatching.title = There is a problem with the RCASP ID in your file
 rcaspNotMatching.heading = There is a problem with the RCASP ID in your file
-rcaspNotMatching.p1 = The RCASP ID in your file is {0}
+rcaspNotMatching.p1 = The RCASP ID in your file is {0}.
 rcaspNotMatching.p2 = This does not match any of the reporting cryptoasset service providers (RCASPs) that you have added in the service.
 rcaspNotMatching.heading.2 = What to do next
 rcaspNotMatching.list.1 = Check and update the value of the SendingEntityIN element in the MessageSpec section of your file to match the RCASP ID.
