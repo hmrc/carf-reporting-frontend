@@ -54,7 +54,7 @@ function isFileNameInvalidLength() {
 function isFileNameContainsDisallowedCharacters() {
     var fileName = $("#file-upload-input")[0].files[0].name;
     var trimmedFileName = fileName.replace(/\.xml$/i, "");
-    return !(/[a-zA-Z0-9_\\.-]/.test(trimmedFileName));
+    return /[^A-Za-z0-9_.-]/.test(trimmedFileName);
 }
 
 function isFileEmpty() {
