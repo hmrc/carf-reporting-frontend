@@ -13,3 +13,4 @@
 ->         /                                                      prod.Routes
 
 GET        /send-a-cryptoasset-report/test-only/AuthAction        testOnly.controllers.AuthActionController.onPageLoad()
+GET        /report/test-only/validate-file                        controllers.upload.FileValidationController.onPageLoad(sendingEntityIn: Option[String])

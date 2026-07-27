@@ -1,15 +1,53 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        link: components.Link,
+        appConfig: config.FrontendAppConfig
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(sendingEntityIn: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("rcaspNotMatching.title"))) {
+@layout(pageTitle = titleNoForm(messages("rcaspNotMatching.title")), showBackLink = false) {
 
-    <h1 class="govuk-heading-l">@messages("rcaspNotMatching.heading")</h1>
+ <h1 class="govuk-heading-l">@messages("rcaspNotMatching.heading")</h1>
+
+ <p class="govuk-body">@messages("rcaspNotMatching.p1", sendingEntityIn)</p>
+
+ <p class="govuk-body">@messages("rcaspNotMatching.p2")</p>
+
+ <h2 class="govuk-heading-m">@messages("rcaspNotMatching.heading.2")</h2>
+ <ol class="govuk-list govuk-list--number">
+  <li>@messages("rcaspNotMatching.list.1")</li>
+  <li>
+  @link(
+   href = controllers.routes.PlaceholderController.onPageLoad("Upload a different file link: CARF-393 - controllers.upload.routes.UploadXmlController").url,
+   key = "rcaspNotMatching.list.2",
+   fullStop = true
+  )
+  </li>
+ </ol>
+
+ <h2 class="govuk-heading-m">@messages("rcaspNotMatching.heading.3")</h2>
+ <p class="govuk-body">
+  @link(
+   href = appConfig.managementUrl + "/your-rcasps",
+   key = "rcaspNotMatching.p.3.link.text"
+  )
+  @messages("rcaspNotMatching.p.3.text")
+ </p>
 }
-
-
-
-    //add full stop = true for p1. and bullet 2.
