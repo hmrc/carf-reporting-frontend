@@ -1,0 +1,15 @@
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton
+)
+
+@()(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("rcaspNotMatching.title"))) {
+
+    <h1 class="govuk-heading-l">@messages("rcaspNotMatching.heading")</h1>
+}
+
+
+
+    //add full stop = true for p1. and bullet 2.
