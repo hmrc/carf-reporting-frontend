@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 
 import java.time.Instant
 
-class UploadCallbackSpec extends SpecBase {
+class CallbackBodySpec extends SpecBase {
 
   "Call back body" - {
     "must marshall correctly when upload is finished" in {

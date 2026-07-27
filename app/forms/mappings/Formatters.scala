@@ -16,16 +16,10 @@
 
 package forms.mappings
 
-import models.Enumerable
-import play.api.Logging
 import play.api.data.FormError
 import play.api.data.format.Formatter
-import scala.util.control.Exception.nonFatalCatch
-import scala.util.{Failure, Success, Try}
 
-trait Formatters extends Logging {
-
-  private type EitherFormErrorOrValue = Either[Seq[FormError], String]
+trait Formatters {
 
   private[mappings] def stringFormatter(errorKey: String, args: Seq[String] = Seq.empty): Formatter[String] =
     new Formatter[String] {
