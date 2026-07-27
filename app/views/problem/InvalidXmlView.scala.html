@@ -52,19 +52,19 @@
 
     <ul class="govuk-list govuk-!-display-none-print">
         <li>
-            @printLink(key = "invalidXml.p5.linkText", id = Some("print-link"))
+        @printLink(key = "invalidXml.p5.linkText", id = Some("print-link"))
         </li>
         <li>
-            @link(
-                href = controllers.routes.PlaceholderController.onPageLoad("Upload a different file link CARF-393").url,
-                key = "invalidXml.p6.linkText"
-            )
+        @link(
+            href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
+            key = "invalidXml.p6.linkText"
+        )
         </li>
         <li>
-            @link(
-                href = appConfig.managementUrl,
-                key = "invalidXml.p7.linkText"
-            )
+        @link(
+            href = appConfig.managementUrl,
+            key = "invalidXml.p7.linkText"
+        )
         </li>
     </ul>
 }
