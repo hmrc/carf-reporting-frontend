@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
         var html = printLink.innerHTML;
         printLink.innerHTML = '<a class="govuk-link" href="#">' + html + '</a>';
 
-        printLink.addEventListener('click', function (e) {
+        printLink.addEventListener('click', function(e){
             e.preventDefault();
             e.stopPropagation();
             window.print();
