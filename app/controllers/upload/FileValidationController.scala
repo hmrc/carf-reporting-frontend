@@ -18,6 +18,7 @@ package controllers.upload
 
 import connectors.RcaspRegistrationConnector
 import controllers.actions._
+import models.UserAnswers
 import pages.SendingEntityInPage
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -32,16 +33,11 @@ import scala.concurrent.{ExecutionContext, Future}
  *
  * This controller is a test-only stub (see conf/testOnlyDoNotUseInAppConf.routes) that
  * simulates the SendingEntityIN value that will eventually be returned from the backend
- * after successful schema validation of the uploaded file. Test the three journeys for this
- * ticket via the sendingEntityIn query parameter:
- *   - sendingEntityIn=<a real RCASPID for the logged-in carfId>        -> placeholder "check your file details" page
- *   - sendingEntityIn=<any non-matching value>                         -> /problem/rcasp-not-matching
- *   - leave out the query parameter entirely                           -> Journey Recovery page
+ * after successful schema validation of the uploaded file.
  */
 class FileValidationController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
-    requireData: DataRequiredAction,
     sessionRepository: SessionRepository,
     rcaspRegistrationConnector: RcaspRegistrationConnector,
     val controllerComponents: MessagesControllerComponents
@@ -50,7 +46,7 @@ class FileValidationController @Inject() (
     with Logging {
 
   def onPageLoad(sendingEntityIn: Option[String]): Action[AnyContent] =
-    (identify() andThen getData() andThen requireData).async { implicit request =>
+    (identify() andThen getData()).async { implicit request =>
       sendingEntityIn match {
         case None =>
           logger.warn("[FileValidationController][onPageLoad] Unable to extract SendingEntityIN from file")
@@ -63,14 +59,15 @@ class FileValidationController @Inject() (
               Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
 
             case Right(rcasps) =>
+              val existingAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(SendingEntityInPage, value))
+                updatedAnswers <- Future.fromTry(existingAnswers.set(SendingEntityInPage, value))
                 _              <- sessionRepository.set(updatedAnswers)
               } yield
                 if (rcasps.exists(_.RCASPID.equalsIgnoreCase(value))) {
                   Redirect(
                     controllers.routes.PlaceholderController.onPageLoad(
-                      "Check your file details page: to be built"
+                      "Check your file details page: to be built (CARF-590)"
                     )
                   )
                 } else {

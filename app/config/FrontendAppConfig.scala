@@ -44,6 +44,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val signOutUrl: String       = configuration.get[String]("urls.signOut")
   val registrationUrl: String  = configuration.get[String]("urls.registration")
   val managementUrl: String    = configuration.get[String]("urls.managementUrl")
+  val yourRcaspsUrl: String    = configuration.get[String]("urls.yourRcaspsUrl")
 
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/carf-reporting-frontend"
