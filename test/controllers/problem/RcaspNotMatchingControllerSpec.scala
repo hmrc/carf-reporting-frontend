@@ -17,28 +17,52 @@
 package controllers.problem
 
 import base.SpecBase
+import pages.SendingEntityInPage
 import play.api.test.FakeRequest
-import play.api.test.Helpers.*
-import views.html.RcaspNotMatchingView
+import play.api.test.Helpers._
+import views.html.problem.RcaspNotMatchingView
 
 class RcaspNotMatchingControllerSpec extends SpecBase {
 
-  "RcaspNotMatching Controller" - {
+  private val sendingEntityIn = "ZMCAR0123456788"
 
-    "must return OK and the correct view for a GET" in {
+  "RcaspNotMatchingController" - {
 
+    "must return OK and the correct view for a GET when SendingEntityIN is present in user answers" in {
+      val userAnswers = emptyUserAnswers.withPage(SendingEntityInPage, sendingEntityIn)
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.RcaspNotMatchingController.onPageLoad().url)
+        val result  = route(application, request).value
+        val view    = application.injector.instanceOf[RcaspNotMatchingView]
+
+        status(result)          mustEqual OK
+        contentAsString(result) mustEqual view(sendingEntityIn)(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when no user answers exist" in {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.IndexController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.RcaspNotMatchingController.onPageLoad().url)
+        val result  = route(application, request).value
 
-        val result = route(application, request).value
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
 
-        val view = application.injector.instanceOf[RcaspNotMatchingView]
+    "must redirect to Journey Recovery for a GET when SendingEntityIN is missing from user answers" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-        status(result) mustEqual OK
+      running(application) {
+        val request = FakeRequest(GET, routes.RcaspNotMatchingController.onPageLoad().url)
+        val result  = route(application, request).value
 
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }
