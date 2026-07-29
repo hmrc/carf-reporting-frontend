@@ -40,8 +40,6 @@
             </label>
         </h1>
 
-        @govukHint(HintViewModel(HtmlContent(messages("uploadXml.hint"))))
-
         @for((key, value) <- upscanInitiateResponse.formFields) {
             <input type="hidden" name="@key" value="@value" />
         }
@@ -52,7 +50,7 @@
             FileUpload(
                 name = "file",
                 id = "file-upload",
-                label = LabelViewModel(messages("uploadXml.hint")).withCssClass("govuk-visually-hidden"),
+                hint = Some(HintViewModel(HtmlContent(messages("uploadXml.hint")))),
                 javascript = Some(true),
                 classes = "hmrc-file-upload",
                 errorMessage = form("file-upload").error.map(x => ErrorMessage(content = x.message)),
