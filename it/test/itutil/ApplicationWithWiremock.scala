@@ -40,10 +40,6 @@ trait ApplicationWithWiremock
     Map[String, Any](
       "microservice.services.auth.host"              -> WireMockConstants.stubHost,
       "microservice.services.auth.port"              -> WireMockConstants.stubPort,
-      "microservice.services.carf-management.host"   -> WireMockConstants.stubHost,
-      "microservice.services.carf-management.port"   -> WireMockConstants.stubPort,
-      "microservice.services.address-lookup.host"    -> WireMockConstants.stubHost,
-      "microservice.services.address-lookup.port"    -> WireMockConstants.stubPort,
       "microservice.services.carf-registration.host" -> WireMockConstants.stubHost,
       "microservice.services.carf-registration.port" -> WireMockConstants.stubPort
     )
