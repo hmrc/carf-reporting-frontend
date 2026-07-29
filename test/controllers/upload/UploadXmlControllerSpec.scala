@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.upload
 
 import base.SpecBase
+import controllers.upload
 import forms.UploadXmlFormProvider
 import models.upscan.{Reference, UpscanInitiateResponse}
 import play.api.data.Form

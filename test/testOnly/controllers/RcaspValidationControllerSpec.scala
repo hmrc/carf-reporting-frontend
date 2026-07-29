@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package controllers.upload
+package testOnly.controllers
 
 import base.SpecBase
 import connectors.RcaspRegistrationConnector
 import models.errors.ApiError.InternalServerError
 import models.rcasp.RcaspDetails
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{never, reset, times, verify, when}
+import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*

@@ -43,7 +43,7 @@
         @for((key, value) <- upscanInitiateResponse.formFields) {
             <input type="hidden" name="@key" value="@value" />
         }
-        <input type="hidden" id="upScanErrorRedirectUrl" value="/send-a-cryptoasset-report/report/error" />
+        <input type="hidden" id="upScanErrorRedirectUrl" value="/send-a-cryptoasset-report/error" />
         <div id="file-upload-container" class="mt-3">
 
         @govukFileUpload(
