@@ -24,12 +24,13 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{never, reset, times, verify, when}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import testOnly.controllers.RcaspValidationController
 import types.ResultT
 
 import scala.concurrent.Future
 
-class FileValidationControllerSpec extends SpecBase {
+class RcaspValidationControllerSpec extends SpecBase {
 
   private val mockRcaspRegistrationConnector: RcaspRegistrationConnector = mock[RcaspRegistrationConnector]
 
@@ -44,7 +45,7 @@ class FileValidationControllerSpec extends SpecBase {
     when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
   }
 
-  "FileValidationController" - {
+  "RcaspValidationController" - {
 
     "onPageLoad" - {
 
@@ -54,7 +55,7 @@ class FileValidationControllerSpec extends SpecBase {
           .build()
 
         running(application) {
-          val controller = application.injector.instanceOf[FileValidationController]
+          val controller = application.injector.instanceOf[RcaspValidationController]
           val request    = FakeRequest(GET, "/test-only/validate-file")
 
           val result = controller.onPageLoad(None)(request)
@@ -76,7 +77,7 @@ class FileValidationControllerSpec extends SpecBase {
           .build()
 
         running(application) {
-          val controller = application.injector.instanceOf[FileValidationController]
+          val controller = application.injector.instanceOf[RcaspValidationController]
           val request    = FakeRequest(GET, "/test-only/validate-file")
 
           val result = controller.onPageLoad(Some(matchingRcaspId))(request)
@@ -97,7 +98,7 @@ class FileValidationControllerSpec extends SpecBase {
           .build()
 
         running(application) {
-          val controller = application.injector.instanceOf[FileValidationController]
+          val controller = application.injector.instanceOf[RcaspValidationController]
           val request    = FakeRequest(GET, "/test-only/validate-file")
 
           val result = controller.onPageLoad(Some(nonMatchingRcaspId))(request)
@@ -119,7 +120,7 @@ class FileValidationControllerSpec extends SpecBase {
           .build()
 
         running(application) {
-          val controller = application.injector.instanceOf[FileValidationController]
+          val controller = application.injector.instanceOf[RcaspValidationController]
           val request    = FakeRequest(GET, "/test-only/validate-file")
 
           val result = controller.onPageLoad(Some(matchingRcaspId))(request)

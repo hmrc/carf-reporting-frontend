@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package controllers.upload
+package testOnly.controllers
 
 import connectors.RcaspRegistrationConnector
-import controllers.actions._
+import controllers.actions.*
 import models.UserAnswers
 import pages.SendingEntityInPage
 import play.api.Logging
@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
  * simulates the SendingEntityIN value that will eventually be returned from the backend
  * after successful schema validation of the uploaded file.
  */
-class FileValidationController @Inject() (
+class RcaspValidationController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     sessionRepository: SessionRepository,
@@ -49,13 +49,13 @@ class FileValidationController @Inject() (
     (identify() andThen getData()).async { implicit request =>
       sendingEntityIn match {
         case None =>
-          logger.warn("[FileValidationController][onPageLoad] Unable to extract SendingEntityIN from file")
+          logger.warn("[RcaspValidationController][onPageLoad] Unable to extract SendingEntityIN from file")
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
 
         case Some(value) =>
           rcaspRegistrationConnector.viewRcasps(request.carfId).value.flatMap {
             case Left(error) =>
-              logger.warn(s"[FileValidationController][onPageLoad] Error calling viewRcasps: $error")
+              logger.warn(s"[RcaspValidationController][onPageLoad] Error calling viewRcasps: $error")
               Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
 
             case Right(rcasps) =>
