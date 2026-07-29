@@ -53,6 +53,11 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
+  val upscanCallbackDelayInSeconds: Int =
+    1 // configuration.get[Int]("microservice.services.upscan.callbackDelayInSeconds")
+
+  val upscanMaxFileNameLength: Int = 100 // configuration.get[Int]("microservice.services.upscan.max-file-name-length")
+
   val enrolmentKey: String   = configuration.get[String]("keys.enrolmentKey.carf")
   val ctEnrolmentKey: String = configuration.get[String]("keys.enrolmentKey.ct")
 }
