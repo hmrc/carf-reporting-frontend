@@ -25,7 +25,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.problem.RcaspNotMatchingView
 
 import javax.inject.Inject
-import scala.concurrent.Future
 
 class RcaspNotMatchingController @Inject() (
     override val messagesApi: MessagesApi,
@@ -38,15 +37,15 @@ class RcaspNotMatchingController @Inject() (
     with I18nSupport
     with Logging {
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData).async { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
     request.userAnswers.get(SendingEntityInPage) match {
       case Some(sendingEntityIn) =>
-        Future.successful(Ok(view(sendingEntityIn)))
+        Ok(view(sendingEntityIn))
       case None                  =>
         logger.warn(
           "[RcaspNotMatchingController][onPageLoad] SendingEntityIN not found in user answers, redirecting to Journey Recovery"
         )
-        Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
   }
 }
