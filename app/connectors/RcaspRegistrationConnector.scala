@@ -52,10 +52,9 @@ class RcaspRegistrationConnector @Inject() (
               Try(response.json.as[ViewRcaspResponse]) match {
                 case Success(viewRcaspResponse) =>
                   Right(viewRcaspResponse.ViewRCASP.ResponseDetails.RCASPList)
-                case Failure(exception)         =>
+                case Failure(_)                 =>
                   logger.warn(
-                    s"[RcaspRegistrationConnector][viewRcasps] Error parsing ViewRcaspResponse from $viewRcaspUrl",
-                    exception
+                    s"[RcaspRegistrationConnector][viewRcasps] Error parsing ViewRcaspResponse from $viewRcaspUrl"
                   )
                   Left(JsonValidationError)
               }
