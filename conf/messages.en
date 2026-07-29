@@ -82,5 +82,5 @@ rcaspNotMatching.heading.2 = What to do next
 rcaspNotMatching.list.1 = Check and update the value of the SendingEntityIN element in the MessageSpec section of your file to match the RCASP ID.
 rcaspNotMatching.list.2 = Upload the updated file
 rcaspNotMatching.heading.3 = If you have not yet added the RCASP in the service
-rcaspNotMatching.p.3.link.text = Add the RCASP in the service
-rcaspNotMatching.p.3.text = before you update your file.
+rcaspNotMatching.p3.link.text = Add the RCASP in the service
+rcaspNotMatching.p3.text = before you update your file.
