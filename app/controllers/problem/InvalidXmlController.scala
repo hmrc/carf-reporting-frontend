@@ -31,7 +31,7 @@ class InvalidXmlController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  // TODO: replace hardcoded filename with the actual uploaded filename from UserAnswers once available (CARF-581)
+  // TODO: replace hardcoded filename with the actual uploaded filename from UserAnswers once available (CARF-596)
   private val fileName: String = "filename.xml"
 
   def onPageLoad: Action[AnyContent] = identify() { implicit request =>
