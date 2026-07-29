@@ -32,7 +32,7 @@ class RcaspRegistrationConnectorISpec
 
   lazy val connector: RcaspRegistrationConnector = app.injector.instanceOf[RcaspRegistrationConnector]
 
-  val testCarfIdLocal = "XE0000123456789"
+  private val viewRcaspUrl = urlPathMatching(s"/carf-management/view-rcasp/$testCarfId/none")
 
   val validResponseBody: String =
     """
@@ -42,13 +42,52 @@ class RcaspRegistrationConnectorISpec
       |      "OriginatingSystem": "MDTP",
       |      "TransmittingSystem": "EIS",
       |      "RequestType": "VIEW",
-      |      "Regime": "CARF",
-      |      "ResponseParameters": null
+      |      "Regime": "CARF"
       |    },
       |    "ResponseDetails": {
       |      "RCASPList": [
-      |        { "RCASPID": "ZMCAR0123456787" },
-      |        { "RCASPID": "ZMCAR0123456788" }
+      |        {
+      |          "RCASPID": "ZMCAR0123456787",
+      |          "SubscriptionID": "1A30",
+      |          "IsRCASPUser": true,
+      |          "PartyType": "Organisation",
+      |          "RCASPName": "Timmy's Turtles",
+      |          "TradingName": "Uva Academy",
+      |          "TINDetails": [
+      |            { "TINType": "UTR", "TIN": "1111111111", "IssuedBy": "GB" }
+      |          ],
+      |          "AddressDetails": {
+      |            "AddressLine1": "1 Test",
+      |            "AddressLine2": "Test Street",
+      |            "AddressLine3": "Test Region",
+      |            "AddressLine4": "Testingtown",
+      |            "PostalCode": "B23 2AZ",
+      |            "CountryCode": "GB"
+      |          }
+      |        },
+      |        {
+      |          "RCASPID": "ZMCAR0123456788",
+      |          "SubscriptionID": "1A30",
+      |          "IsRCASPUser": false,
+      |          "PartyType": "Organisation",
+      |          "RCASPName": "Amazon UK",
+      |          "TradingName": "Amazon UK",
+      |          "TINDetails": [
+      |            { "TINType": "UTR", "TIN": "1111111111", "IssuedBy": "GB" }
+      |          ],
+      |          "AddressDetails": {
+      |            "AddressLine1": "1 Test",
+      |            "AddressLine2": "Test Street",
+      |            "AddressLine3": "Test Region",
+      |            "AddressLine4": "Testingtown",
+      |            "PostalCode": "B23 2AZ",
+      |            "CountryCode": "GB"
+      |          },
+      |          "PrimaryContactDetails": {
+      |            "ContactName": "Clavell",
+      |            "EmailAddress": "clavell@uva.edu.org"
+      |          }
+      |        }
       |      ]
       |    }
       |  }
@@ -57,9 +96,9 @@ class RcaspRegistrationConnectorISpec
 
   "viewRcasps" - {
 
-    "must successfully retrieve a list of RcaspDetails" in {
+    "must successfully retrieve a list of RcaspDetails, ignoring fields not required by RcaspDetails" in {
       stubFor(
-        get(urlPathMatching(s"/carf-management/view-rcasp/$testCarfIdLocal/none"))
+        get(viewRcaspUrl)
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -67,14 +106,14 @@ class RcaspRegistrationConnectorISpec
           )
       )
 
-      val result = connector.viewRcasps(testCarfIdLocal).value.futureValue
+      val result = connector.viewRcasps(testCarfId).value.futureValue
 
       result shouldBe Right(List(RcaspDetails("ZMCAR0123456787"), RcaspDetails("ZMCAR0123456788")))
     }
 
     "must return a Json validation error if an unexpected response body is returned" in {
       stubFor(
-        get(urlPathMatching(s"/carf-management/view-rcasp/$testCarfIdLocal/none"))
+        get(viewRcaspUrl)
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -82,35 +121,35 @@ class RcaspRegistrationConnectorISpec
           )
       )
 
-      val result = connector.viewRcasps(testCarfIdLocal).value.futureValue
+      val result = connector.viewRcasps(testCarfId).value.futureValue
 
       result shouldBe Left(ApiError.JsonValidationError)
     }
 
     "must return an empty list if the backend returns 404" in {
       stubFor(
-        get(urlPathMatching(s"/carf-management/view-rcasp/$testCarfIdLocal/none"))
+        get(viewRcaspUrl)
           .willReturn(
             aResponse()
               .withStatus(NOT_FOUND)
           )
       )
 
-      val result = connector.viewRcasps(testCarfIdLocal).value.futureValue
+      val result = connector.viewRcasps(testCarfId).value.futureValue
 
       result shouldBe Right(List.empty)
     }
 
     "must return an internal server error if an unexpected non-200 status is returned" in {
       stubFor(
-        get(urlPathMatching(s"/carf-management/view-rcasp/$testCarfIdLocal/none"))
+        get(viewRcaspUrl)
           .willReturn(
             aResponse()
               .withStatus(500)
           )
       )
 
-      val result = connector.viewRcasps(testCarfIdLocal).value.futureValue
+      val result = connector.viewRcasps(testCarfId).value.futureValue
 
       result shouldBe Left(ApiError.InternalServerError)
     }
