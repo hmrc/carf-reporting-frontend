@@ -18,7 +18,10 @@ GET         /account/signed-out                controllers.auth.SignedOutControl
 
 GET         /unauthorised                      controllers.UnauthorisedController.onPageLoad()
 
-GET         /report/upload-file                controllers.upload.UploadXmlController.onPageLoad()
-POST        /report/upload-file                controllers.upload.UploadXmlController.onSubmit()
-GET         /report/error                      controllers.upload.UploadXmlController.showError(errorCode: String, errorMessage: String, errorRequestId: String)
-GET         /report/problem/invalid-xml        controllers.problem.InvalidXmlController.onPageLoad()
+GET         /upload-file                       controllers.upload.UploadXmlController.onPageLoad()
+POST        /upload-file                       controllers.upload.UploadXmlController.onSubmit()
+GET         /error                             controllers.upload.UploadXmlController.showError(errorCode: String, errorMessage: String, errorRequestId: String)
+
+GET         /problem/invalid-xml               controllers.problem.InvalidXmlController.onPageLoad()
+
+GET         /problem/rcasp-not-matching        controllers.problem.RcaspNotMatchingController.onPageLoad()

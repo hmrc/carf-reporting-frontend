@@ -52,7 +52,7 @@ class UploadXmlController @Inject() (
   // TODO: Remove when implementing Upscan functionality (CARF-578, CARF-579)
   val upscanInitiateResponse = UpscanInitiateResponse(
     fileReference = Reference("abc"),
-    postTarget = "http://localhost:17004/send-a-cryptoasset-report/report/upload-file",
+    postTarget = "http://localhost:17004/send-a-cryptoasset-report/upload-file",
     formFields = Map.empty
   )
 

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.upload
 
 import base.SpecBase
+import controllers.upload
 import forms.UploadXmlFormProvider
 import models.upscan.{Reference, UpscanInitiateResponse}
 import play.api.data.Form
@@ -33,7 +34,7 @@ class UploadXmlControllerSpec extends SpecBase {
   // TODO: Remove when implementing Upscan functionality (CARF-578, CARF-579)
   val upscanInitiateResponse = UpscanInitiateResponse(
     fileReference = Reference("abc"),
-    postTarget = "http://localhost:17004/send-a-cryptoasset-report/report/upload-file",
+    postTarget = "http://localhost:17004/send-a-cryptoasset-report/upload-file",
     formFields = Map.empty
   )
 

@@ -17,24 +17,35 @@
 package controllers.problem
 
 import controllers.actions._
-import javax.inject.Inject
+import pages.SendingEntityInPage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.problem.InvalidXmlView
+import views.html.problem.RcaspNotMatchingView
 
-class InvalidXmlController @Inject() (
+import javax.inject.Inject
+
+class RcaspNotMatchingController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    getData: DataRetrievalAction,
+    requireData: DataRequiredAction,
     val controllerComponents: MessagesControllerComponents,
-    view: InvalidXmlView
+    view: RcaspNotMatchingView
 ) extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
-  // TODO: replace hardcoded filename with the actual uploaded filename from UserAnswers once available (CARF-596)
-  private val fileName: String = "filename.xml"
-
-  def onPageLoad: Action[AnyContent] = identify() { implicit request =>
-    Ok(view(fileName))
+  def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
+    request.userAnswers.get(SendingEntityInPage) match {
+      case Some(sendingEntityIn) =>
+        Ok(view(sendingEntityIn))
+      case None                  =>
+        logger.warn(
+          "[RcaspNotMatchingController][onPageLoad] SendingEntityIN not found in user answers, redirecting to Journey Recovery"
+        )
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 }
