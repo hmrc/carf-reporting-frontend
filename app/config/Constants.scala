@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package models.upscan
+package config
 
-import play.api.libs.json.*
-import play.api.mvc.QueryStringBindable
+object Constants {
 
-import java.util.UUID
+  val fileNameAllowedCharacters = "^[A-Za-z0-9_.-]+$"
 
-case class UploadId(value: String)
-
-object UploadId {
-  def generate = UploadId(UUID.randomUUID().toString)
-
-  implicit def queryBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[UploadId] =
-    stringBinder.transform(UploadId(_), _.value)
-
-  implicit val readsUploadId: Reads[UploadId] = Reads.StringReads.map(UploadId(_))
-
-  implicit val writesUploadId: Writes[UploadId] = Writes[UploadId](x => JsString(x.value))
 }

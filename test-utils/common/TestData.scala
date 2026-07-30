@@ -18,6 +18,8 @@ package common
 
 import generators.Generators
 import models.*
+import models.upscan.*
+import models.upscan.UploadStatus.*
 
 import java.time.{Clock, Instant, ZoneId}
 
@@ -33,4 +35,35 @@ trait TestData extends Generators {
   def emptyUserAnswers: UserAnswers =
     UserAnswers(id = userAnswersId, lastUpdated = Instant.now(clock))
 
+  val testUploadId  = UploadId("123456")
+  val testReference = Reference("11370e18-6e24-453e-b45a-76d3e32ea33d")
+
+  val testFileName    = "test.xml"
+  val testDownloadUrl = "https://bucketName.s3.eu-west-2.amazonaws.com?1235676"
+  val testFileSize    = 987L
+  val testChecksum    = "396f1"
+
+  val postTarget = "http://localhost:9570/upscan/upload-proxy"
+
+  val upscanInitiateResponse = UpscanInitiateResponse(
+    testReference,
+    postTarget,
+    formFields = Map("formKey" -> "formValue")
+  )
+
+  val uploadedSuccessfully: UploadStatus.UploadedSuccessfully =
+    UploadedSuccessfully(
+      name = testFileName,
+      downloadUrl = testDownloadUrl,
+      size = testFileSize,
+      checksum = testChecksum
+    )
+
+  val uploadRejected: UploadStatus.UploadRejected =
+    UploadRejected(
+      ErrorDetails(
+        failureReason = "REJECTED",
+        message = "Error message"
+      )
+    )
 }

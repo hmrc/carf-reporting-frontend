@@ -16,20 +16,16 @@
 
 package models.upscan
 
-import play.api.libs.json.*
-import play.api.mvc.QueryStringBindable
+import play.api.libs.json.{Json, OFormat}
 
-import java.util.UUID
+case class UpscanInitiateRequest(
+    callbackUrl: String,
+    successRedirect: String,
+    errorRedirect: String,
+    minimumFileSize: Option[Int] = None,
+    maximumFileSize: Option[Int] = None
+)
 
-case class UploadId(value: String)
-
-object UploadId {
-  def generate = UploadId(UUID.randomUUID().toString)
-
-  implicit def queryBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[UploadId] =
-    stringBinder.transform(UploadId(_), _.value)
-
-  implicit val readsUploadId: Reads[UploadId] = Reads.StringReads.map(UploadId(_))
-
-  implicit val writesUploadId: Writes[UploadId] = Writes[UploadId](x => JsString(x.value))
+object UpscanInitiateRequest {
+  implicit val format: OFormat[UpscanInitiateRequest] = Json.format[UpscanInitiateRequest]
 }

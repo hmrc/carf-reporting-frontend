@@ -25,7 +25,6 @@ import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import testOnly.controllers.RcaspValidationController
 import types.ResultT
 
 import scala.concurrent.Future

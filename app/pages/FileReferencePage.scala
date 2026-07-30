@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package models.upscan
+package pages
 
-import play.api.libs.json.*
-import play.api.mvc.QueryStringBindable
+import models.upscan.Reference
+import play.api.libs.json.JsPath
 
-import java.util.UUID
+case object FileReferencePage extends QuestionPage[Reference] {
 
-case class UploadId(value: String)
+  override def path: JsPath = JsPath \ toString
 
-object UploadId {
-  def generate = UploadId(UUID.randomUUID().toString)
+  override def toString: String = "fileReference"
 
-  implicit def queryBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[UploadId] =
-    stringBinder.transform(UploadId(_), _.value)
-
-  implicit val readsUploadId: Reads[UploadId] = Reads.StringReads.map(UploadId(_))
-
-  implicit val writesUploadId: Writes[UploadId] = Writes[UploadId](x => JsString(x.value))
 }
