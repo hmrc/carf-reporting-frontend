@@ -25,3 +25,5 @@ GET         /error                             controllers.upload.UploadXmlContr
 GET         /problem/invalid-xml               controllers.problem.InvalidXmlController.onPageLoad()
 
 GET         /problem/rcasp-not-matching        controllers.problem.RcaspNotMatchingController.onPageLoad()
+
+GET         /check-your-file-details           controllers.CheckYourFileDetailsController.onPageLoad()

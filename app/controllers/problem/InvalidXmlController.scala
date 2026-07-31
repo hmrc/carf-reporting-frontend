@@ -16,18 +16,21 @@
 
 package controllers.problem
 
-import controllers.actions._
-import javax.inject.Inject
+import config.FrontendAppConfig
+import controllers.actions.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.problem.InvalidXmlView
 
+import javax.inject.Inject
+
 class InvalidXmlController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     val controllerComponents: MessagesControllerComponents,
-    view: InvalidXmlView
+    view: InvalidXmlView,
+    appConfig: FrontendAppConfig
 ) extends FrontendBaseController
     with I18nSupport {
 
@@ -35,6 +38,6 @@ class InvalidXmlController @Inject() (
   private val fileName: String = "filename.xml"
 
   def onPageLoad: Action[AnyContent] = identify() { implicit request =>
-    Ok(view(fileName))
+    Ok(view(fileName, appConfig.managementUrl))
   }
 }

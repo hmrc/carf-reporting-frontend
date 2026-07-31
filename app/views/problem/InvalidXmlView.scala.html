@@ -17,11 +17,10 @@
 @this(
         layout: templates.Layout,
         link: components.Link,
-        printLink: components.PrintLink,
-        appConfig: config.FrontendAppConfig
+        printLink: components.PrintLink
 )
 
-@(fileName: String)(implicit request: Request[_], messages: Messages)
+@(fileName: String, managementUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("invalidXml.title")), showBackLink = false) {
 
@@ -62,7 +61,7 @@
         </li>
         <li>
         @link(
-            href = appConfig.managementUrl,
+            href = managementUrl,
             key = "invalidXml.p7.linkText"
         )
         </li>

@@ -18,12 +18,6 @@ package models.rcasp
 
 import play.api.libs.json.{Json, Reads}
 
-case class RcaspDetails(RCASPID: String)
-
-object RcaspDetails {
-  implicit val reads: Reads[RcaspDetails] = Json.reads[RcaspDetails]
-}
-
 case class RcaspResponseDetails(RCASPList: List[RcaspDetails])
 
 object RcaspResponseDetails {

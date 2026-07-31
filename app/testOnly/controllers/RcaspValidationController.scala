@@ -19,7 +19,7 @@ package testOnly.controllers
 import connectors.RcaspRegistrationConnector
 import controllers.actions.*
 import models.UserAnswers
-import pages.SendingEntityInPage
+import pages.{RcaspDetailsPage, SendingEntityInPage}
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -29,8 +29,8 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 /*
- * TODO: Remove/replace once real schema validation/data extraction is wired up (CARF-596).
- *
+ * TODO: Remove/replace once real schema validation/data extraction is wired up (CARF-596). ExtractedFileDetails will be saved in user answers containing sendingEntityIn and SendingEntityInPage can be removed.
+ * TODO: It is also at this stage (after XML validation) that we get subscription data and save it in user answers (CARF-625) - add it here if needed before CARF-596
  * This controller is a test-only stub (see conf/testOnlyDoNotUseInAppConf.routes) that
  * simulates the SendingEntityIN value that will eventually be returned from the backend
  * after successful schema validation of the uploaded file.
@@ -58,20 +58,22 @@ class RcaspValidationController @Inject() (
               logger.warn(s"[RcaspValidationController][onPageLoad] Error calling viewRcasps: $error")
               Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
 
-            case Right(rcasps) =>
+            case Right(rcaspList) =>
               val existingAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
-              for {
-                updatedAnswers <- Future.fromTry(existingAnswers.set(SendingEntityInPage, value))
-                _              <- sessionRepository.set(updatedAnswers)
-              } yield
-                if (rcasps.exists(_.RCASPID.equalsIgnoreCase(value))) {
-                  Redirect(
-                    controllers.routes.PlaceholderController.onPageLoad(
-                      "Check your file details page: to be built (CARF-590)"
-                    )
-                  )
-                } else {
-                  Redirect(controllers.problem.routes.RcaspNotMatchingController.onPageLoad())
+              rcaspList
+                .find(_.RCASPID.equalsIgnoreCase(value))
+                .fold {
+                  for {
+                    updatedAnswers <- Future.fromTry(existingAnswers.set(SendingEntityInPage, value))
+                    _              <- sessionRepository.set(updatedAnswers)
+                  } yield Redirect(controllers.problem.routes.RcaspNotMatchingController.onPageLoad())
+                } { matchingRcasp =>
+                  for {
+                    updatedAnswers1 <- Future.fromTry(existingAnswers.set(SendingEntityInPage, value))
+                    updatedAnswers2 <-
+                      Future.fromTry(updatedAnswers1.set(RcaspDetailsPage, matchingRcasp))
+                    _               <- sessionRepository.set(updatedAnswers2)
+                  } yield Redirect(controllers.routes.CheckYourFileDetailsController.onPageLoad())
                 }
           }
       }
