@@ -1,0 +1,61 @@
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package models.problem
+
+import play.twirl.api.Html
+
+object DataErrorsStubData {
+
+  val fewErrors: Seq[SchemaError] = Seq(
+    SchemaError(4, Html("SendingEntityIN value must be the RCASP ID of the reporting cryptoasset service provider")),
+    SchemaError(6, Html("Value is missing between ReceivingCountry element tags")),
+    SchemaError(
+      10,
+      Html(
+        """<p class="govuk-body govuk-!-margin-bottom-1">MessageRefId element must be from 26 to 100 characters. It must also match the file name and include the following in the order referenced:</p>
+          |<ul class="govuk-list govuk-list--bullet">
+          |  <li>&lsquo;GB&rsquo;</li>
+          |  <li>the same value as the year in the MessageSpec ReportingPeriod in the format &lsquo;YYYY&rsquo;</li>
+          |  <li>&lsquo;GB&rsquo;</li>
+          |  <li>a hyphen (-)</li>
+          |  <li>the 15-character RCASP ID from the MessageSpec SendingEntityIN</li>
+          |  <li>a hyphen (-)</li>
+          |  <li>1 to 75 characters of your choice to make the ID unique</li>
+          |</ul>
+          |<p class="govuk-body govuk-!-margin-bottom-0">MessageRefId must also not include less than signs (<), greater than signs (>), colons (:), straight double quotes ("), apostrophes ('), ampersands (&amp;), forward slashes (/), backslashes (\), or vertical bars (|).</p>
+          |""".stripMargin
+      )
+    ),
+    SchemaError(
+      12,
+      Html(
+        """<p class="govuk-body govuk-!-margin-bottom-1">ReportingPeriod value must:</p>
+          |<ul class="govuk-list govuk-list--bullet">
+          |  <li>be in the format YYYY-MM-DD</li>
+          |  <li>be between 2026 and the end of the current year</li>
+          |  <li>include 31 as the day and 12 as the month</li>
+          |</ul>
+          |<p class="govuk-body govuk-!-margin-bottom-0">For example, 2026-12-31.</p>
+          |""".stripMargin
+      )
+    )
+  )
+
+  val manyErrors: Seq[SchemaError] = (1 to 105).map { i =>
+    SchemaError(i, Html(s"Sample schema error for testing purposes, line $i"))
+  }
+}

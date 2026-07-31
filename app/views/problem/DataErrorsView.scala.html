@@ -1,0 +1,102 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import models.problem.SchemaError
+
+@this(
+        layout: templates.Layout,
+        link: components.Link,
+        printLink: components.PrintLink,
+        appConfig: config.FrontendAppConfig
+)
+
+@(fileName: String, errors: Seq[SchemaError], hasMoreThanMax: Boolean)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("dataErrors.title")), showBackLink = false, fullWidth = true) {
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+
+            <h1 class="govuk-heading-l long-word">@messages("dataErrors.heading")</h1>
+
+            <p class="govuk-body">@messages("dataErrors.p1", fileName)</p>
+
+            <h2 class="govuk-heading-m">@messages("dataErrors.h2")</h2>
+
+            <ol class="govuk-list govuk-list--number">
+                <li>
+                    @printLink(key = "dataErrors.list.1.linkText", id = Some("print-link"))
+                </li>
+                <li>@messages("dataErrors.list.2")</li>
+                <li>
+                    @link(
+                        href = controllers.routes.PlaceholderController.onPageLoad("TODO: Technical guidance for XML files link - URL not yet available").url,
+                        key = "dataErrors.list.3.linkText",
+                        classes = "govuk-link print-url"
+                    )
+                    @messages("dataErrors.list.3.after")
+                </li>
+                <li>
+                    @* TODO: replace with real upload-file route once CARF-393 is complete *@
+                    @link(
+                        href = controllers.routes.PlaceholderController.onPageLoad("Upload the updated file link - CARF-393").url,
+                        key = "dataErrors.list.4.linkText"
+                    )
+                </li>
+            </ol>
+
+        </div>
+    </div>
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+
+            @if(hasMoreThanMax) {
+                <p class="govuk-body" id="hundred-para">@messages("dataErrors.hundredPara")</p>
+            }
+
+            <table class="govuk-table">
+                <caption class="govuk-table__caption govuk-table__caption--m govuk-!-margin-top-2 govuk-!-margin-bottom-2">@messages("dataErrors.table.caption")</caption>
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header" style="width: 5%;">@messages("dataErrors.table.head.line")</th>
+                        <th scope="col" class="govuk-table__header">@messages("dataErrors.table.head.error")</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                @for(error <- errors) {
+                    <tr class="govuk-table__row">
+                        <td class="govuk-table__cell govuk-table__cell--numeric">@error.lineNumber</td>
+                        <td class="govuk-table__cell">@error.message</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <p class="govuk-body govuk-!-padding-top-5">
+                @link(
+                    href = appConfig.managementUrl,
+                    key = "dataErrors.back.linkText"
+                )
+            </p>
+        </div>
+    </div>
+}
