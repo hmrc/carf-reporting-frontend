@@ -60,7 +60,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val upscanInitiatePath: String        = configuration.get[String]("microservice.services.upscan.initiate-path")
   val upscanRedirectBase: String        = configuration.get[String]("microservice.services.upscan.redirect-base")
   val upscanCallbackDelayInSeconds: Int = configuration.get[Int]("microservice.services.upscan.callbackDelayInSeconds")
-  val upscanMaxFileSize: Int            = configuration.get[Int]("microservice.services.upscan.max-file-size-in-mb")
+  val upscanMaxFileSizeInMb: Int        = configuration.get[Int]("microservice.services.upscan.max-file-size-in-mb")
   val upscanMaxFileNameLength: Int      = configuration.get[Int]("microservice.services.upscan.max-file-name-length")
 
   val enrolmentKey: String   = configuration.get[String]("keys.enrolmentKey.carf")

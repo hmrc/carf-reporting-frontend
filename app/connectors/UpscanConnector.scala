@@ -16,6 +16,7 @@
 
 package connectors
 
+import config.Constants.bytesInMb
 import config.FrontendAppConfig
 import models.errors.ApiError.{InternalServerError, JsonValidationError}
 import models.upscan.*
@@ -49,7 +50,7 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
       successRedirect = s"$upscanRedirectBase${controllers.upload.routes.UploadXmlController.getStatus(uploadId).url}",
       errorRedirect = s"$upscanRedirectBase/send-a-cryptoasset-report/error",
       minimumFileSize = None,
-      maximumFileSize = Some(upscanMaxSize * 1048576)
+      maximumFileSize = Some(upscanMaxSizeInMb * bytesInMb)
     )
 
     ResultT.fromFuture {
@@ -88,7 +89,7 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
         .execute[HttpResponse]
         .map { response =>
           response.status match {
-            case OK => Right((): Unit)
+            case OK => Right(())
             case _  =>
               logger.warn(s"[UpscanConnector][requestUpload] Unexpected response with status ${response.status}")
               Left(InternalServerError)
@@ -126,5 +127,5 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
   private lazy val backendUrl         = config.carfReportingBaseUrl
   private lazy val upscanInitiateUrl  = s"${config.upscanInitiateHost}${config.upscanInitiatePath}"
   private lazy val upscanRedirectBase = config.upscanRedirectBase
-  private lazy val upscanMaxSize      = config.upscanMaxFileSize
+  private lazy val upscanMaxSizeInMb  = config.upscanMaxFileSizeInMb
 }

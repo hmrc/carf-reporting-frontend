@@ -20,4 +20,6 @@ object Constants {
 
   val fileNameAllowedCharacters = "^[A-Za-z0-9_.-]+$"
 
+  val bytesInMb = 1048576
+
 }

@@ -59,7 +59,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -138,7 +138,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -166,7 +166,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -192,7 +192,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -218,7 +218,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -248,7 +248,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -278,7 +278,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -307,7 +307,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -336,7 +336,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -362,7 +362,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.getUpscanFormData(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue((): Unit))
+        when(mockUpscanConnector.requestUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
