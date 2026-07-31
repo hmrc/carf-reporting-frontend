@@ -50,7 +50,7 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
       successRedirect = s"$upscanRedirectBase${controllers.upload.routes.UploadXmlController.getStatus(uploadId).url}",
       errorRedirect = s"$upscanRedirectBase/send-a-cryptoasset-report/error",
       minimumFileSize = None,
-      maximumFileSize = Some(upscanMaxSizeInMb * bytesInMb)
+      maximumFileSize = upscanMaxSizeInMb * bytesInMb
     )
 
     ResultT.fromFuture {
