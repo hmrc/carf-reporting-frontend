@@ -41,13 +41,14 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
     HeaderNames.CONTENT_TYPE -> "application/json"
   )
 
-  def getUpscanFormData(
+  def upscanFormInitiate(
       uploadId: UploadId
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[UpscanInitiateResponse] = {
     val callbackUrl = s"$backendUrl/upscan/callback"
     val body        = UpscanInitiateRequest(
       callbackUrl,
-      successRedirect = s"$upscanRedirectBase${controllers.upload.routes.UploadXmlController.getStatus(uploadId).url}",
+      successRedirect =
+        s"$upscanRedirectBase${controllers.upload.routes.UploadXmlController.getUploadStatusAndRedirect(uploadId).url}",
       errorRedirect = s"$upscanRedirectBase/send-a-cryptoasset-report/error",
       minimumFileSize = None,
       maximumFileSize = upscanMaxSizeInMb * bytesInMb
@@ -65,18 +66,18 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
               Try(response.json.as[PreparedUpload]) match {
                 case Success(preparedUpload) => Right(preparedUpload.toUpscanInitiateResponse)
                 case Failure(exception)      =>
-                  logger.warn("[UpscanConnector][getUpscanFormData] Error parsing response body as PreparedUpload")
+                  logger.warn("[UpscanConnector][upscanFormInitiate] Error parsing response body as PreparedUpload")
                   Left(JsonValidationError)
               }
             case _  =>
-              logger.warn(s"[UpscanConnector][getUpscanFormData] Unexpected response with status ${response.status}")
+              logger.warn(s"[UpscanConnector][upscanFormInitiate] Unexpected response with status ${response.status}")
               Left(InternalServerError)
           }
         }
     }
   }
 
-  def requestUpload(
+  def saveRequestedUpload(
       uploadId: UploadId,
       fileReference: Reference
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[Unit] = {
@@ -91,7 +92,7 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
           response.status match {
             case OK => Right(())
             case _  =>
-              logger.warn(s"[UpscanConnector][requestUpload] Unexpected response with status ${response.status}")
+              logger.warn(s"[UpscanConnector][saveRequestedUpload] Unexpected response with status ${response.status}")
               Left(InternalServerError)
           }
         }

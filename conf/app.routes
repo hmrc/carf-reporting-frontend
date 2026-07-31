@@ -19,7 +19,7 @@ GET         /account/signed-out                controllers.auth.SignedOutControl
 GET         /unauthorised                      controllers.UnauthorisedController.onPageLoad()
 
 GET         /upload-file                       controllers.upload.UploadXmlController.onPageLoad()
-GET         /status                            controllers.upload.UploadXmlController.getStatus(uploadId: upscan.UploadId)
+GET         /status                            controllers.upload.UploadXmlController.getUploadStatusAndRedirect(uploadId: upscan.UploadId)
 GET         /error                             controllers.upload.UploadXmlController.showError(errorCode: String, errorMessage: String, errorRequestId: String)
 
 GET         /problem/invalid-xml               controllers.problem.InvalidXmlController.onPageLoad()

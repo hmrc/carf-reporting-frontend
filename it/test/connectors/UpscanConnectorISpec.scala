@@ -29,7 +29,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
 
   lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
 
-  ".getUpscanFormData" - {
+  ".upscanFormInitiate" - {
     val testUrl = "/upscan/v2/initiate"
 
     "must successfully retrieve an UpscanInitiateResponse" in {
@@ -55,7 +55,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.getUpscanFormData(testUploadId).value.futureValue
+      val result = connector.upscanFormInitiate(testUploadId).value.futureValue
       result mustBe Right(upscanInitiateResponse)
     }
 
@@ -69,7 +69,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.getUpscanFormData(testUploadId).value.futureValue
+      val result = connector.upscanFormInitiate(testUploadId).value.futureValue
       result mustBe Left(JsonValidationError)
     }
 
@@ -87,7 +87,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.getUpscanFormData(testUploadId).value.futureValue
+      val result = connector.upscanFormInitiate(testUploadId).value.futureValue
       result mustBe Left(InternalServerError)
     }
 
@@ -105,12 +105,12 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.getUpscanFormData(testUploadId).value.futureValue
+      val result = connector.upscanFormInitiate(testUploadId).value.futureValue
       result mustBe Left(InternalServerError)
     }
   }
 
-  ".requestUpload" - {
+  ".saveRequestedUpload" - {
     val testUrl = "/carf-reporting/upscan/upload"
 
     "must return Unit when backend returns 200" in {
@@ -121,7 +121,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.requestUpload(testUploadId, testReference).value.futureValue
+      val result = connector.saveRequestedUpload(testUploadId, testReference).value.futureValue
       result mustBe Right((): Unit)
     }
 
@@ -139,7 +139,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.requestUpload(testUploadId, testReference).value.futureValue
+      val result = connector.saveRequestedUpload(testUploadId, testReference).value.futureValue
       result mustBe Left(InternalServerError)
     }
 
@@ -157,7 +157,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.requestUpload(testUploadId, testReference).value.futureValue
+      val result = connector.saveRequestedUpload(testUploadId, testReference).value.futureValue
       result mustBe Left(InternalServerError)
     }
   }

@@ -94,9 +94,9 @@ class UploadXmlController @Inject() (
     val uploadId: UploadId = UploadId.generate
     val userAnswers        = request.userAnswers.getOrElse(UserAnswers(id = request.userId))
 
-    upscanConnector.getUpscanFormData(uploadId).value.flatMap {
+    upscanConnector.upscanFormInitiate(uploadId).value.flatMap {
       case Right(upscanInitiateResponse) =>
-        upscanConnector.requestUpload(uploadId, upscanInitiateResponse.fileReference).value.flatMap {
+        upscanConnector.saveRequestedUpload(uploadId, upscanInitiateResponse.fileReference).value.flatMap {
           case Right(_)    =>
             for {
               answersWithUploadId <- Future.fromTry(userAnswers.set(UploadIdPage, uploadId))
@@ -114,8 +114,8 @@ class UploadXmlController @Inject() (
     }
   }
 
-  def getStatus(uploadId: UploadId): Action[AnyContent] = (identify() andThen getData() andThen requireData).async {
-    implicit request =>
+  def getUploadStatusAndRedirect(uploadId: UploadId): Action[AnyContent] =
+    (identify() andThen getData() andThen requireData).async { implicit request =>
       def errorRedirect(errorCode: String, errorMessage: String, errorRequestId: String): Result =
         Redirect(controllers.upload.routes.UploadXmlController.showError(errorCode, errorMessage, errorRequestId).url)
 
@@ -144,35 +144,35 @@ class UploadXmlController @Inject() (
               case Some(uploadRejected: UploadRejected)             =>
                 if (uploadRejected.details.message.contains("octet-stream")) {
                   logger.warn(
-                    s"[UploadXmlController][getStatus] Upload rejected with 'octet-stream' in message. Error details: ${uploadRejected.details}"
+                    s"[UploadXmlController][getUploadStatusAndRedirect] Upload rejected with 'octet-stream' in message. Error details: ${uploadRejected.details}"
                   )
                   val errorReason = uploadRejected.details.failureReason
                   errorRedirect(OctetStream.code, errorReason.toLowerCase, "")
                 } else {
                   logger.warn(
-                    s"[UploadXmlController][getStatus] Upload rejected. Error details: ${uploadRejected.details}"
+                    s"[UploadXmlController][getUploadStatusAndRedirect] Upload rejected. Error details: ${uploadRejected.details}"
                   )
                   errorRedirect(InvalidArgument.code, TypeMismatch.message, "")
                 }
               case Some(Quarantined)                                =>
                 errorRedirect(VirusFile.code, "", "")
               case Some(Failed)                                     =>
-                logger.warn("[UploadXmlController][getStatus] File upload returned failed status")
+                logger.warn("[UploadXmlController][getUploadStatusAndRedirect] File upload returned failed status")
                 errorRedirect("UploadFailed", "", "")
               case Some(_)                                          =>
-                Redirect(controllers.upload.routes.UploadXmlController.getStatus(uploadId).url)
+                Redirect(controllers.upload.routes.UploadXmlController.getUploadStatusAndRedirect(uploadId).url)
               case None                                             =>
                 logger.error(
-                  s"[UploadXmlController][getStatus] Unable to retrieve a record with uploadId ${uploadId.value}"
+                  s"[UploadXmlController][getUploadStatusAndRedirect] Unable to retrieve a record with uploadId ${uploadId.value}"
                 )
                 errorRedirect("UploadFailed", "", "")
             }
           case Left(error)              =>
-            logger.error(s"[UploadXmlController][getStatus] Error getting upload status: $error")
+            logger.error(s"[UploadXmlController][getUploadStatusAndRedirect] Error getting upload status: $error")
             Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
         }
       }
-  }
+    }
 
   private def isFileNameTooLong(name: String): Boolean =
     name.stripSuffix(".xml").length > config.upscanMaxFileNameLength
