@@ -25,12 +25,12 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.problem.DataErrorsView
 
 class DataErrorsController @Inject() (
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: DataErrorsView
-                                     ) extends FrontendBaseController
-  with I18nSupport {
+    override val messagesApi: MessagesApi,
+    identify: IdentifierAction,
+    val controllerComponents: MessagesControllerComponents,
+    view: DataErrorsView
+) extends FrontendBaseController
+    with I18nSupport {
 
   // TODO: replace hardcoded filename and stub error data with real values from (CARF-593, CARF-596)
   private val fileName: String = "filename.xml"

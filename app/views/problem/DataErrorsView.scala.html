@@ -38,12 +38,12 @@
 
             <ol class="govuk-list govuk-list--number">
                 <li>
-                    @printLink(key = "dataErrors.list.1.linkText", id = Some("print-link"))
+                @printLink(key = "dataErrors.list.1.linkText", id = Some("print-link"), fullStop = true)
                 </li>
                 <li>@messages("dataErrors.list.2")</li>
                 <li>
                     @link(
-                        href = controllers.routes.PlaceholderController.onPageLoad("TODO: Technical guidance for XML files link - URL not yet available").url,
+                        href = controllers.routes.PlaceholderController.onPageLoad("TODO: Technical guidance for XML files link - CARF-595").url,
                         key = "dataErrors.list.3.linkText",
                         classes = "govuk-link print-url"
                     )
@@ -52,8 +52,9 @@
                 <li>
                     @* TODO: replace with real upload-file route once CARF-393 is complete *@
                     @link(
-                        href = controllers.routes.PlaceholderController.onPageLoad("Upload the updated file link - CARF-393").url,
-                        key = "dataErrors.list.4.linkText"
+                        href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
+                        key = "dataErrors.list.4.linkText",
+                        fullStop = true
                     )
                 </li>
             </ol>

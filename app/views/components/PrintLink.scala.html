@@ -16,10 +16,10 @@
 
 @this()
 
-@(key: String, id: Option[String] = None)(implicit messages: Messages)
+@(key: String, id: Option[String] = None, fullStop: Boolean = false)(implicit messages: Messages)
 
 @*
 note the default (non js) behaviour is to just display the text as an instruction (e.g. "print this page")
 if the user has js, a <a> tag will be added within the span and an window.print event listener assigned to the whole thing
 *@
-<span class="print-link" @if(id.isDefined){id="@id"}>@messages(key)</span>
+<span class="print-link" @if(id.isDefined){id="@id"}>@messages(key)</span>@if(fullStop){.}

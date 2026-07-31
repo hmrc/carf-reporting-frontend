@@ -36,7 +36,7 @@ object DataErrorsStubData {
           |  <li>a hyphen (-)</li>
           |  <li>1 to 75 characters of your choice to make the ID unique</li>
           |</ul>
-          |<p class="govuk-body govuk-!-margin-bottom-0">MessageRefId must also not include less than signs (<), greater than signs (>), colons (:), straight double quotes ("), apostrophes ('), ampersands (&amp;), forward slashes (/), backslashes (\), or vertical bars (|).</p>
+          |<p class="govuk-body govuk-!-margin-bottom-0">MessageRefId must also not include less than signs (<), greater than signs (>), colons (:), straight double quotes ("), apostrophes ('), ampersands (&amp;), forward slashes (/), backslashes (\), vertical bars (|), question marks (?) or asterisks (*).</p>
           |""".stripMargin
       )
     ),
@@ -52,7 +52,25 @@ object DataErrorsStubData {
           |<p class="govuk-body govuk-!-margin-bottom-0">For example, 2026-12-31.</p>
           |""".stripMargin
       )
-    )
+    ),
+    SchemaError(15, Html("RCASP must contain either Entity or Individual")),
+    SchemaError(26, Html("Value is missing between optional Street element tags")),
+    SchemaError(36, Html("OtherNexus ResCountryCode attribute must contain an ISO country code")),
+    SchemaError(
+      41,
+      Html(
+        """<p class="govuk-body govuk-!-margin-bottom-1">DocRefId element must be from 28 to 164 characters and include the following in the order referenced:</p>
+          |<ul class="govuk-list govuk-list--bullet">
+          |  <li>the same value as the MessageRefId for this submission</li>
+          |  <li>a hyphen (-)</li>
+          |  <li>1 to 63 characters of your choice to make the ID unique</li>
+          |</ul>
+          |<p class="govuk-body govuk-!-margin-bottom-0">For an OECD0 file, the DocRefId must match the previous submission.</p>
+          |""".stripMargin
+      )
+    ),
+    SchemaError(120, Html("Amount element must have 2 decimal places. The amount must be 0 or more than 0")),
+    SchemaError(260, Html("RelevantTransactions section is missing"))
   )
 
   val manyErrors: Seq[SchemaError] = (1 to 105).map { i =>

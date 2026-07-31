@@ -32,12 +32,10 @@ class DataErrorsTestOnlyController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  private val fileName: String    = "filename.xml"
-  private val maxErrorsShown: Int = 100
+  private val fileName: String = "filename.xml"
 
   def fewErrors(): Action[AnyContent] = identify() { implicit request =>
-    val errors = DataErrorsStubData.fewErrors
-    Ok(view(fileName, errors.take(maxErrorsShown), hasMoreThanMax = errors.size > maxErrorsShown))
+    Ok(view(fileName, DataErrorsStubData.fewErrors, hasMoreThanMax = false))
   }
 
   def manyErrors(): Action[AnyContent] = identify() { implicit request =>
