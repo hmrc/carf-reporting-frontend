@@ -16,6 +16,7 @@
 
 package testOnly.controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import javax.inject.Inject
 import models.problem.DataErrorsStubData
@@ -27,19 +28,22 @@ import views.html.problem.DataErrorsView
 class DataErrorsTestOnlyController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    appConfig: FrontendAppConfig,
     val controllerComponents: MessagesControllerComponents,
     view: DataErrorsView
 ) extends FrontendBaseController
     with I18nSupport {
 
-  private val fileName: String = "filename.xml"
+  private val fileName: String    = "filename.xml"
+  private val maxErrorsShown: Int = 100
 
   def fewErrors(): Action[AnyContent] = identify() { implicit request =>
-    Ok(view(fileName, DataErrorsStubData.fewErrors, hasMoreThanMax = false))
+    Ok(view(fileName, DataErrorsStubData.fewErrors, hasMoreThanMax = false, appConfig.managementUrl))
   }
 
   def manyErrors(): Action[AnyContent] = identify() { implicit request =>
-    Ok(view(fileName, DataErrorsStubData.manyErrors.take(100), hasMoreThanMax = true))
+    Ok(
+      view(fileName, DataErrorsStubData.manyErrors.take(maxErrorsShown), hasMoreThanMax = true, appConfig.managementUrl)
+    )
   }
-
 }

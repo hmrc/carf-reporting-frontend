@@ -16,6 +16,7 @@
 
 package controllers.problem
 
+import config.FrontendAppConfig
 import controllers.actions._
 import javax.inject.Inject
 import models.problem.DataErrorsStubData
@@ -27,6 +28,7 @@ import views.html.problem.DataErrorsView
 class DataErrorsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    appConfig: FrontendAppConfig,
     val controllerComponents: MessagesControllerComponents,
     view: DataErrorsView
 ) extends FrontendBaseController
@@ -36,6 +38,6 @@ class DataErrorsController @Inject() (
   private val fileName: String = "filename.xml"
 
   def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
-    Ok(view(fileName, DataErrorsStubData.fewErrors, hasMoreThanMax = false))
+    Ok(view(fileName, DataErrorsStubData.fewErrors, hasMoreThanMax = false, appConfig.managementUrl))
   }
 }

@@ -17,6 +17,7 @@
 package controllers.problem
 
 import base.SpecBase
+import config.FrontendAppConfig
 import models.problem.DataErrorsStubData
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -33,6 +34,8 @@ class DataErrorsControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
+        val appConfig = application.injector.instanceOf[FrontendAppConfig]
+
         val request = FakeRequest(GET, routes.DataErrorsController.onPageLoad().url)
 
         val result = route(application, request).value
@@ -41,7 +44,10 @@ class DataErrorsControllerSpec extends SpecBase {
 
         status(result)          mustEqual OK
         contentAsString(result) mustEqual
-          view(fileName, DataErrorsStubData.fewErrors, hasMoreThanMax = false)(request, messages(application)).toString
+          view(fileName, DataErrorsStubData.fewErrors, hasMoreThanMax = false, appConfig.managementUrl)(
+            request,
+            messages(application)
+          ).toString
       }
     }
   }

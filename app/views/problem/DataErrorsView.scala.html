@@ -19,11 +19,10 @@
 @this(
         layout: templates.Layout,
         link: components.Link,
-        printLink: components.PrintLink,
-        appConfig: config.FrontendAppConfig
+        printLink: components.PrintLink
 )
 
-@(fileName: String, errors: Seq[SchemaError], hasMoreThanMax: Boolean)(implicit request: Request[_], messages: Messages)
+@(fileName: String, errors: Seq[SchemaError], hasMoreThanMax: Boolean, managementUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("dataErrors.title")), showBackLink = false, fullWidth = true) {
 
@@ -37,9 +36,7 @@
             <h2 class="govuk-heading-m">@messages("dataErrors.h2")</h2>
 
             <ol class="govuk-list govuk-list--number">
-                <li>
-                @printLink(key = "dataErrors.list.1.linkText", id = Some("print-link"), fullStop = true)
-                </li>
+                <li>@printLink(key = "dataErrors.list.1.linkText", id = Some("print-link"), fullStop = true)</li>
                 <li>@messages("dataErrors.list.2")</li>
                 <li>
                     @link(
@@ -57,7 +54,6 @@
                     )
                 </li>
             </ol>
-
         </div>
     </div>
 
@@ -85,7 +81,6 @@
                 }
                 </tbody>
             </table>
-
         </div>
     </div>
 
@@ -93,7 +88,7 @@
         <div class="govuk-grid-column-two-thirds">
             <p class="govuk-body govuk-!-padding-top-5">
                 @link(
-                    href = appConfig.managementUrl,
+                    href = managementUrl,
                     key = "dataErrors.back.linkText"
                 )
             </p>
