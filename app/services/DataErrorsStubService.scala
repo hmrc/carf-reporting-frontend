@@ -25,7 +25,7 @@ class DataErrorsStubService {
 
   private val stubFileName: String = "filename.xml"
 
-  // TODO: replace with real lookups from UserAnswers once schema-validation logic exists (CARF-593, CARF-596).
+  // TODO: replace with real lookups from UserAnswers once schema-validation logic exists (CARF-596).
   def getFileName(carfId: String): Option[String] =
     carfId.headOption match {
       case Some('Z') => None

@@ -16,7 +16,7 @@
 
 package controllers.problem
 
-import config.FrontendAppConfig
+import config.{Constants, FrontendAppConfig}
 import controllers.actions._
 import javax.inject.Inject
 import play.api.Logging
@@ -37,15 +37,14 @@ class DataErrorsController @Inject() (
     with I18nSupport
     with Logging {
 
-  private val maxErrorsShown: Int = 100
-
   def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
     val carfId = request.carfId
 
     (dataErrorsStubService.getDataErrors(carfId), dataErrorsStubService.getFileName(carfId)) match {
       case (Some(errors), Some(fileName)) if errors.nonEmpty =>
-        val hasMoreThanMax = errors.length > maxErrorsShown
-        Ok(view(fileName, errors.take(maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
+        val hasMoreThanMax = errors.length > Constants.maxErrorsShown
+        logger.info(s"Rendering data errors page. Errors length: ${errors.length}")
+        Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
       case (_, _) =>
         logger.warn("Unable to retrieve data errors or file name for data-errors page")
