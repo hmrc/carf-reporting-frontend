@@ -45,7 +45,7 @@ class DataErrorsController @Inject() (
         val hasMoreThanMax = errors.length > Constants.maxErrorsShown
         Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
-      case (errors, fileName) =>
+      case (errors, _) =>
         logger.warn(s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${errors.map(_.length)}")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
