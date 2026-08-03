@@ -43,11 +43,10 @@ class DataErrorsController @Inject() (
     (dataErrorsStubService.getDataErrors(carfId), dataErrorsStubService.getFileName(carfId)) match {
       case (Some(errors), Some(fileName)) if errors.nonEmpty =>
         val hasMoreThanMax = errors.length > Constants.maxErrorsShown
-        logger.info(s"Rendering data errors page. Errors length: ${errors.length}")
         Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
-      case (_, _) =>
-        logger.warn("Unable to retrieve data errors or file name for data-errors page")
+      case (errors, fileName) =>
+        logger.warn(s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${errors.map(_.length)}")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
   }
