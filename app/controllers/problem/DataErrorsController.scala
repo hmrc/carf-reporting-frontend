@@ -19,9 +19,10 @@ package controllers.problem
 import config.FrontendAppConfig
 import controllers.actions._
 import javax.inject.Inject
-import models.problem.DataErrorsStubData
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.DataErrorsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.problem.DataErrorsView
 
@@ -29,15 +30,26 @@ class DataErrorsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     appConfig: FrontendAppConfig,
+    dataErrorsStubService: DataErrorsStubService,
     val controllerComponents: MessagesControllerComponents,
     view: DataErrorsView
 ) extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
-  // TODO: replace hardcoded filename and stub error data with real values from (CARF-593, CARF-596)
-  private val fileName: String = "filename.xml"
+  private val maxErrorsShown: Int = 100
 
   def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
-    Ok(view(fileName, DataErrorsStubData.fewErrors, hasMoreThanMax = false, appConfig.managementUrl))
+    val carfId = request.carfId
+
+    (dataErrorsStubService.getDataErrors(carfId), dataErrorsStubService.getFileName(carfId)) match {
+      case (Some(errors), Some(fileName)) if errors.nonEmpty =>
+        val hasMoreThanMax = errors.length > maxErrorsShown
+        Ok(view(fileName, errors.take(maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
+
+      case (_, _) =>
+        logger.warn("Unable to retrieve data errors or file name for data-errors page")
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 }
