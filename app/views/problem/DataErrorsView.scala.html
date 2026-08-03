@@ -15,11 +15,13 @@
  *@
 
 @import models.problem.SchemaError
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
         layout: templates.Layout,
         link: components.Link,
-        printLink: components.PrintLink
+        printLink: components.PrintLink,
+        govukTable: GovukTable
 )
 
 @(fileName: String, errors: Seq[SchemaError], hasMoreThanMax: Boolean, managementUrl: String)(implicit request: Request[_], messages: Messages)
@@ -36,24 +38,33 @@
             <h2 class="govuk-heading-m">@messages("dataErrors.h2")</h2>
 
             <ol class="govuk-list govuk-list--number">
-                <li>@printLink(key = "dataErrors.list.1.linkText", id = Some("print-link"), fullStop = true)</li>
+                <li>
+                @printLink(
+                    key = "dataErrors.list.1.linkText",
+                    id = Some("print-link"),
+                    fullStop = true
+                )
+                </li>
                 <li>@messages("dataErrors.list.2")</li>
                 <li>
                     @link(
-                        href = controllers.routes.PlaceholderController.onPageLoad("TODO: Technical guidance for XML files link - CARF-595").url,
+                        href = controllers.routes.PlaceholderController
+                        .onPageLoad("TODO: Technical guidance for XML files link - CARF-595")
+                        .url,
                         key = "dataErrors.list.3.linkText",
                         classes = "govuk-link print-url"
                     )
                     @messages("dataErrors.list.3.after")
                 </li>
                 <li>
-                    @link(
-                        href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
-                        key = "dataErrors.list.4.linkText",
-                        fullStop = true
-                    )
+                @link(
+                    href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
+                    key = "dataErrors.list.4.linkText",
+                    fullStop = true
+                )
                 </li>
             </ol>
+
         </div>
     </div>
 
@@ -64,33 +75,41 @@
                 <p class="govuk-body" id="hundred-para">@messages("dataErrors.hundredPara")</p>
             }
 
-            <table class="govuk-table">
-                <caption class="govuk-table__caption govuk-table__caption--m govuk-!-margin-top-2 govuk-!-margin-bottom-2">@messages("dataErrors.table.caption")</caption>
-                <thead class="govuk-table__head">
-                    <tr class="govuk-table__row">
-                        <th scope="col" class="govuk-table__header" style="width: 5%;">@messages("dataErrors.table.head.line")</th>
-                        <th scope="col" class="govuk-table__header">@messages("dataErrors.table.head.error")</th>
-                    </tr>
-                </thead>
-                <tbody class="govuk-table__body">
-                @for(error <- errors) {
-                    <tr class="govuk-table__row">
-                        <td class="govuk-table__cell govuk-table__cell--numeric">@error.lineNumber</td>
-                        <td class="govuk-table__cell">@error.message</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+            @govukTable(Table(
+                rows = errors.map { error =>
+                    Seq(
+                        TableRow(
+                            content = Text(error.lineNumber.toString),
+                            format = Some("numeric")
+                        ),
+                        TableRow(
+                            content = HtmlContent(error.message)
+                        )
+                    )
+                },
+                head = Some(Seq(
+                    HeadCell(
+                        content = Text(messages("dataErrors.table.head.line")),
+                        attributes = Map("style" -> "width: 5%;")
+                    ),
+                    HeadCell(
+                        content = Text(messages("dataErrors.table.head.error"))
+                    )
+                )),
+                caption = Some(messages("dataErrors.table.caption")),
+                captionClasses = "govuk-table__caption--m govuk-!-margin-top-2 govuk-!-margin-bottom-2"
+            ))
+
         </div>
     </div>
 
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
             <p class="govuk-body govuk-!-padding-top-5">
-                @link(
-                    href = managementUrl,
-                    key = "dataErrors.back.linkText"
-                )
+            @link(
+                href = managementUrl,
+                key = "dataErrors.back.linkText"
+            )
             </p>
         </div>
     </div>
