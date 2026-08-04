@@ -70,7 +70,7 @@ trait TestData extends Generators {
         message = "Error message"
       )
     )
-    
+
   val testMessageRefId =
     "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001"
   val testRcaspId      = "ZMCAR0123456787"

@@ -45,37 +45,30 @@ class RcaspValidationController @Inject() (
     extends FrontendBaseController
     with Logging {
 
-  def onPageLoad(sendingEntityIn: Option[String]): Action[AnyContent] =
+  def onPageLoad(sendingEntityIn: String): Action[AnyContent] =
     (identify() andThen getData()).async { implicit request =>
-      sendingEntityIn match {
-        case None =>
-          logger.warn("[RcaspValidationController][onPageLoad] Unable to extract SendingEntityIN from file")
+      rcaspRegistrationConnector.viewRcasps(request.carfId).value.flatMap {
+        case Left(error) =>
+          logger.warn(s"[RcaspValidationController][onPageLoad] Error calling viewRcasps: $error")
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
 
-        case Some(value) =>
-          rcaspRegistrationConnector.viewRcasps(request.carfId).value.flatMap {
-            case Left(error) =>
-              logger.warn(s"[RcaspValidationController][onPageLoad] Error calling viewRcasps: $error")
-              Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
-
-            case Right(rcaspList) =>
-              val existingAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
-              rcaspList
-                .find(_.RCASPID.equalsIgnoreCase(value))
-                .fold {
-                  for {
-                    updatedAnswers <- Future.fromTry(existingAnswers.set(SendingEntityInPage, value))
-                    _              <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(controllers.problem.routes.RcaspNotMatchingController.onPageLoad())
-                } { matchingRcasp =>
-                  for {
-                    updatedAnswers1 <- Future.fromTry(existingAnswers.set(SendingEntityInPage, value))
-                    updatedAnswers2 <-
-                      Future.fromTry(updatedAnswers1.set(RcaspDetailsPage, matchingRcasp))
-                    _               <- sessionRepository.set(updatedAnswers2)
-                  } yield Redirect(controllers.routes.CheckYourFileDetailsController.onPageLoad())
-                }
-          }
+        case Right(rcaspList) =>
+          val existingAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+          rcaspList
+            .find(_.RCASPID.equalsIgnoreCase(sendingEntityIn))
+            .fold {
+              for {
+                updatedAnswers <- Future.fromTry(existingAnswers.set(SendingEntityInPage, sendingEntityIn))
+                _              <- sessionRepository.set(updatedAnswers)
+              } yield Redirect(controllers.problem.routes.RcaspNotMatchingController.onPageLoad())
+            } { matchingRcasp =>
+              for {
+                updatedAnswers1 <- Future.fromTry(existingAnswers.set(SendingEntityInPage, sendingEntityIn))
+                updatedAnswers2 <-
+                  Future.fromTry(updatedAnswers1.set(RcaspDetailsPage, matchingRcasp))
+                _               <- sessionRepository.set(updatedAnswers2)
+              } yield Redirect(controllers.routes.CheckYourFileDetailsController.onPageLoad())
+            }
       }
     }
 }
