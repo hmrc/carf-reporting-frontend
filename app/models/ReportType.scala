@@ -17,7 +17,6 @@
 package models
 
 import models.ReportType.*
-import play.api.libs.json.*
 
 enum ReportType {
   case TestData
@@ -33,37 +32,6 @@ enum ReportType {
 }
 
 object ReportType {
-  private val fromJson: Map[String, ReportType] = Map(
-    "TEST_DATA"                                             -> TestData,
-    "NIL_REPORT"                                            -> NilReport,
-    "NOTIFICATION_OF_REPORTING_OUTSIDE_UK"                  -> NotificationOfReportingOutsideUk,
-    "NEW_INFORMATION"                                       -> NewInformation,
-    "ADDITIONAL_INFORMATION_FOR_EXISTING_REPORT"            -> AdditionalInformationForExistingReport,
-    "DELETION_OF_EXISTING_REPORT"                           -> DeletionOfExistingReport,
-    "CORRECTED_INFORMATION_FOR_EXISTING_REPORT"             -> CorrectedInformationForExistingReport,
-    "DELETED_INFORMATION_FOR_EXISTING_REPORT"               -> DeletedInformationForExistingReport,
-    "CORRECTED_AND_DELETED_INFORMATION_FOR_EXISTING_REPORT" -> CorrectedAndDeletedInformationForExistingReport,
-    "REPORTABLE_INFORMATION"                                -> ReportableInformationFallback
-  )
-
-  private val toJson: Map[ReportType, String] = fromJson.map(_.swap)
-
-  given Format[ReportType] = new Format[ReportType] {
-
-    override def reads(json: JsValue): JsResult[ReportType] =
-      json match {
-        case JsString(value) =>
-          fromJson
-            .get(value)
-            .map(JsSuccess(_))
-            .getOrElse(JsError(s"Invalid ReportType value: $value"))
-        case _               =>
-          JsError("ReportType must be a string")
-      }
-
-    override def writes(value: ReportType): JsValue =
-      JsString(toJson(value))
-  }
 
   def fileInformationMessageKeyForReportType(reportType: ReportType): String =
     reportType match {
