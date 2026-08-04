@@ -27,14 +27,14 @@ class DataErrorsStubService {
 
   // TODO: replace with real lookups from UserAnswers once schema-validation logic exists (CARF-596).
   def getFileName(carfId: String): Option[String] =
-    carfId.headOption match {
+    carfId.headOption.map(_.toUpper) match {
       case Some('Z') => None
       case Some('X') => None
       case _         => Some(stubFileName)
     }
 
   def getDataErrors(carfId: String): Option[Seq[SchemaError]] =
-    carfId.headOption match {
+    carfId.headOption.map(_.toUpper) match {
       case Some('Z') => None
       case Some('Y') => Some(Seq.empty)
       case Some('X') => Some(DataErrorsStubData.fewErrors)
