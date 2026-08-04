@@ -31,10 +31,8 @@
         <hr aria-hidden="true">
     </div>
 
-    <p class="govuk-body">
     @govukButton(
         ButtonViewModel(messages("site.continue")).withAttribute("id" -> "continue")
         .asLink(controllers.routes.PlaceholderController.onPageLoad("Should redirect to /send-your-file (CARF-598)").url)
     )
-    </p>
 }
