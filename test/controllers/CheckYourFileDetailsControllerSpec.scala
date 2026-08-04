@@ -17,60 +17,38 @@
 package controllers
 
 import base.SpecBase
-import models.DocTypeIndic.OECD10
 import models.ExtractedFileDetails
-import models.MessageTypeIndic.CARF701
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
-import pages.{RcaspDetailsPage, SendingEntityInPage}
+import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import service.StubService
 import utils.CheckYourFileDetailsHelper
 import views.html.CheckYourFileDetailsView
 
 class CheckYourFileDetailsControllerSpec extends SpecBase {
 
-  // TODO: Remove StubService when file validation and data extraction are linked to the frontend (CARF-596)
-  val mockStubService: StubService                               = mock[StubService]
   val mockCheckYourFileDetailsHelper: CheckYourFileDetailsHelper = mock[CheckYourFileDetailsHelper]
 
   lazy val checkFileDetailsRoute: String = controllers.routes.CheckYourFileDetailsController.onPageLoad().url
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockStubService, mockCheckYourFileDetailsHelper)
+    reset(mockCheckYourFileDetailsHelper)
   }
 
   "CheckYourFileDetails Controller" - {
 
     "must return OK and the correct view for a GET" in {
       val userAnswers = emptyUserAnswers
-        .withPage(SendingEntityInPage, testRcaspId)
+        .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
 
-      val testExtractedFileDetails = ExtractedFileDetails(
-        messageRefId = testMessageRefId,
-        sendingEntityIn = testRcaspId,
-        rcaspName = Some(testRcaspName),
-        messageTypeIndic = CARF701,
-        hasOtherNexus = false,
-        hasCryptoUsers = true,
-        docTypeIndic = OECD10,
-        isTestData = true,
-        allCryptoUsersAreCorrections = false,
-        allCryptoUsersAreDeletions = false
-      )
-
-      when(mockStubService.getExtractedFileDetails(any(), any())).thenReturn(Some(testExtractedFileDetails))
       when(mockCheckYourFileDetailsHelper.fileDetailsSummaryList(any())(any())).thenReturn(testSummaryList)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(
-          bind[StubService].toInstance(mockStubService),
-          bind[CheckYourFileDetailsHelper].toInstance(mockCheckYourFileDetailsHelper)
-        )
+        .overrides(bind[CheckYourFileDetailsHelper].toInstance(mockCheckYourFileDetailsHelper))
         .build()
 
       running(application) {
@@ -82,43 +60,17 @@ class CheckYourFileDetailsControllerSpec extends SpecBase {
         status(result)          mustEqual OK
         contentAsString(result) mustEqual view(testRcaspName, testSummaryList)(request, messages(application)).toString
 
-        verify(mockStubService, times(1)).getExtractedFileDetails(any(), eqTo(testRcaspId))
-        verify(mockCheckYourFileDetailsHelper, times(1)).fileDetailsSummaryList(eqTo(testExtractedFileDetails))(any())
-      }
-    }
-
-    // TODO: Could be removed in CARF-596 if SendingEntityIn is already saved as part of ExtractedFileDetails after data extraction
-    "must redirect to Journey Recovery for a GET when SendingEntityIn is missing from user answers" in {
-      val userAnswers = emptyUserAnswers
-        .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(
-          bind[StubService].toInstance(mockStubService),
-          bind[CheckYourFileDetailsHelper].toInstance(mockCheckYourFileDetailsHelper)
+        verify(mockCheckYourFileDetailsHelper, times(1)).fileDetailsSummaryList(eqTo(extractedFileDetailsTestData))(
+          any()
         )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, checkFileDetailsRoute)
-        val result  = route(application, request).value
-
-        status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
-
-        verify(mockStubService, times(0)).getExtractedFileDetails(any(), any())
-        verify(mockCheckYourFileDetailsHelper, times(0)).fileDetailsSummaryList(any())(any())
       }
     }
 
     "must redirect to Journey Recovery for a GET when RcaspDetails is missing from user answers" in {
-      val userAnswers = emptyUserAnswers.withPage(SendingEntityInPage, testRcaspId)
+      val userAnswers = emptyUserAnswers.withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(
-          bind[StubService].toInstance(mockStubService),
-          bind[CheckYourFileDetailsHelper].toInstance(mockCheckYourFileDetailsHelper)
-        )
+        .overrides(bind[CheckYourFileDetailsHelper].toInstance(mockCheckYourFileDetailsHelper))
         .build()
 
       running(application) {
@@ -128,23 +80,15 @@ class CheckYourFileDetailsControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockStubService, times(0)).getExtractedFileDetails(any(), any())
         verify(mockCheckYourFileDetailsHelper, times(0)).fileDetailsSummaryList(any())(any())
       }
     }
 
     "must redirect to Journey Recovery for a GET when ExtractedFileDetails is missing from user answers" in {
-      val userAnswers = emptyUserAnswers
-        .withPage(SendingEntityInPage, testRcaspId)
-        .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
-
-      when(mockStubService.getExtractedFileDetails(any(), any())).thenReturn(None)
+      val userAnswers = emptyUserAnswers.withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(
-          bind[StubService].toInstance(mockStubService),
-          bind[CheckYourFileDetailsHelper].toInstance(mockCheckYourFileDetailsHelper)
-        )
+        .overrides(bind[CheckYourFileDetailsHelper].toInstance(mockCheckYourFileDetailsHelper))
         .build()
 
       running(application) {
@@ -154,7 +98,22 @@ class CheckYourFileDetailsControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockStubService, times(1)).getExtractedFileDetails(any(), eqTo(testRcaspId))
+        verify(mockCheckYourFileDetailsHelper, times(0)).fileDetailsSummaryList(any())(any())
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when RcaspDetails and ExtractedFileDetails are missing from user answers" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[CheckYourFileDetailsHelper].toInstance(mockCheckYourFileDetailsHelper))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, checkFileDetailsRoute)
+        val result  = route(application, request).value
+
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
         verify(mockCheckYourFileDetailsHelper, times(0)).fileDetailsSummaryList(any())(any())
       }
     }

@@ -17,19 +17,17 @@
 package controllers.problem
 
 import base.SpecBase
-import pages.SendingEntityInPage
+import pages.ExtractedFileDetailsPage
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.problem.RcaspNotMatchingView
 
 class RcaspNotMatchingControllerSpec extends SpecBase {
 
-  private val sendingEntityIn = "ZMCAR0123456788"
-
   "RcaspNotMatchingController" - {
 
-    "must return OK and the correct view for a GET when SendingEntityIN is present in user answers" in {
-      val userAnswers = emptyUserAnswers.withPage(SendingEntityInPage, sendingEntityIn)
+    "must return OK and the correct view for a GET when ExtractedFileDetails is present in user answers" in {
+      val userAnswers = emptyUserAnswers.withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
@@ -38,7 +36,7 @@ class RcaspNotMatchingControllerSpec extends SpecBase {
         val view    = application.injector.instanceOf[RcaspNotMatchingView]
 
         status(result)          mustEqual OK
-        contentAsString(result) mustEqual view(sendingEntityIn)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(testRcaspId)(request, messages(application)).toString
       }
     }
 
@@ -54,7 +52,7 @@ class RcaspNotMatchingControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Journey Recovery for a GET when SendingEntityIN is missing from user answers" in {
+    "must redirect to Journey Recovery for a GET when ExtractedFileDetails is missing from user answers" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {

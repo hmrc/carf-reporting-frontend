@@ -16,14 +16,14 @@
 
 package controllers
 
+import cats.syntax.all.*
 import controllers.actions.*
 import models.rcasp.getName
-import pages.{RcaspDetailsPage, SendingEntityInPage}
+import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.StubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CheckYourFileDetailsHelper
 import views.html.CheckYourFileDetailsView
@@ -35,7 +35,6 @@ class CheckYourFileDetailsController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
-    stubService: StubService,
     checkYourFileDetailsHelper: CheckYourFileDetailsHelper,
     view: CheckYourFileDetailsView,
     val controllerComponents: MessagesControllerComponents
@@ -46,19 +45,16 @@ class CheckYourFileDetailsController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
     val userAnswers = request.userAnswers
 
-    // TODO: Get ExtractedFileDetails from user answers once file validation/data extraction has been linked to frontend (CARF-596)
-    (for {
-      sendingEntityIn      <- userAnswers.get(SendingEntityInPage)
-      rcaspDetails         <- userAnswers.get(RcaspDetailsPage)
-      extractedFileDetails <- stubService.getExtractedFileDetails(request.carfId, sendingEntityIn)
-    } yield {
-      val fileDetailsSummaryList = checkYourFileDetailsHelper.fileDetailsSummaryList(extractedFileDetails)
-      Ok(view(rcaspDetails.getName, fileDetailsSummaryList))
-    }).getOrElse {
-      logger.warn(
-        "[CheckYourFileDetailsController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
-      )
-      Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-    }
+    (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
+      .mapN { (rcaspDetails, extractedFileDetails) =>
+        val fileDetailsSummaryList = checkYourFileDetailsHelper.fileDetailsSummaryList(extractedFileDetails)
+        Ok(view(rcaspDetails.getName, fileDetailsSummaryList))
+      }
+      .getOrElse {
+        logger.warn(
+          "[CheckYourFileDetailsController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
+        )
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+      }
   }
 }

@@ -18,6 +18,8 @@ package common
 
 import generators.Generators
 import models.*
+import models.DocTypeIndic.*
+import models.MessageTypeIndic.*
 import models.upscan.*
 import models.upscan.UploadStatus.*
 import models.rcasp.{IndividualRcaspDetails, OrganisationRcaspDetails, RcaspContactDetails}
@@ -109,4 +111,18 @@ trait TestData extends Generators {
     )
 
   lazy val testSummaryList: SummaryList = SummaryList(Seq(testSummaryListRow))
+
+  val extractedFileDetailsTestData: ExtractedFileDetails =
+    ExtractedFileDetails(
+      messageRefId = testMessageRefId,
+      sendingEntityIn = testRcaspId,
+      rcaspName = Some(testRcaspName),
+      messageTypeIndic = CARF701,
+      hasOtherNexus = false,
+      hasCryptoUsers = true,
+      docTypeIndic = OECD10,
+      isTestData = true,
+      allCryptoUsersAreCorrections = false,
+      allCryptoUsersAreDeletions = false
+    )
 }

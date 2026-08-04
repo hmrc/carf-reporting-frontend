@@ -16,8 +16,8 @@
 
 package controllers.problem
 
-import controllers.actions._
-import pages.SendingEntityInPage
+import controllers.actions.*
+import pages.ExtractedFileDetailsPage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -38,12 +38,12 @@ class RcaspNotMatchingController @Inject() (
     with Logging {
 
   def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
-    request.userAnswers.get(SendingEntityInPage) match {
-      case Some(sendingEntityIn) =>
-        Ok(view(sendingEntityIn))
-      case None                  =>
+    request.userAnswers.get(ExtractedFileDetailsPage) match {
+      case Some(extractedFileDetails) =>
+        Ok(view(extractedFileDetails.sendingEntityIn))
+      case None                       =>
         logger.warn(
-          "[RcaspNotMatchingController][onPageLoad] SendingEntityIN not found in user answers, redirecting to Journey Recovery"
+          "[RcaspNotMatchingController][onPageLoad] ExtractedFileDetails not found in user answers, redirecting to Journey Recovery"
         )
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
