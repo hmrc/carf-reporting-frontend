@@ -16,60 +16,54 @@
 
 package controllers.upload
 
+import config.Constants.fileNameAllowedCharacters
 import config.FrontendAppConfig
+import connectors.UpscanConnector
 import controllers.actions.*
 import forms.UploadXmlFormProvider
 import models.ErrorCode.{InvalidArgument, OctetStream, VirusFile}
 import models.InvalidArgumentErrorMessage.{DisallowedCharacters, FileIsEmpty, InvalidFileNameLength, TypeMismatch}
-import models.upscan.{Reference, UpscanInitiateResponse}
-import models.{ErrorCode, InvalidArgumentErrorMessage}
+import models.requests.OptionalDataRequest
+import models.upscan.*
+import models.upscan.UploadStatus.*
+import models.{ErrorCode, InvalidArgumentErrorMessage, UserAnswers}
 import org.apache.pekko
 import org.apache.pekko.actor.ActorSystem
+import pages.{FileReferencePage, UploadIdPage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import repositories.SessionRepository
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.upload.UploadXmlView
 
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{ExecutionContext, Future}
 
 class UploadXmlController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
+    upscanConnector: UpscanConnector,
+    sessionRepository: SessionRepository,
     actorSystem: ActorSystem,
     config: FrontendAppConfig,
     formProvider: UploadXmlFormProvider,
     val controllerComponents: MessagesControllerComponents,
     view: UploadXmlView
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport
     with Logging {
 
-  // TODO: Remove when implementing Upscan functionality (CARF-578, CARF-579)
-  val upscanInitiateResponse = UpscanInitiateResponse(
-    fileReference = Reference("abc"),
-    postTarget = "http://localhost:17004/send-a-cryptoasset-report/upload-file",
-    formFields = Map.empty
-  )
-
   val form: Form[String] = formProvider()
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()) { implicit request =>
-    Ok(view(form, upscanInitiateResponse))
-  }
-
-  // TODO: Update when implementing Upscan functionality (CARF-578, CARF-579)
-  def onSubmit(): Action[AnyContent] = (identify() andThen getData()) { implicit request =>
-    Thread.sleep(1000)
-    Redirect(
-      controllers.routes.PlaceholderController.onPageLoad(
-        "Should redirect based on upscan checks: CARF-578, CARF-579"
-      )
-    )
+  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()).async { implicit request =>
+    initialUpscanCall(form)
   }
 
   def showError(errorCode: String, errorMessage: String, errorRequestId: String): Action[AnyContent] =
@@ -91,6 +85,101 @@ class UploadXmlController @Inject() (
           logger.warn(s"Upscan error $errorCode: $errorMessage, requestId is $errorRequestId")
           form.withError("file-upload", "uploadXml.error.file.content.unknown")
       }
-      Future.successful(Ok(view(formWithErrors, upscanInitiateResponse)))
+      initialUpscanCall(formWithErrors)
     }
+
+  private def initialUpscanCall(
+      preparedForm: Form[String]
+  )(implicit request: OptionalDataRequest[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    val uploadId: UploadId = UploadId.generate
+    val userAnswers        = request.userAnswers.getOrElse(UserAnswers(id = request.userId))
+
+    upscanConnector.upscanFormInitiate(uploadId).value.flatMap {
+      case Right(upscanInitiateResponse) =>
+        upscanConnector.saveRequestedUpload(uploadId, upscanInitiateResponse.fileReference).value.flatMap {
+          case Right(_)    =>
+            for {
+              answersWithUploadId <- Future.fromTry(userAnswers.set(UploadIdPage, uploadId))
+              updatedAnswers      <-
+                Future.fromTry(answersWithUploadId.set(FileReferencePage, upscanInitiateResponse.fileReference))
+              _                   <- sessionRepository.set(updatedAnswers)
+            } yield Ok(view(preparedForm, upscanInitiateResponse))
+          case Left(error) =>
+            logger.error(s"[UploadXmlController][initialUpscanCall] Error setting initial upload status: $error")
+            Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        }
+      case Left(error)                   =>
+        logger.error(s"[UploadXmlController][initialUpscanCall] Error getting UpscanInitiateResponse: $error")
+        Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+    }
+  }
+
+  def getUploadStatusAndRedirect(uploadId: UploadId): Action[AnyContent] =
+    (identify() andThen getData() andThen requireData).async { implicit request =>
+      def errorRedirect(errorCode: String, errorMessage: String, errorRequestId: String): Result =
+        Redirect(controllers.upload.routes.UploadXmlController.showError(errorCode, errorMessage, errorRequestId).url)
+
+      // Delay the call to make sure the backend db has been populated by the upscan callback first
+      pekko.pattern.after(config.upscanCallbackDelayInSeconds.seconds, actorSystem.scheduler) {
+        upscanConnector.getUploadStatus(uploadId).value.map {
+          case Right(maybeUploadStatus) =>
+            maybeUploadStatus match {
+              case Some(uploadedSuccessfully: UploadedSuccessfully) =>
+                if (isFileNameTooLong(uploadedSuccessfully.name)) {
+                  errorRedirect(InvalidArgument.code, InvalidFileNameLength.message, "")
+                } else if (isFileNameDisallowed(uploadedSuccessfully.name)) {
+                  errorRedirect(InvalidArgument.code, DisallowedCharacters.message, "")
+                } else if (isFileNotXml(uploadedSuccessfully.name)) {
+                  // When running locally, upscan stub uploads non-XML successfully. Actual Upscan would return an UploadRejected.
+                  errorRedirect(InvalidArgument.code, TypeMismatch.message, "")
+                } else if (isFileEmpty(uploadedSuccessfully.size)) {
+                  errorRedirect(InvalidArgument.code, FileIsEmpty.message, "")
+                } else {
+                  Redirect(
+                    controllers.routes.PlaceholderController
+                      .onPageLoad("Upscan checks passed. Should redirect to FileValidationController (CARF-596)")
+                      .url
+                  )
+                }
+              case Some(uploadRejected: UploadRejected)             =>
+                if (uploadRejected.details.message.contains("octet-stream")) {
+                  logger.warn(
+                    s"[UploadXmlController][getUploadStatusAndRedirect] Upload rejected with 'octet-stream' in message. Error details: ${uploadRejected.details}"
+                  )
+                  val errorReason = uploadRejected.details.failureReason
+                  errorRedirect(OctetStream.code, errorReason.toLowerCase, "")
+                } else {
+                  logger.warn(
+                    s"[UploadXmlController][getUploadStatusAndRedirect] Upload rejected. Error details: ${uploadRejected.details}"
+                  )
+                  errorRedirect(InvalidArgument.code, TypeMismatch.message, "")
+                }
+              case Some(Quarantined)                                =>
+                errorRedirect(VirusFile.code, "", "")
+              case Some(Failed)                                     =>
+                logger.warn("[UploadXmlController][getUploadStatusAndRedirect] File upload returned failed status")
+                errorRedirect("UploadFailed", "", "")
+              case Some(_)                                          =>
+                Redirect(controllers.upload.routes.UploadXmlController.getUploadStatusAndRedirect(uploadId).url)
+              case None                                             =>
+                logger.error(
+                  s"[UploadXmlController][getUploadStatusAndRedirect] Unable to retrieve a record with uploadId ${uploadId.value}"
+                )
+                errorRedirect("UploadFailed", "", "")
+            }
+          case Left(error)              =>
+            logger.error(s"[UploadXmlController][getUploadStatusAndRedirect] Error getting upload status: $error")
+            Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        }
+      }
+    }
+
+  private def isFileNameTooLong(name: String): Boolean =
+    name.stripSuffix(".xml").length > config.upscanMaxFileNameLength
+
+  private def isFileNameDisallowed(name: String): Boolean = !name.matches(fileNameAllowedCharacters)
+
+  private def isFileNotXml(name: String): Boolean = !name.endsWith(".xml")
+
+  private def isFileEmpty(size: Long): Boolean = size == 0L
 }

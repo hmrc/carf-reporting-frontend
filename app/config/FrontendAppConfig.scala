@@ -49,18 +49,19 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/carf-reporting-frontend"
 
-  val languageTranslationEnabled: Boolean =
-    configuration.get[Boolean]("features.welsh-translation")
+  val languageTranslationEnabled: Boolean = configuration.get[Boolean]("features.welsh-translation")
 
   val timeout: Int   = configuration.get[Int]("timeout-dialog.timeout")
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 
   val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
-  val upscanCallbackDelayInSeconds: Int =
-    1 // configuration.get[Int]("microservice.services.upscan.callbackDelayInSeconds")
-
-  val upscanMaxFileNameLength: Int = 100 // configuration.get[Int]("microservice.services.upscan.max-file-name-length")
+  val upscanInitiateHost: String        = servicesConfig.baseUrl("upscan")
+  val upscanInitiatePath: String        = configuration.get[String]("microservice.services.upscan.initiate-path")
+  val upscanRedirectBase: String        = configuration.get[String]("microservice.services.upscan.redirect-base")
+  val upscanCallbackDelayInSeconds: Int = configuration.get[Int]("microservice.services.upscan.callbackDelayInSeconds")
+  val upscanMaxFileSizeInMb: Int        = configuration.get[Int]("microservice.services.upscan.max-file-size-in-mb")
+  val upscanMaxFileNameLength: Int      = configuration.get[Int]("microservice.services.upscan.max-file-name-length")
 
   val enrolmentKey: String   = configuration.get[String]("keys.enrolmentKey.carf")
   val ctEnrolmentKey: String = configuration.get[String]("keys.enrolmentKey.ct")
