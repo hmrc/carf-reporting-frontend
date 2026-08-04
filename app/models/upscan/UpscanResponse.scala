@@ -73,8 +73,8 @@ object CallbackBody {
       case JsDefined(JsString("READY"))  => implicitly[Reads[ReadyCallbackBody]].reads(json)
       case JsDefined(JsString("FAILED")) => implicitly[Reads[FailedCallbackBody]].reads(json)
       case JsDefined(value)              => JsError(s"Invalid type distriminator: $value")
-      case JsUndefined()                 => JsError(s"Missing type distriminator")
-      case _                             => JsError(s"Unknown generic error")
+      case JsUndefined()                 => JsError("Missing type distriminator")
+      case _                             => JsError("Unknown generic error")
     }
 }
 
@@ -85,6 +85,10 @@ object UploadDetails {
 }
 
 case class ErrorDetails(failureReason: String, message: String)
+
+object ErrorDetails {
+  implicit val format: OFormat[ErrorDetails] = Json.format[ErrorDetails]
+}
 
 case class ReadyCallbackBody(
     reference: Reference,

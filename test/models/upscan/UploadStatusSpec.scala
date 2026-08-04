@@ -1,0 +1,115 @@
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package models.upscan
+
+import base.SpecBase
+import models.upscan.UploadStatus.*
+import play.api.libs.json.{JsError, Json}
+
+class UploadStatusSpec extends SpecBase {
+
+  val statuses: List[UploadStatus] = List(NotStarted, Failed, InProgress, Quarantined)
+
+  "UploadStatus" - {
+    "json reads" - {
+      statuses.foreach { status =>
+        s"must return $status when _type is $status" in {
+          val json = s"""{"_type": "$status"}"""
+          Json.parse(json).as[UploadStatus] mustBe status
+        }
+      }
+
+      "must return UploadedSuccessfully when _type is UploadedSuccessfully" in {
+        val expectedName     = "fileName"
+        val expectedUrl      = "downloadUrl"
+        val expectedFileSize = 20L
+        val expectedChecksum = "MD5:123"
+        val json             =
+          s"""{
+               |"_type": "UploadedSuccessfully",
+               |"name": "$expectedName",
+               |"downloadUrl": "$expectedUrl",
+               |"size": $expectedFileSize,
+               |"checksum": "$expectedChecksum"
+               |}""".stripMargin
+
+        val expectedResponse = UploadedSuccessfully(expectedName, expectedUrl, expectedFileSize, expectedChecksum)
+
+        Json.parse(json).as[UploadStatus] mustBe expectedResponse
+      }
+
+      "must return UploadRejected when _type is UploadRejected" in {
+        val json             = """{"_type":"UploadRejected","details":{"failureReason":"REJECTED","message":"message"}}"""
+        val expectedResponse = UploadRejected(ErrorDetails("REJECTED", "message"))
+
+        Json.parse(json).as[UploadStatus] mustBe expectedResponse
+      }
+
+      "must return JsonError" - {
+        "when _type is unexpected value" in {
+          val unexpectedValue = "RandomValue"
+          val json            = s"""{"_type": "$unexpectedValue"}"""
+          Json.parse(json).validate[UploadStatus] mustBe JsError(s"""Unexpected value of _type: "$unexpectedValue"""")
+        }
+
+        "when _type is missing from JSON" in {
+          val json = """{"type": "RandomValue"}"""
+          Json.parse(json).validate[UploadStatus] mustBe JsError("Missing _type field")
+        }
+      }
+    }
+
+    "json writes" - {
+      statuses.foreach { status =>
+        s"must set _type as $status when status is $status" in {
+          val expectedJson = s"""{"_type":"$status"}"""
+          Json.toJson(status).toString() mustBe expectedJson
+        }
+      }
+
+      "must set _type as UploadedSuccessfully with name, downloadUrl, size and checksum in json when status is UploadedSuccessfully" in {
+        val expectedName     = "fileName"
+        val expectedUrl      = "downloadUrl"
+        val expectedFileSize = 20L
+        val expectedChecksum = "MD5:123"
+        val expectedJson     =
+          s"""{
+               |  "name" : "$expectedName",
+               |  "downloadUrl" : "$expectedUrl",
+               |  "size" : $expectedFileSize,
+               |  "checksum" : "$expectedChecksum",
+               |  "_type" : "UploadedSuccessfully"
+               |}""".stripMargin
+
+        val uploadStatus: UploadStatus =
+          UploadedSuccessfully(expectedName, expectedUrl, expectedFileSize, expectedChecksum)
+
+        Json.prettyPrint(Json.toJson(uploadStatus)) mustBe expectedJson
+      }
+
+      "must set _type as UploadRejected with error details in json when status is UploadRejected" in {
+        val errorDetails: ErrorDetails = ErrorDetails("REJECTED", "message")
+        val expectedJson               =
+          """{"details":{"failureReason":"REJECTED","message":"message"},"_type":"UploadRejected"}"""
+
+        val uploadStatus: UploadStatus = UploadRejected(errorDetails)
+
+        Json.toJson(uploadStatus).toString() mustBe expectedJson
+      }
+    }
+  }
+}
