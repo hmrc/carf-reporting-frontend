@@ -17,9 +17,6 @@
 package utils
 
 import base.SpecBase
-import models.DocTypeIndic.OECD11
-import models.ExtractedFileDetails
-import models.MessageTypeIndic.{CARF701, CARF703}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.ActionItem
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
@@ -33,19 +30,6 @@ class CheckYourFileDetailsHelperSpec extends SpecBase {
   "CheckYourFileDetailsHelper" - {
     ".fileDetailsSummaryList" - {
       "must return a summary list including RCASP name row when rcaspName is present in ExtractedFileDetails (not NilReport)" in {
-        val extractedFileDetails = ExtractedFileDetails(
-          messageRefId = testMessageRefId,
-          sendingEntityIn = testRcaspId,
-          rcaspName = Some(testRcaspName),
-          messageTypeIndic = CARF701,
-          hasOtherNexus = false,
-          hasCryptoUsers = true,
-          docTypeIndic = OECD11,
-          isTestData = false,
-          allCryptoUsersAreCorrections = false,
-          allCryptoUsersAreDeletions = false
-        )
-
         val expectedKeys = List(
           Text("File ID (MessageRefId)"),
           Text("RCASP ID (SendingEntityIN)"),
@@ -57,7 +41,7 @@ class CheckYourFileDetailsHelperSpec extends SpecBase {
           Text(testMessageRefId),
           Text(testRcaspId),
           Text(testRcaspName),
-          Text("New information")
+          Text("Test data")
         )
 
         val expectedClasses = List(
@@ -81,7 +65,7 @@ class CheckYourFileDetailsHelperSpec extends SpecBase {
           )
         )
 
-        val summaryList = helper.fileDetailsSummaryList(extractedFileDetails)
+        val summaryList = helper.fileDetailsSummaryList(extractedFileDetailsTestData)
 
         summaryList.rows.map(_.key.content)          mustBe expectedKeys
         summaryList.rows.map(_.value.content)        mustBe expectedValues
@@ -90,19 +74,6 @@ class CheckYourFileDetailsHelperSpec extends SpecBase {
       }
 
       "must return a summary list excluding RCASP name row when rcaspName is None in ExtractedFileDetails (NilReport)" in {
-        val extractedFileDetails = ExtractedFileDetails(
-          messageRefId = testMessageRefId,
-          sendingEntityIn = testRcaspId,
-          rcaspName = None,
-          messageTypeIndic = CARF703,
-          hasOtherNexus = false,
-          hasCryptoUsers = false,
-          docTypeIndic = OECD11,
-          isTestData = false,
-          allCryptoUsersAreCorrections = false,
-          allCryptoUsersAreDeletions = false
-        )
-
         val expectedKeys = List(
           Text("File ID (MessageRefId)"),
           Text("RCASP ID (SendingEntityIN)"),
@@ -134,7 +105,7 @@ class CheckYourFileDetailsHelperSpec extends SpecBase {
           )
         )
 
-        val summaryList = helper.fileDetailsSummaryList(extractedFileDetails)
+        val summaryList = helper.fileDetailsSummaryList(extractedFileDetailsNilReport)
 
         summaryList.rows.map(_.key.content)          mustBe expectedKeys
         summaryList.rows.map(_.value.content)        mustBe expectedValues

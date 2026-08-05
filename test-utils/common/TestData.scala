@@ -125,4 +125,18 @@ trait TestData extends Generators {
       allCryptoUsersAreCorrections = false,
       allCryptoUsersAreDeletions = false
     )
+
+  val extractedFileDetailsNilReport: ExtractedFileDetails =
+    ExtractedFileDetails(
+      messageRefId = testMessageRefId,
+      sendingEntityIn = testRcaspId,
+      rcaspName = None,
+      messageTypeIndic = CARF703,
+      hasOtherNexus = false,
+      hasCryptoUsers = false,
+      docTypeIndic = OECD11,
+      isTestData = false,
+      allCryptoUsersAreCorrections = false,
+      allCryptoUsersAreDeletions = false
+    )
 }

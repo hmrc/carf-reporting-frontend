@@ -17,6 +17,7 @@
 package models
 
 import models.ReportType.*
+import play.api.i18n.Messages
 
 enum ReportType {
   case TestData
@@ -33,30 +34,36 @@ enum ReportType {
 
 object ReportType {
 
-  def fileInformationMessageKeyForReportType(reportType: ReportType): String =
+  def fileInformationMessageForReportType(reportType: ReportType)(implicit messages: Messages): String =
     reportType match {
-      case TestData                                        => "reportType.testData"
-      case NilReport                                       => "reportType.nilReport"
-      case NotificationOfReportingOutsideUk                => "reportType.notificationOfReportingOutsideUk"
-      case NewInformation                                  => "reportType.newInformation"
-      case AdditionalInformationForExistingReport          => "reportType.additionalInformationForExistingReport"
-      case DeletionOfExistingReport                        => "reportType.deletionOfExistingReport"
-      case CorrectedInformationForExistingReport           => "reportType.correctedInformationForExistingReport"
-      case DeletedInformationForExistingReport             => "reportType.deletedInformationForExistingReport"
+      case TestData                                        => messages("reportType.testData")
+      case NilReport                                       => messages("reportType.nilReport")
+      case NotificationOfReportingOutsideUk                => messages("reportType.notificationOfReportingOutsideUk")
+      case NewInformation                                  => messages("reportType.newInformation")
+      case AdditionalInformationForExistingReport          => messages("reportType.additionalInformationForExistingReport")
+      case DeletionOfExistingReport                        => messages("reportType.deletionOfExistingReport")
+      case CorrectedInformationForExistingReport           => messages("reportType.correctedInformationForExistingReport")
+      case DeletedInformationForExistingReport             => messages("reportType.deletedInformationForExistingReport")
       case CorrectedAndDeletedInformationForExistingReport =>
-        "reportType.correctedAndDeletedInformationForExistingReport"
-      case ReportableInformationFallback                   => "reportType.reportableInformation"
+        messages("reportType.correctedAndDeletedInformationForExistingReport")
+      case ReportableInformationFallback                   => messages("reportType.reportableInformation")
     }
 
-  def warningMessageKeyForReportType(reportType: ReportType): Option[String] =
+  def warningMessageForReportType(
+      reportType: ReportType,
+      rcaspName: String
+  )(implicit messages: Messages): Option[String] =
     reportType match {
-      case TestData                                        => Some("reportType.testData.warning")
-      case NotificationOfReportingOutsideUk                => Some("reportType.notificationOfReportingOutsideUk.warning")
-      case DeletionOfExistingReport                        => Some("reportType.deletionOfExistingReport.warning")
-      case CorrectedInformationForExistingReport           => Some("reportType.correctedInformationForExistingReport.warning")
-      case DeletedInformationForExistingReport             => Some("reportType.deletedInformationForExistingReport.warning")
+      case TestData                                        => Some(messages("reportType.testData.warning"))
+      case NotificationOfReportingOutsideUk                =>
+        Some(messages("reportType.notificationOfReportingOutsideUk.warning", rcaspName))
+      case DeletionOfExistingReport                        => Some(messages("reportType.deletionOfExistingReport.warning"))
+      case CorrectedInformationForExistingReport           =>
+        Some(messages("reportType.correctedInformationForExistingReport.warning"))
+      case DeletedInformationForExistingReport             =>
+        Some(messages("reportType.deletedInformationForExistingReport.warning"))
       case CorrectedAndDeletedInformationForExistingReport =>
-        Some("reportType.correctedAndDeletedInformationForExistingReport.warning")
+        Some(messages("reportType.correctedAndDeletedInformationForExistingReport.warning"))
       case _                                               => None
     }
 }

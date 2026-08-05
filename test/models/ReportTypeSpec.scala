@@ -18,65 +18,73 @@ package models
 
 import base.SpecBase
 import models.ReportType.*
+import play.api.i18n.Messages
 
 class ReportTypeSpec extends SpecBase {
 
+  implicit val messages: Messages = messages(app)
+
   "ReportType" - {
-    ".fileInformationMessageKeyForReportType" - {
+    ".fileInformationMessageForReportType" - {
       "must return the correct message key for each ReportType value" in {
-        fileInformationMessageKeyForReportType(TestData) mustBe "reportType.testData"
+        fileInformationMessageForReportType(TestData) mustBe "Test data"
 
-        fileInformationMessageKeyForReportType(NilReport) mustBe "reportType.nilReport"
+        fileInformationMessageForReportType(NilReport) mustBe "No reportable information"
 
-        fileInformationMessageKeyForReportType(NotificationOfReportingOutsideUk) mustBe
-          "reportType.notificationOfReportingOutsideUk"
+        fileInformationMessageForReportType(NotificationOfReportingOutsideUk) mustBe
+          "Notification of reporting outside of the UK"
 
-        fileInformationMessageKeyForReportType(NewInformation) mustBe "reportType.newInformation"
+        fileInformationMessageForReportType(NewInformation) mustBe "New information"
 
-        fileInformationMessageKeyForReportType(AdditionalInformationForExistingReport) mustBe
-          "reportType.additionalInformationForExistingReport"
+        fileInformationMessageForReportType(AdditionalInformationForExistingReport) mustBe
+          "Additional information for an existing report"
 
-        fileInformationMessageKeyForReportType(DeletionOfExistingReport) mustBe "reportType.deletionOfExistingReport"
+        fileInformationMessageForReportType(DeletionOfExistingReport) mustBe "Deletion of an existing report"
 
-        fileInformationMessageKeyForReportType(CorrectedInformationForExistingReport) mustBe
-          "reportType.correctedInformationForExistingReport"
+        fileInformationMessageForReportType(CorrectedInformationForExistingReport) mustBe
+          "Corrected information for an existing report"
 
-        fileInformationMessageKeyForReportType(DeletedInformationForExistingReport) mustBe
-          "reportType.deletedInformationForExistingReport"
+        fileInformationMessageForReportType(DeletedInformationForExistingReport) mustBe
+          "Deleted information for an existing report"
 
-        fileInformationMessageKeyForReportType(CorrectedAndDeletedInformationForExistingReport) mustBe
-          "reportType.correctedAndDeletedInformationForExistingReport"
+        fileInformationMessageForReportType(CorrectedAndDeletedInformationForExistingReport) mustBe
+          "Corrected and deleted information for an existing report"
 
-        fileInformationMessageKeyForReportType(ReportableInformationFallback) mustBe "reportType.reportableInformation"
+        fileInformationMessageForReportType(ReportableInformationFallback) mustBe "Reportable information"
       }
     }
 
-    ".warningMessageKeyForReportType" - {
+    ".warningMessageForReportType" - {
       "must return the correct message key if the ReportType requires a warning message, or None otherwise" in {
-        warningMessageKeyForReportType(TestData) mustBe Some("reportType.testData.warning")
+        warningMessageForReportType(TestData, testRcaspName) mustBe
+          Some("We cannot complete all checks on test data or accept the file.")
 
-        warningMessageKeyForReportType(NilReport) mustBe None
+        warningMessageForReportType(NilReport, testRcaspName) mustBe None
 
-        warningMessageKeyForReportType(NotificationOfReportingOutsideUk) mustBe
-          Some("reportType.notificationOfReportingOutsideUk.warning")
+        warningMessageForReportType(NotificationOfReportingOutsideUk, testRcaspName) mustBe
+          Some(
+            "With this file, you’re notifying us that Timmy's Turtles is reporting for the Cryptoasset Reporting Framework outside of the UK."
+          )
 
-        warningMessageKeyForReportType(NewInformation) mustBe None
+        warningMessageForReportType(NewInformation, testRcaspName) mustBe None
 
-        warningMessageKeyForReportType(AdditionalInformationForExistingReport) mustBe None
+        warningMessageForReportType(AdditionalInformationForExistingReport, testRcaspName) mustBe None
 
-        warningMessageKeyForReportType(DeletionOfExistingReport) mustBe
-          Some("reportType.deletionOfExistingReport.warning")
+        warningMessageForReportType(DeletionOfExistingReport, testRcaspName) mustBe
+          Some("This will permanently delete an existing report.")
 
-        warningMessageKeyForReportType(CorrectedInformationForExistingReport) mustBe
-          Some("reportType.correctedInformationForExistingReport.warning")
+        warningMessageForReportType(CorrectedInformationForExistingReport, testRcaspName) mustBe
+          Some("This will permanently change reported information marked as a correction.")
 
-        warningMessageKeyForReportType(DeletedInformationForExistingReport) mustBe
-          Some("reportType.deletedInformationForExistingReport.warning")
+        warningMessageForReportType(DeletedInformationForExistingReport, testRcaspName) mustBe
+          Some("This will permanently delete reported information marked for deletion.")
 
-        warningMessageKeyForReportType(CorrectedAndDeletedInformationForExistingReport) mustBe
-          Some("reportType.correctedAndDeletedInformationForExistingReport.warning")
+        warningMessageForReportType(CorrectedAndDeletedInformationForExistingReport, testRcaspName) mustBe
+          Some(
+            "This will permanently change reported information marked as a correction. It will also permanently delete reported information marked for deletion."
+          )
 
-        warningMessageKeyForReportType(ReportableInformationFallback) mustBe None
+        warningMessageForReportType(ReportableInformationFallback, testRcaspName) mustBe None
       }
     }
   }

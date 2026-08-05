@@ -39,7 +39,7 @@ class CheckYourFileDetailsHelper {
 
     val fileInformationRow = createSummaryListRow(
       messages("checkYourFileDetails.fileInformation.key"),
-      messages(ReportType.fileInformationMessageKeyForReportType(extractedFileDetails.getReportType)),
+      ReportType.fileInformationMessageForReportType(extractedFileDetails.getReportType),
       maybeActionItem = Some(
         ActionItemViewModel(
           href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
