@@ -26,19 +26,13 @@
 
 @(form: Form[_], upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("uploadXml.title"))) {
+@layout(pageTitle = title(form, messages("uploadXml.title"))) {
 
     <form action="@upscanInitiateResponse.postTarget"  method="post" id="uploadForm" enctype="multipart/form-data" novalidate>
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
-
-        <h1 class="govuk-label-wrapper">
-            <label class="govuk-label govuk-label--l" for="file-upload">
-            @messages("uploadXml.heading")
-            </label>
-        </h1>
 
         @for((key, value) <- upscanInitiateResponse.formFields) {
             <input type="hidden" name="@key" value="@value" />
@@ -50,6 +44,7 @@
             FileUpload(
                 name = "file",
                 id = "file-upload",
+                label = LabelViewModel(messages("uploadXml.heading")).asPageHeading(),
                 hint = Some(HintViewModel(HtmlContent(messages("uploadXml.hint")))),
                 javascript = Some(true),
                 classes = "hmrc-file-upload",
