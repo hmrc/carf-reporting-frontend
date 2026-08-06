@@ -20,12 +20,12 @@ import cats.syntax.all.*
 import controllers.actions.*
 import models.rcasp.getName
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
-import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CheckYourFileDetailsHelper
+import utils.LoggerUtil.*
 import views.html.CheckYourFileDetailsView
 
 import javax.inject.Inject
@@ -39,8 +39,7 @@ class CheckYourFileDetailsController @Inject() (
     view: CheckYourFileDetailsView,
     val controllerComponents: MessagesControllerComponents
 ) extends FrontendBaseController
-    with I18nSupport
-    with Logging {
+    with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
     val userAnswers = request.userAnswers
@@ -51,7 +50,7 @@ class CheckYourFileDetailsController @Inject() (
         Ok(view(rcaspDetails.getName, fileDetailsSummaryList))
       }
       .getOrElse {
-        logger.warn(
+        logWarn(
           "[CheckYourFileDetailsController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
         )
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())

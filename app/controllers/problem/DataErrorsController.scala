@@ -17,13 +17,14 @@
 package controllers.problem
 
 import config.{Constants, FrontendAppConfig}
-import controllers.actions._
+import controllers.actions.*
+
 import javax.inject.Inject
-import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.DataErrorsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.LoggerUtil.*
 import views.html.problem.DataErrorsView
 
 class DataErrorsController @Inject() (
@@ -34,8 +35,7 @@ class DataErrorsController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     view: DataErrorsView
 ) extends FrontendBaseController
-    with I18nSupport
-    with Logging {
+    with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
     val carfId = request.carfId
@@ -46,7 +46,7 @@ class DataErrorsController @Inject() (
         Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
       case (errors, _) =>
-        logger.warn(
+        logWarn(
           s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${errors.map(_.length)}"
         )
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())

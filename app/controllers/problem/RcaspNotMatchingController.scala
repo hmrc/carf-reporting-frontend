@@ -18,10 +18,10 @@ package controllers.problem
 
 import controllers.actions.*
 import pages.ExtractedFileDetailsPage
-import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.LoggerUtil.*
 import views.html.problem.RcaspNotMatchingView
 
 import javax.inject.Inject
@@ -34,15 +34,14 @@ class RcaspNotMatchingController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     view: RcaspNotMatchingView
 ) extends FrontendBaseController
-    with I18nSupport
-    with Logging {
+    with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
     request.userAnswers.get(ExtractedFileDetailsPage) match {
       case Some(extractedFileDetails) =>
         Ok(view(extractedFileDetails.sendingEntityIn))
       case None                       =>
-        logger.warn(
+        logWarn(
           "[RcaspNotMatchingController][onPageLoad] ExtractedFileDetails not found in user answers, redirecting to Journey Recovery"
         )
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())

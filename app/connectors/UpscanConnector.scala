@@ -20,7 +20,6 @@ import config.Constants.bytesInMb
 import config.FrontendAppConfig
 import models.errors.ApiError.{InternalServerError, JsonValidationError}
 import models.upscan.*
-import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.json.Json
@@ -30,12 +29,13 @@ import uk.gov.hmrc.http
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
+import utils.LoggerUtil.logWarn
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpClientV2) extends Logging {
+class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpClientV2) {
 
   private val headers = Map(
     HeaderNames.CONTENT_TYPE -> "application/json"
@@ -66,11 +66,11 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
               Try(response.json.as[PreparedUpload]) match {
                 case Success(preparedUpload) => Right(preparedUpload.toUpscanInitiateResponse)
                 case Failure(exception)      =>
-                  logger.warn("[UpscanConnector][upscanFormInitiate] Error parsing response body as PreparedUpload")
+                  logWarn("[UpscanConnector][upscanFormInitiate] Error parsing response body as PreparedUpload")
                   Left(JsonValidationError)
               }
             case _  =>
-              logger.warn(s"[UpscanConnector][upscanFormInitiate] Unexpected response with status ${response.status}")
+              logWarn(s"[UpscanConnector][upscanFormInitiate] Unexpected response with status ${response.status}")
               Left(InternalServerError)
           }
         }
@@ -92,7 +92,7 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
           response.status match {
             case OK => Right(())
             case _  =>
-              logger.warn(s"[UpscanConnector][saveRequestedUpload] Unexpected response with status ${response.status}")
+              logWarn(s"[UpscanConnector][saveRequestedUpload] Unexpected response with status ${response.status}")
               Left(InternalServerError)
           }
         }
@@ -111,14 +111,14 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
             Try(response.json.as[UploadStatus]) match {
               case Success(status)    => Right(Some(status))
               case Failure(exception) =>
-                logger.warn("[UpscanConnector][getUploadStatus] Error parsing response body as UploadStatus")
+                logWarn("[UpscanConnector][getUploadStatus] Error parsing response body as UploadStatus")
                 Left(JsonValidationError)
             }
           case NOT_FOUND =>
-            logger.warn(s"[UpscanConnector][getUploadStatus] No record found for uploadId ${uploadId.value}")
+            logWarn(s"[UpscanConnector][getUploadStatus] No record found for uploadId ${uploadId.value}")
             Right(None)
           case _         =>
-            logger.warn(s"[UpscanConnector][getUploadStatus] Unexpected response with status ${response.status}")
+            logWarn(s"[UpscanConnector][getUploadStatus] Unexpected response with status ${response.status}")
             Left(InternalServerError)
         }
       }

@@ -65,4 +65,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val enrolmentKey: String   = configuration.get[String]("keys.enrolmentKey.carf")
   val ctEnrolmentKey: String = configuration.get[String]("keys.enrolmentKey.ct")
+
+  val spinnerMaxPollingAttempts: Int = configuration.get[Int]("spinner.max-polling-attempts")
 }
