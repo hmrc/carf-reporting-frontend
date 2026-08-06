@@ -16,21 +16,23 @@
 
 @this(
         layout: templates.Layout,
+        govukSummaryList: GovukSummaryList,
         govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(rcaspName: String, fileDetailsSummaryList: SummaryList)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("journeyRecovery.startAgain.title"))) {
+@layout(pageTitle = titleNoForm(messages("checkYourFileDetails.title"))) {
 
-    <h1 class="govuk-heading-l">@messages("journeyRecovery.startAgain.heading")</h1>
+    <h1 class="govuk-heading-l long-word">@messages("checkYourFileDetails.heading", rcaspName)</h1>
 
-    <p class="govuk-body">@messages("journeyRecovery.startAgain.guidance")</p>
+    <div class="govuk-!-margin-bottom-9">
+        @govukSummaryList(fileDetailsSummaryList)
+        <hr aria-hidden="true">
+    </div>
 
-    <p class="govuk-body">
     @govukButton(
-        ButtonViewModel(messages("site.startAgain"))
-        .asLink(controllers.upload.routes.UploadXmlController.onPageLoad().url)
+        ButtonViewModel(messages("site.continue")).withAttribute("id" -> "continue")
+        .asLink(controllers.routes.PlaceholderController.onPageLoad("Should redirect to /send-your-file (CARF-598)").url)
     )
-    </p>
 }

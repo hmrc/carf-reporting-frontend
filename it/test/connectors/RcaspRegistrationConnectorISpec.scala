@@ -32,73 +32,73 @@ class RcaspRegistrationConnectorISpec
 
   lazy val connector: RcaspRegistrationConnector = app.injector.instanceOf[RcaspRegistrationConnector]
 
-  private val viewRcaspUrl = urlPathMatching(s"/carf-management/view-rcasp/$testCarfId/none")
-
-  val validResponseBody: String =
-    """
-      |{
-      |  "ViewRCASP": {
-      |    "ResponseCommon": {
-      |      "OriginatingSystem": "MDTP",
-      |      "TransmittingSystem": "EIS",
-      |      "RequestType": "VIEW",
-      |      "Regime": "CARF"
-      |    },
-      |    "ResponseDetails": {
-      |      "RCASPList": [
-      |        {
-      |          "RCASPID": "ZMCAR0123456787",
-      |          "SubscriptionID": "1A30",
-      |          "IsRCASPUser": true,
-      |          "PartyType": "Organisation",
-      |          "RCASPName": "Timmy's Turtles",
-      |          "TradingName": "Uva Academy",
-      |          "TINDetails": [
-      |            { "TINType": "UTR", "TIN": "1111111111", "IssuedBy": "GB" }
-      |          ],
-      |          "AddressDetails": {
-      |            "AddressLine1": "1 Test",
-      |            "AddressLine2": "Test Street",
-      |            "AddressLine3": "Test Region",
-      |            "AddressLine4": "Testingtown",
-      |            "PostalCode": "B23 2AZ",
-      |            "CountryCode": "GB"
-      |          }
-      |        },
-      |        {
-      |          "RCASPID": "ZMCAR0123456788",
-      |          "SubscriptionID": "1A30",
-      |          "IsRCASPUser": false,
-      |          "PartyType": "Organisation",
-      |          "RCASPName": "Amazon UK",
-      |          "TradingName": "Amazon UK",
-      |          "TINDetails": [
-      |            { "TINType": "UTR", "TIN": "1111111111", "IssuedBy": "GB" }
-      |          ],
-      |          "AddressDetails": {
-      |            "AddressLine1": "1 Test",
-      |            "AddressLine2": "Test Street",
-      |            "AddressLine3": "Test Region",
-      |            "AddressLine4": "Testingtown",
-      |            "PostalCode": "B23 2AZ",
-      |            "CountryCode": "GB"
-      |          },
-      |          "PrimaryContactDetails": {
-      |            "ContactName": "Clavell",
-      |            "EmailAddress": "clavell@uva.edu.org"
-      |          }
-      |        }
-      |      ]
-      |    }
-      |  }
-      |}
-      |""".stripMargin
-
   "viewRcasps" - {
+
+    val testUrl = s"/carf-management/view-rcasp/$testCarfId/none"
+
+    val validResponseBody: String =
+      """
+        |{
+        |  "ViewRCASP": {
+        |    "ResponseCommon": {
+        |      "OriginatingSystem": "MDTP",
+        |      "TransmittingSystem": "EIS",
+        |      "RequestType": "VIEW",
+        |      "Regime": "CARF"
+        |    },
+        |    "ResponseDetails": {
+        |      "RCASPList": [
+        |        {
+        |          "RCASPID": "ZMCAR0123456787",
+        |          "SubscriptionID": "1A30",
+        |          "IsRCASPUser": true,
+        |          "PartyType": "Organisation",
+        |          "RCASPName": "Timmy's Turtles",
+        |          "TradingName": "Uva Academy",
+        |          "TINDetails": [
+        |            { "TINType": "UTR", "TIN": "1111111111", "IssuedBy": "GB" }
+        |          ],
+        |          "AddressDetails": {
+        |            "AddressLine1": "1 Test",
+        |            "AddressLine2": "Test Street",
+        |            "AddressLine3": "Test Region",
+        |            "AddressLine4": "Testingtown",
+        |            "PostalCode": "B23 2AZ",
+        |            "CountryCode": "GB"
+        |          }
+        |        },
+        |        {
+        |          "RCASPID": "ZMCAR0123456788",
+        |          "SubscriptionID": "1A30",
+        |          "IsRCASPUser": false,
+        |          "PartyType": "Individual",
+        |          "FirstName": "Nemona",
+        |          "LastName": "Champion",
+        |          "TINDetails": [
+        |            { "TINType": "OTHER", "TIN": "1111111111", "IssuedBy": "GB" }
+        |          ],
+        |          "AddressDetails": {
+        |            "AddressLine1": "1 Test",
+        |            "AddressLine2": "Test Street",
+        |            "AddressLine3": "Test Region",
+        |            "AddressLine4": "Testingtown",
+        |            "PostalCode": "B23 2AZ",
+        |            "CountryCode": "GB"
+        |          },
+        |          "PrimaryContactDetails": {
+        |            "ContactName": "Clavell",
+        |            "EmailAddress": "clavell@uva.edu.org"
+        |          }
+        |        }
+        |      ]
+        |    }
+        |  }
+        |}
+        |""".stripMargin
 
     "must successfully retrieve a list of RcaspDetails, ignoring fields not required by RcaspDetails" in {
       stubFor(
-        get(viewRcaspUrl)
+        get(urlPathMatching(testUrl))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -108,12 +108,14 @@ class RcaspRegistrationConnectorISpec
 
       val result = connector.viewRcasps(testCarfId).value.futureValue
 
-      result shouldBe Right(List(RcaspDetails("ZMCAR0123456787"), RcaspDetails("ZMCAR0123456788")))
+      result shouldBe Right(
+        List(organisationRegisteredBusinessRcaspDetails, individualRcaspDetails)
+      )
     }
 
     "must return a Json validation error if an unexpected response body is returned" in {
       stubFor(
-        get(viewRcaspUrl)
+        get(urlPathMatching(testUrl))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -128,7 +130,7 @@ class RcaspRegistrationConnectorISpec
 
     "must return an empty list if the backend returns 404" in {
       stubFor(
-        get(viewRcaspUrl)
+        get(urlPathMatching(testUrl))
           .willReturn(
             aResponse()
               .withStatus(NOT_FOUND)
@@ -142,7 +144,7 @@ class RcaspRegistrationConnectorISpec
 
     "must return an internal server error if an unexpected non-200 status is returned" in {
       stubFor(
-        get(viewRcaspUrl)
+        get(urlPathMatching(testUrl))
           .willReturn(
             aResponse()
               .withStatus(500)

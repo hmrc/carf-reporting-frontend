@@ -18,8 +18,14 @@ package common
 
 import generators.Generators
 import models.*
+import models.DocTypeIndic.*
+import models.MessageTypeIndic.*
 import models.upscan.*
 import models.upscan.UploadStatus.*
+import models.rcasp.{IndividualRcaspDetails, OrganisationRcaspDetails, RcaspContactDetails}
+import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryList, SummaryListRow}
+import viewmodels.govuk.all.{ActionItemViewModel, FluentActionItem, SummaryListRowViewModel, ValueViewModel}
 
 import java.time.{Clock, Instant, ZoneId}
 
@@ -65,5 +71,72 @@ trait TestData extends Generators {
         failureReason = "REJECTED",
         message = "Error message"
       )
+    )
+
+  val testMessageRefId =
+    "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001"
+  val testRcaspId      = "ZMCAR0123456787"
+  val testRcaspName    = "Timmy's Turtles"
+
+  val organisationRegisteredBusinessRcaspDetails =
+    OrganisationRcaspDetails(
+      RCASPID = testRcaspId,
+      IsRCASPUser = true,
+      RCASPName = testRcaspName,
+      PrimaryContactDetails = None,
+      SecondaryContactDetails = None
+    )
+
+  val individualRcaspDetails =
+    IndividualRcaspDetails(
+      RCASPID = "ZMCAR0123456788",
+      IsRCASPUser = false,
+      FirstName = "Nemona",
+      LastName = "Champion",
+      PrimaryContactDetails = Some(
+        RcaspContactDetails(ContactName = "Clavell", EmailAddress = "clavell@uva.edu.org")
+      )
+    )
+
+  lazy val testSummaryListRow: SummaryListRow =
+    SummaryListRowViewModel(
+      key = Key(Text("TEST Key")),
+      value = ValueViewModel(Text("TEST Value")),
+      actions = Seq(
+        ActionItemViewModel(
+          Text("TEST Action"),
+          controllers.upload.routes.UploadXmlController.onPageLoad().url
+        ).withVisuallyHiddenText("TEST HIDDEN TEXT")
+      )
+    )
+
+  lazy val testSummaryList: SummaryList = SummaryList(Seq(testSummaryListRow))
+
+  val extractedFileDetailsTestData: ExtractedFileDetails =
+    ExtractedFileDetails(
+      messageRefId = testMessageRefId,
+      sendingEntityIn = testRcaspId,
+      rcaspName = Some(testRcaspName),
+      messageTypeIndic = CARF701,
+      hasOtherNexus = false,
+      hasCryptoUsers = true,
+      docTypeIndic = OECD10,
+      isTestData = true,
+      allCryptoUsersAreCorrections = false,
+      allCryptoUsersAreDeletions = false
+    )
+
+  val extractedFileDetailsNilReport: ExtractedFileDetails =
+    ExtractedFileDetails(
+      messageRefId = testMessageRefId,
+      sendingEntityIn = testRcaspId,
+      rcaspName = None,
+      messageTypeIndic = CARF703,
+      hasOtherNexus = false,
+      hasCryptoUsers = false,
+      docTypeIndic = OECD11,
+      isTestData = false,
+      allCryptoUsersAreCorrections = false,
+      allCryptoUsersAreDeletions = false
     )
 }

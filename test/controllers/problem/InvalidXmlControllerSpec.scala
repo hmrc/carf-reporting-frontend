@@ -17,17 +17,27 @@
 package controllers.problem
 
 import base.SpecBase
+import config.FrontendAppConfig
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import views.html.problem.InvalidXmlView
 
 class InvalidXmlControllerSpec extends SpecBase {
 
+  val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
+
   "InvalidXml Controller" - {
 
     "must return OK and the correct view for a GET" in {
+      when(mockAppConfig.managementUrl) thenReturn "managementUrl"
+      when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, routes.InvalidXmlController.onPageLoad().url)
@@ -37,7 +47,7 @@ class InvalidXmlControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[InvalidXmlView]
 
         status(result)          mustEqual OK
-        contentAsString(result) mustEqual view("filename.xml")(request, messages(application)).toString
+        contentAsString(result) mustEqual view("filename.xml", "managementUrl")(request, messages(application)).toString
       }
     }
   }

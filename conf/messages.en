@@ -74,17 +74,6 @@ invalidXml.p5.linkText = Print this page
 invalidXml.p6.linkText = Upload a different file
 invalidXml.p7.linkText = Back to manage your cryptoasset reports
 
-rcaspNotMatching.title = There is a problem with the RCASP ID in your file
-rcaspNotMatching.heading = There is a problem with the RCASP ID in your file
-rcaspNotMatching.p1 = The RCASP ID in your file is {0}.
-rcaspNotMatching.p2 = This does not match any of the reporting cryptoasset service providers (RCASPs) that you have added in the service.
-rcaspNotMatching.heading.2 = What to do next
-rcaspNotMatching.list.1 = Check and update the value of the SendingEntityIN element in the MessageSpec section of your file to match the RCASP ID.
-rcaspNotMatching.list.2 = Upload the updated file
-rcaspNotMatching.heading.3 = If you have not yet added the RCASP in the service
-rcaspNotMatching.p3.link.text = Add the RCASP in the service
-rcaspNotMatching.p3.text = before you update your file.
-
 dataErrors.title = There is a problem with your file data
 dataErrors.heading = There is a problem with your file data
 dataErrors.p1 = We cannot accept the file {0} because it does not meet the data requirements.
@@ -99,3 +88,40 @@ dataErrors.table.caption = Errors
 dataErrors.table.head.line = Line
 dataErrors.table.head.error = Error
 dataErrors.back.linkText = Back to manage your cryptoasset reports
+
+rcaspNotMatching.title = There is a problem with the RCASP ID in your file
+rcaspNotMatching.heading = There is a problem with the RCASP ID in your file
+rcaspNotMatching.p1 = The RCASP ID in your file is {0}.
+rcaspNotMatching.p2 = This does not match any of the reporting cryptoasset service providers (RCASPs) that you have added in the service.
+rcaspNotMatching.heading.2 = What to do next
+rcaspNotMatching.list.1 = Check and update the value of the SendingEntityIN element in the MessageSpec section of your file to match the RCASP ID.
+rcaspNotMatching.list.2 = Upload the updated file
+rcaspNotMatching.heading.3 = If you have not yet added the RCASP in the service
+rcaspNotMatching.p3.link.text = Add the RCASP in the service
+rcaspNotMatching.p3.text = before you update your file.
+
+checkYourFileDetails.title = Check your file details are correct for the cryptoasset service provider
+checkYourFileDetails.heading = Check your file details are correct for {0}
+checkYourFileDetails.fileId.key = File ID (MessageRefId)
+checkYourFileDetails.rcaspId.key = RCASP ID (SendingEntityIN)
+checkYourFileDetails.rcaspName.key = Reporting cryptoasset service provider (RCASP Name)
+checkYourFileDetails.fileInformation.key = File information
+checkYourFileDetails.fileInformation.change = Change file
+
+reportType.testData = Test data
+reportType.nilReport = No reportable information
+reportType.notificationOfReportingOutsideUk = Notification of reporting outside of the UK
+reportType.newInformation = New information
+reportType.additionalInformationForExistingReport = Additional information for an existing report
+reportType.deletionOfExistingReport = Deletion of an existing report
+reportType.correctedInformationForExistingReport = Corrected information for an existing report
+reportType.deletedInformationForExistingReport = Deleted information for an existing report
+reportType.correctedAndDeletedInformationForExistingReport = Corrected and deleted information for an existing report
+reportType.reportableInformation = Reportable information
+
+reportType.testData.warning = We cannot complete all checks on test data or accept the file.
+reportType.notificationOfReportingOutsideUk.warning = With this file, you’re notifying us that {0} is reporting for the Cryptoasset Reporting Framework outside of the UK.
+reportType.deletionOfExistingReport.warning = This will permanently delete an existing report.
+reportType.correctedInformationForExistingReport.warning = This will permanently change reported information marked as a correction.
+reportType.deletedInformationForExistingReport.warning = This will permanently delete reported information marked for deletion.
+reportType.correctedAndDeletedInformationForExistingReport.warning = This will permanently change reported information marked as a correction. It will also permanently delete reported information marked for deletion.

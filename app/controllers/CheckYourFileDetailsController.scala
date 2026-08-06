@@ -14,38 +14,47 @@
  * limitations under the License.
  */
 
-package controllers.problem
+package controllers
 
+import cats.syntax.all.*
 import controllers.actions.*
-import pages.ExtractedFileDetailsPage
+import models.rcasp.getName
+import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.problem.RcaspNotMatchingView
+import utils.CheckYourFileDetailsHelper
+import views.html.CheckYourFileDetailsView
 
 import javax.inject.Inject
 
-class RcaspNotMatchingController @Inject() (
+class CheckYourFileDetailsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
-    val controllerComponents: MessagesControllerComponents,
-    view: RcaspNotMatchingView
+    checkYourFileDetailsHelper: CheckYourFileDetailsHelper,
+    view: CheckYourFileDetailsView,
+    val controllerComponents: MessagesControllerComponents
 ) extends FrontendBaseController
     with I18nSupport
     with Logging {
 
   def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
-    request.userAnswers.get(ExtractedFileDetailsPage) match {
-      case Some(extractedFileDetails) =>
-        Ok(view(extractedFileDetails.sendingEntityIn))
-      case None                       =>
+    val userAnswers = request.userAnswers
+
+    (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
+      .mapN { (rcaspDetails, extractedFileDetails) =>
+        val fileDetailsSummaryList = checkYourFileDetailsHelper.fileDetailsSummaryList(extractedFileDetails)
+        Ok(view(rcaspDetails.getName, fileDetailsSummaryList))
+      }
+      .getOrElse {
         logger.warn(
-          "[RcaspNotMatchingController][onPageLoad] ExtractedFileDetails not found in user answers, redirecting to Journey Recovery"
+          "[CheckYourFileDetailsController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
         )
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-    }
+      }
   }
 }

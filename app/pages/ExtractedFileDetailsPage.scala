@@ -16,11 +16,12 @@
 
 package pages
 
+import models.ExtractedFileDetails
 import play.api.libs.json.JsPath
 
-case object SendingEntityInPage extends QuestionPage[String] {
+case object ExtractedFileDetailsPage extends QuestionPage[ExtractedFileDetails] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "sendingEntityIn"
+  override def toString: String = "extractedFileDetails"
 }
