@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this()
+package models.problem
 
-@(key: String, id: Option[String] = None, fullStop: Boolean = false)(implicit messages: Messages)
+import play.twirl.api.Html
 
-@*
-note the default (non js) behaviour is to just display the text as an instruction (e.g. "print this page")
-if the user has js, a <a> tag will be added within the span and an window.print event listener assigned to the whole thing
-*@
-<span class="print-link" @if(id.isDefined){id="@id"}>@messages(key)</span>@if(fullStop){.}
+final case class SchemaError(lineNumber: Int, message: Html)
