@@ -62,6 +62,7 @@ class SendYourFileController @Inject() (
   }
 
   def onSubmit(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
+    // TODO: Build request for FTS (details TBC) and call submission connector (CARF-611)
     request.userAnswers
       .get(ExtractedFileDetailsPage)
       .fold {
@@ -78,6 +79,7 @@ class SendYourFileController @Inject() (
 
   def getFileStatusAndRedirect(): Action[AnyContent] = (identify() andThen getData() andThen requireData) {
     implicit request =>
+      // TODO: Call backend to check file status (CARF-621)
       Redirect(
         controllers.routes.PlaceholderController.onPageLoad("Redirect to next page based on file status (CARF-621)").url
       )

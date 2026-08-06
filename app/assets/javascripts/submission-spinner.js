@@ -28,7 +28,7 @@ $("#sendYourFileForm").submit(function (e) {
                     window.location = $("#technicalDifficultiesRedirectUrl").val()
                 }).done(function () {
                     checkProgress = true
-                    refreshToCheckStatusPage();
+                    pollBackendToCheckFileStatus();
                 });
             }
         }
@@ -38,9 +38,9 @@ $("#sendYourFileForm").submit(function (e) {
 });
 
 // =====================================================
-//  Refresh status page
+//  Call SendYourFileController .getFileStatusAndRedirect to check file status
 // =====================================================
-function refreshToCheckStatusPage() {
+function pollBackendToCheckFileStatus() {
     var refreshUrl = $("#fileStatusRefreshUrl").val();
     if (refreshUrl) {
         setTimeout(function () {
