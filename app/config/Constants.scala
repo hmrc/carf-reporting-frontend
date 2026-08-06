@@ -22,4 +22,5 @@ object Constants {
 
   val bytesInMb = 1048576
 
+  val maxErrorsShown: Int = 100
 }
