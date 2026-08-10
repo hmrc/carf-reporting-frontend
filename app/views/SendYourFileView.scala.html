@@ -1,0 +1,52 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@this(
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukButton: GovukButton,
+        govukWarningText: GovukWarningText
+)
+
+@(maybeWarningMessage: Option[String], maxPollingAttempts: Int)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("sendYourFile.title"))) {
+
+    @formHelper(action = routes.SendYourFileController.onSubmit(), args = Symbol("id") -> "sendYourFileForm") {
+        <input type="hidden" id="fileStatusRefreshUrl" value="@routes.SendYourFileController.getFileStatusAndRedirect().url" />
+        <input type="hidden" id="maxPollingAttempts" value="@maxPollingAttempts" />
+        <input type="hidden" id="slowJourneyUrl" value="@routes.PlaceholderController.onPageLoad("Should redirect to /still-checking-your-file (CARF-616)").url" />
+        <input type="hidden" id="technicalDifficultiesRedirectUrl" value="@routes.JourneyRecoveryController.onPageLoad().url" />
+        <input type="hidden" id="processingMessage" value="@messages("sendYourFile.processing")" />
+
+        <h1 class="govuk-heading-l">@messages("sendYourFile.heading")</h1>
+
+        <p class="govuk-body">@messages("sendYourFile.p1")</p>
+        <p class="govuk-body">@messages("sendYourFile.p2")</p>
+
+        @maybeWarningMessage.map { warningMessage =>
+            @govukWarningText(WarningText(
+                iconFallbackText = Some(messages("site.warning")),
+                content = Text(warningMessage)
+            ))
+        }
+
+        <div id="processing" aria-live="polite" role="status" class="govuk-!-margin-bottom-5 govuk-!-margin-top-5"></div>
+        @govukButton(
+            ButtonViewModel(messages("site.confirmAndSend")).withAttribute("id" -> "submit").preventingDoubleClick()
+        )
+    }
+}

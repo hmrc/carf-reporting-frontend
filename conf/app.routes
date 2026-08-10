@@ -29,3 +29,7 @@ GET         /problem/data-errors               controllers.problem.DataErrorsCon
 GET         /problem/rcasp-not-matching        controllers.problem.RcaspNotMatchingController.onPageLoad()
 
 GET         /check-your-file-details           controllers.CheckYourFileDetailsController.onPageLoad()
+
+GET         /send-your-file                    controllers.SendYourFileController.onPageLoad()
+POST        /send-your-file                    controllers.SendYourFileController.onSubmit()
+GET         /send-your-file/status             controllers.SendYourFileController.getFileStatusAndRedirect()

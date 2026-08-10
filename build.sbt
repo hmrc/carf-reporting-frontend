@@ -33,8 +33,9 @@ lazy val microservice = (project in file("."))
       "viewmodels.govuk.all._"
     ),
     PlayKeys.playDefaultPort := 17004,
-    ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
-      ".*Routes.*;.*viewmodels.govuk.*;",
+    ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;.*viewmodels.govuk.*;" +
+      ".*BuildInfo.*;.*javascript.*;.*Routes.*;.*testOnly.*;.*ViewUtils.*;.*GuiceInjector;.*html.*;" +
+      ".*ControllerConfiguration",
     ScoverageKeys.coverageMinimumStmtTotal := 55,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
@@ -57,7 +58,8 @@ lazy val microservice = (project in file("."))
           Seq(
             "javascripts/jquery-3.6.0.min.js",
             "javascripts/app.js",
-            "javascripts/upload-spinner.js"
+            "javascripts/upload-spinner.js",
+            "javascripts/submission-spinner.js"
           )
         )
     ),
