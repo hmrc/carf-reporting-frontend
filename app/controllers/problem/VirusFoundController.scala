@@ -17,40 +17,35 @@
 package controllers.problem
 
 import config.FrontendAppConfig
-import controllers.actions._
-import javax.inject.Inject
+import controllers.actions.IdentifierAction
 import models.filecheck.FileCheckStatus.Virus
-import pages.ExtractedFileDetailsPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.FileCheckStatusStubService
+import services.StubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil._
+import utils.LoggerUtil.*
 import views.html.problem.VirusFoundView
+
+import javax.inject.Inject
 
 class VirusFoundController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
-    getData: DataRetrievalAction,
     appConfig: FrontendAppConfig,
-    fileCheckStatusStubService: FileCheckStatusStubService,
+    stubService: StubService,
     val controllerComponents: MessagesControllerComponents,
     view: VirusFoundView
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()) { implicit request =>
-    val carfId       = request.carfId
-    val messageRefId = request.userAnswers.flatMap(_.get(ExtractedFileDetailsPage)).map(_.messageRefId)
-    val checkStatus  = fileCheckStatusStubService.getFileCheckStatus(carfId)
-
-    (checkStatus, messageRefId) match {
-      case (Some(Virus), Some(_)) =>
+  def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
+    stubService.getFileCheckResult(request.carfId) match {
+      case Some(result) if result.status == Virus =>
         Ok(view(appConfig.managementUrl))
 
-      case (status, refId) =>
+      case result =>
         logWarn(
-          s"Unable to display virus-found page. Status present: ${status.isDefined}, MessageRefId present: ${refId.isDefined}"
+          s"Unable to display virus-found page. File-check result present: ${result.isDefined}"
         )
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }

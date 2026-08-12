@@ -17,7 +17,9 @@
 package services
 
 import models.DocTypeIndic.*
+import models.filecheck.{FileCheckResult, FileCheckStatus}
 import models.MessageTypeIndic.*
+import models.filecheck.FileCheckStatus.{Failed, Passed, Virus}
 import models.errors.ApiError.InternalServerError
 import models.fileSubmission.FileStatus
 import models.fileSubmission.FileStatus.*
@@ -31,11 +33,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class StubService @Inject() (sessionRepository: SessionRepository) {
 
-  def getExtractedFileDetails(carfId: String, sendingEntityIn: String): Option[ExtractedFileDetails] = {
-    val testMessageRefId      =
-      "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001"
-    val testRcaspNameFromFile = "Timmy's Turtles"
+  private val testMessageRefId =
+    "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001"
 
+  private val testRcaspNameFromFile = "Timmy's Turtles"
+
+  def getExtractedFileDetails(carfId: String, sendingEntityIn: String): Option[ExtractedFileDetails] =
     carfId.takeRight(1) match {
       case "1" => // TestData
         Some(
@@ -187,6 +190,18 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             allCryptoUsersAreDeletions = false
           )
         )
+
+      case _ => None
+    }
+
+  /*
+   * TODO: replace with the real file-check response and MessageRefId supplied throughCARF-593/CARF-596.
+   */
+  def getFileCheckResult(carfId: String): Option[FileCheckResult] =
+    carfId.takeRight(1) match {
+      case "P" => Some(FileCheckResult(Passed, testMessageRefId))
+      case "F" => Some(FileCheckResult(Failed, testMessageRefId))
+      case "V" => Some(FileCheckResult(Virus, testMessageRefId))
       case _   => None
     }
   }
