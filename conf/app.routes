@@ -35,9 +35,7 @@ POST        /send-your-file                    controllers.SendYourFileControlle
 GET         /send-your-file/status             controllers.SendYourFileController.getFileStatusAndRedirect()
 
 GET         /file-passed-checks                controllers.upload.FilePassedChecksController.onPageLoad()
-POST        /file-passed-checks                controllers.upload.FilePassedChecksController.onSubmit()
 
 GET         /file-failed-checks                controllers.upload.FileFailedChecksController.onPageLoad()
-POST        /file-failed-checks                controllers.upload.FileFailedChecksController.onSubmit()
 
 GET         /problem/virus-found               controllers.problem.VirusFoundController.onPageLoad()
