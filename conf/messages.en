@@ -150,3 +150,12 @@ fileStatus.pending = Pending
 fileStatus.passed = Passed
 fileStatus.failed = Failed
 fileStatus.problem = Problem
+
+filePassedChecks.title = filePassedChecks
+filePassedChecks.heading = filePassedChecks
+
+fileFailedChecks.title = fileFailedChecks
+fileFailedChecks.heading = fileFailedChecks
+
+virusFound.title = virusFound
+virusFound.heading = virusFound
