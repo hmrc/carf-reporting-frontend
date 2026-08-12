@@ -52,7 +52,11 @@ $hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-f
 }
 
 .govuk-summary-checking-file__key {
-  width: 15% !important;
+  width: 30% !important;
+}
+
+.govuk-summary-checking-file__value {
+  width: 70% !important;
 }
 
 .govuk-file-confirmation__key {

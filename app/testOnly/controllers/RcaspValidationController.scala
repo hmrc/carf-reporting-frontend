@@ -23,7 +23,7 @@ import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import service.StubService
+import services.StubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject

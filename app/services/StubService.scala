@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-package service
+package services
 
 import models.DocTypeIndic.*
-import models.ExtractedFileDetails
 import models.MessageTypeIndic.*
+import models.errors.ApiError.InternalServerError
+import models.fileSubmission.FileStatus
+import models.fileSubmission.FileStatus.*
+import models.{ExtractedFileDetails, UserAnswers}
+import pages.FileStatusPage
+import repositories.SessionRepository
+import types.ResultT
 
-class StubService {
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+
+class StubService @Inject() (sessionRepository: SessionRepository) {
 
   def getExtractedFileDetails(carfId: String, sendingEntityIn: String): Option[ExtractedFileDetails] = {
     val testMessageRefId      =
@@ -181,4 +190,37 @@ class StubService {
       case _   => None
     }
   }
+
+  def getFileStatus(carfId: String, userAnswers: UserAnswers)(implicit ec: ExecutionContext): ResultT[FileStatus] =
+    if (carfId.takeRight(2).take(1) == "0") {
+      ResultT.fromError(InternalServerError)
+    } else {
+      userAnswers
+        .get(FileStatusPage)
+        .fold {
+          ResultT.fromFuture {
+            for {
+              updatedAnswers <- Future.fromTry(userAnswers.set(FileStatusPage, Pending))
+              _              <- sessionRepository.set(updatedAnswers)
+            } yield Right(Pending)
+          }
+        } {
+          case Pending                 =>
+            val newStatus = carfId.takeRight(2).take(1) match {
+              case "9" => UnexpectedError
+              case "8" => UnprocessableErrorFile
+              case "7" => VirusFound
+              case "6" => Failed
+              case "5" => Passed
+              case _   => Pending
+            }
+            ResultT.fromFuture {
+              for {
+                updatedAnswers <- Future.fromTry(userAnswers.set(FileStatusPage, newStatus))
+                _              <- sessionRepository.set(updatedAnswers)
+              } yield Right(newStatus)
+            }
+          case otherStatus: FileStatus => ResultT.fromValue(otherStatus)
+        }
+    }
 }

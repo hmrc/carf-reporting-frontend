@@ -69,11 +69,7 @@ class SendYourFileController @Inject() (
         logWarn("[SendYourFileController][onSubmit] Unable to get ExtractedFileDetails from user answers")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
       } { extractedFileDetails =>
-        Redirect(
-          controllers.routes.PlaceholderController
-            .onPageLoad("Should submit to FTS (CARF-611), then redirect to /still-checking-your-file (CARF-616)")
-            .url
-        )
+        Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad().url)
       }
   }
 
