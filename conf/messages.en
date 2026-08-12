@@ -133,6 +133,13 @@ sendYourFile.p1 = We’ll now automatically check your file for business rule er
 sendYourFile.p2 = By sending this file, you are confirming that the information is correct and complete to the best of your knowledge.
 sendYourFile.processing = We are checking your file. This could take a few minutes.
 
+filePassedChecks.title = Your file has passed our checks
+filePassedChecks.heading = Your file has passed our checks
+filePassedChecks.summary.messageRefId.label = File ID (MessageRefId)
+filePassedChecks.summary.result.label = Result of automatic checks
+filePassedChecks.summary.result.value = Passed
+filePassedChecks.button = Go to confirmation
+
 stillCheckingYourFile.title = We need a few more minutes to check your file
 stillCheckingYourFile.heading = We need a few more minutes to check your file
 stillCheckingYourFile.p1 = You can refresh the page for updates on the status of our automatic checks.
@@ -151,11 +158,16 @@ fileStatus.passed = Passed
 fileStatus.failed = Failed
 fileStatus.problem = Problem
 
-filePassedChecks.title = filePassedChecks
-filePassedChecks.heading = filePassedChecks
+fileFailedChecks.title = Your file has failed our checks
+fileFailedChecks.heading = Your file has failed our checks
+fileFailedChecks.summary.messageRefId.label = File ID (MessageRefId)
+fileFailedChecks.summary.result.label = Result of automatic checks
+fileFailedChecks.summary.result.value = Failed
+fileFailedChecks.warning = You must send another version. Not sending another report on time may result in a penalty for the reporting cryptoasset service provider (RCASP).
+fileFailedChecks.button = Check errors
 
-fileFailedChecks.title = fileFailedChecks
-fileFailedChecks.heading = fileFailedChecks
-
-virusFound.title = virusFound
-virusFound.heading = virusFound
+virusFound.title = There is a virus in your file
+virusFound.heading = There is a virus in your file
+virusFound.p1 = We cannot accept this file as it contains a virus.
+virusFound.link1 = Upload a different file
+virusFound.link2 = Back to manage your cryptoasset reports
