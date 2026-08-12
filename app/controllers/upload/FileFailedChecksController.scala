@@ -16,39 +16,34 @@
 
 package controllers.upload
 
-import controllers.actions._
-import javax.inject.Inject
+import controllers.actions.IdentifierAction
 import models.filecheck.FileCheckStatus.Failed
-import pages.ExtractedFileDetailsPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.FileCheckStatusStubService
+import services.StubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil._
+import utils.LoggerUtil.*
 import views.html.upload.FileFailedChecksView
+
+import javax.inject.Inject
 
 class FileFailedChecksController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
-    getData: DataRetrievalAction,
-    fileCheckStatusStubService: FileCheckStatusStubService,
+    stubService: StubService,
     val controllerComponents: MessagesControllerComponents,
     view: FileFailedChecksView
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()) { implicit request =>
-    val carfId       = request.carfId
-    val messageRefId = request.userAnswers.flatMap(_.get(ExtractedFileDetailsPage)).map(_.messageRefId)
-    val checkStatus  = fileCheckStatusStubService.getFileCheckStatus(carfId)
+  def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
+    stubService.getFileCheckResult(request.carfId) match {
+      case Some(result) if result.status == Failed =>
+        Ok(view(result.messageRefId))
 
-    (checkStatus, messageRefId) match {
-      case (Some(Failed), Some(refId)) =>
-        Ok(view(refId))
-
-      case (status, refId) =>
+      case result =>
         logWarn(
-          s"Unable to display file-failed-checks page. Status present: ${status.isDefined}, MessageRefId present: ${refId.isDefined}"
+          s"Unable to display file-failed-checks page. File-check result present: ${result.isDefined}"
         )
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
