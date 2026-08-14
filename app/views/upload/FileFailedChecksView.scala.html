@@ -19,40 +19,25 @@
 @this(
         layout: templates.Layout,
         govukSummaryList: GovukSummaryList,
-        govukTag: GovukTag,
         govukWarningText: GovukWarningText,
         govukButton: GovukButton
 )
 
-@(messageRefId: String)(implicit request: Request[_], messages: Messages)
+@(summaryList: SummaryList)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("fileFailedChecks.title")), showBackLink = false) {
 
     <h1 class="govuk-heading-l">@messages("fileFailedChecks.heading")</h1>
 
-    @govukSummaryList(SummaryList(
-        rows = Seq(
-            SummaryListRow(
-                key = Key(content = Text(messages("fileFailedChecks.summary.messageRefId.label"))),
-                value = Value(content = Text(messageRefId))
-            ),
-            SummaryListRow(
-                key = Key(content = Text(messages("fileFailedChecks.summary.result.label"))),
-                value = Value(content = HtmlContent(govukTag(Tag(
-                    content = Text(messages("fileFailedChecks.summary.result.value")),
-                    classes = "govuk-tag--red"
-                ))))
-            )
-        )
-    ))
+    @govukSummaryList(summaryList)
 
     @govukWarningText(WarningText(
-        iconFallbackText = Some(messages("generic.warning")),
+        iconFallbackText = Some(messages("site.warning")),
         content = Text(messages("fileFailedChecks.warning"))
     ))
 
     @govukButton(Button(
-        href = Some(controllers.routes.PlaceholderController.onPageLoad("TODO: problem/rules-errors link - ticket CARF-616").url),
+        href = Some(controllers.routes.PlaceholderController.onPageLoad("TODO: problem/rules-errors link - ticket CARF-614").url),
         content = Text(messages("fileFailedChecks.button"))
     ))
 }
