@@ -17,8 +17,9 @@
 package controllers.problem
 
 import config.FrontendAppConfig
-import controllers.actions.IdentifierAction
-import models.filecheck.FileCheckStatus.Virus
+import controllers.actions._
+import models.fileSubmission.FileStatus.VirusFound
+import pages.ExtractedFileDetailsPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.StubService
@@ -27,26 +28,39 @@ import utils.LoggerUtil.*
 import views.html.problem.VirusFoundView
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class VirusFoundController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    getData: DataRetrievalAction,
     appConfig: FrontendAppConfig,
     stubService: StubService,
     val controllerComponents: MessagesControllerComponents,
     view: VirusFoundView
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
-    stubService.getFileCheckResult(request.carfId) match {
-      case Some(result) if result.status == Virus =>
-        Ok(view(appConfig.managementUrl))
+  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()).async { implicit request =>
+    val carfId       = request.carfId
+    val messageRefId = request.userAnswers.flatMap(_.get(ExtractedFileDetailsPage)).map(_.messageRefId)
 
-      case result =>
-        logWarn(
-          s"Unable to display virus-found page. File-check result present: ${result.isDefined}"
-        )
+    stubService.getFileStatus(carfId).value.map {
+      case Right(VirusFound) =>
+        messageRefId match {
+          case Some(_) => Ok(view(appConfig.managementUrl))
+          case None    =>
+            logWarn("Unable to display virus-found page. ExtractedFileDetailsPage missing from UserAnswers.")
+            Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        }
+
+      case Right(otherStatus) =>
+        logWarn(s"Unable to display virus-found page. Status was: $otherStatus")
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+
+      case Left(error) =>
+        logWarn(s"Unable to display virus-found page. Error retrieving status: $error")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
   }

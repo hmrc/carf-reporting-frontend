@@ -16,8 +16,9 @@
 
 package controllers.upload
 
-import controllers.actions.IdentifierAction
-import models.filecheck.FileCheckStatus.Failed
+import controllers.actions._
+import models.fileSubmission.FileStatus.Failed
+import pages.ExtractedFileDetailsPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.StubService
@@ -26,25 +27,38 @@ import utils.LoggerUtil.*
 import views.html.upload.FileFailedChecksView
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class FileFailedChecksController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    getData: DataRetrievalAction,
     stubService: StubService,
     val controllerComponents: MessagesControllerComponents,
     view: FileFailedChecksView
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
-    stubService.getFileCheckResult(request.carfId) match {
-      case Some(result) if result.status == Failed =>
-        Ok(view(result.messageRefId))
+  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()).async { implicit request =>
+    val carfId       = request.carfId
+    val messageRefId = request.userAnswers.flatMap(_.get(ExtractedFileDetailsPage)).map(_.messageRefId)
 
-      case result =>
-        logWarn(
-          s"Unable to display file-failed-checks page. File-check result present: ${result.isDefined}"
-        )
+    stubService.getFileStatus(carfId).value.map {
+      case Right(Failed) =>
+        messageRefId match {
+          case Some(refId) => Ok(view(refId))
+          case None        =>
+            logWarn("Unable to display file-failed-checks page. ExtractedFileDetailsPage missing from UserAnswers.")
+            Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        }
+
+      case Right(otherStatus) =>
+        logWarn(s"Unable to display file-failed-checks page. Status was: $otherStatus")
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+
+      case Left(error) =>
+        logWarn(s"Unable to display file-failed-checks page. Error retrieving status: $error")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
   }

@@ -17,7 +17,6 @@
 package services
 
 import models.DocTypeIndic.*
-import models.filecheck.{FileCheckResult, FileCheckStatus}
 import models.MessageTypeIndic.*
 import models.filecheck.FileCheckStatus.{Failed, Passed, Virus}
 import models.errors.ApiError.InternalServerError
@@ -26,6 +25,9 @@ import models.fileSubmission.FileStatus.*
 import models.{ExtractedFileDetails, UserAnswers}
 import pages.FileStatusPage
 import repositories.SessionRepository
+import types.ResultT
+import models.fileSubmission.FileStatus
+import models.fileSubmission.FileStatus.*
 import types.ResultT
 
 import javax.inject.Inject
@@ -194,17 +196,19 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
       case _ => None
     }
 
-  /*
-   * TODO: replace with the real file-check response and MessageRefId supplied throughCARF-593/CARF-596.
-   */
-  def getFileCheckResult(carfId: String): Option[FileCheckResult] =
-    carfId.takeRight(1) match {
-      case "P" => Some(FileCheckResult(Passed, testMessageRefId))
-      case "F" => Some(FileCheckResult(Failed, testMessageRefId))
-      case "V" => Some(FileCheckResult(Virus, testMessageRefId))
-      case _   => None
+  def getFileStatus(carfId: String): ResultT[FileStatus] = {
+    val status = carfId.dropRight(1).lastOption match {
+      case Some('9') => UnexpectedError
+      case Some('8') => UnprocessableErrorFile
+      case Some('7') => VirusFound
+      case Some('6') => Failed
+      case Some('5') => Passed
+      case _         => Pending
     }
+
+    ResultT.fromValue(status)
   }
+}
 
   def getFileStatus(carfId: String, userAnswers: UserAnswers)(implicit ec: ExecutionContext): ResultT[FileStatus] =
     if (carfId.takeRight(2).take(1) == "0") {
