@@ -43,20 +43,12 @@ $hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-f
   border-bottom: 0 !important;
 }
 
-.govuk-summary-list__key {
-  width: 40%;
+.govuk-summary-check-details__key {
+  width: 40% !important;
 }
 
-.govuk-summary-list__value {
-  width: 40%;
-}
-
-.govuk-summary-checking-file__key {
-  width: 30% !important;
-}
-
-.govuk-summary-checking-file__value {
-  width: 70% !important;
+.govuk-summary-check-details__value {
+  width: 40% !important;
 }
 
 .govuk-file-confirmation__key {

@@ -22,7 +22,7 @@ import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.html.components.GovukTag
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
-import viewmodels.govuk.all.{FluentKey, FluentValue, KeyViewModel, SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
+import viewmodels.govuk.all.{KeyViewModel, SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 
 class StillCheckingYourFileHelper {
 
@@ -32,9 +32,8 @@ class StillCheckingYourFileHelper {
     SummaryListViewModel(
       rows = Seq(
         SummaryListRowViewModel(
-          key = KeyViewModel(Text(messages("stillCheckingYourFile.fileId.key")))
-            .withCssClass("govuk-summary-checking-file__key"),
-          value = ValueViewModel(Text(messageRefId)).withCssClass("govuk-summary-checking-file__value")
+          key = KeyViewModel(Text(messages("stillCheckingYourFile.fileId.key"))),
+          value = ValueViewModel(Text(messageRefId))
         ),
         SummaryListRowViewModel(
           key = KeyViewModel(Text(messages("stillCheckingYourFile.result.key"))),
