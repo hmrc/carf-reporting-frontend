@@ -134,6 +134,11 @@ sendYourFile.p1 = We’ll now automatically check your file for business rule er
 sendYourFile.p2 = By sending this file, you are confirming that the information is correct and complete to the best of your knowledge.
 sendYourFile.processing = We are checking your file. This could take a few minutes.
 
+fileStatus.pending = Pending
+fileStatus.passed = Passed
+fileStatus.failed = Failed
+fileStatus.problem = Problem
+
 filePassedChecks.title = Your file has passed our checks
 filePassedChecks.heading = Your file has passed our checks
 filePassedChecks.summary.messageRefId.label = File ID (MessageRefId)

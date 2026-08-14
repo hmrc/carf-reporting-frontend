@@ -19,34 +19,19 @@
 @this(
         layout: templates.Layout,
         govukSummaryList: GovukSummaryList,
-        govukTag: GovukTag,
         govukButton: GovukButton
 )
 
-@(messageRefId: String)(implicit request: Request[_], messages: Messages)
+@(summaryList: SummaryList)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("filePassedChecks.title")), showBackLink = false) {
 
     <h1 class="govuk-heading-l">@messages("filePassedChecks.heading")</h1>
 
-    @govukSummaryList(SummaryList(
-        rows = Seq(
-            SummaryListRow(
-                key = Key(content = Text(messages("filePassedChecks.summary.messageRefId.label"))),
-                value = Value(content = Text(messageRefId))
-            ),
-            SummaryListRow(
-                key = Key(content = Text(messages("filePassedChecks.summary.result.label"))),
-                value = Value(content = HtmlContent(govukTag(Tag(
-                    content = Text(messages("filePassedChecks.summary.result.value")),
-                    classes = "govuk-tag--green"
-                ))))
-            )
-        )
-    ))
+    @govukSummaryList(summaryList)
 
     @govukButton(Button(
-        href = Some(controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation link - ticket TBC").url),
+        href = Some(controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation link - ticket CARF-645").url),
         content = Text(messages("filePassedChecks.button"))
     ))
 }

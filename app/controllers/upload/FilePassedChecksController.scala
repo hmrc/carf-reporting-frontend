@@ -23,7 +23,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.StubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.*
+import utils.{FileCheckResultHelper, LoggerUtil}
 import views.html.upload.FilePassedChecksView
 
 import javax.inject.Inject
@@ -33,33 +33,51 @@ class FilePassedChecksController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
+    requireData: DataRequiredAction,
     stubService: StubService,
+    fileCheckResultHelper: FileCheckResultHelper,
     val controllerComponents: MessagesControllerComponents,
     view: FilePassedChecksView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()).async { implicit request =>
-    val carfId       = request.carfId
-    val messageRefId = request.userAnswers.flatMap(_.get(ExtractedFileDetailsPage)).map(_.messageRefId)
+  def onPageLoad(): Action[AnyContent] =
+    (identify() andThen getData() andThen requireData).async { implicit request =>
+      val messageRefId =
+        request.userAnswers.get(ExtractedFileDetailsPage).map(_.messageRefId)
 
-    stubService.getFileStatus(carfId).value.map {
-      case Right(Passed) =>
-        messageRefId match {
-          case Some(refId) => Ok(view(refId))
-          case None        =>
-            logWarn("Unable to display file-passed-checks page. ExtractedFileDetailsPage missing from UserAnswers.")
-            Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-        }
+      stubService.getFileStatus(request.carfId).value.map {
+        case Right(Passed) =>
+          messageRefId match {
+            case Some(value) =>
+              val summaryList =
+                fileCheckResultHelper.summaryList(
+                  messageRefId = value,
+                  fileStatus = Passed,
+                  messagePrefix = "filePassedChecks"
+                )
 
-      case Right(otherStatus) =>
-        logWarn(s"Unable to display file-passed-checks page. Status was: $otherStatus")
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+              Ok(view(summaryList))
 
-      case Left(error) =>
-        logWarn(s"Unable to display file-passed-checks page. Error retrieving status: $error")
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+            case None =>
+              LoggerUtil.logWarn(
+                "[FilePassedChecksController][onPageLoad] ExtractedFileDetailsPage missing from UserAnswers"
+              )
+              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+          }
+
+        case Right(otherStatus) =>
+          LoggerUtil.logWarn(
+            s"[FilePassedChecksController][onPageLoad] File status was: $otherStatus"
+          )
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+
+        case Left(error) =>
+          LoggerUtil.logWarn(
+            s"[FilePassedChecksController][onPageLoad] Error retrieving file status: $error"
+          )
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+      }
     }
-  }
 }
