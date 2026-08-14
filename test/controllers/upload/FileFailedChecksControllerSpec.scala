@@ -17,22 +17,37 @@
 package controllers.upload
 
 import base.SpecBase
-import models.filecheck.FileCheckStatus.{Failed, Passed, Virus}
-import models.filecheck.FileCheckResult
+import models.errors.ApiError.InternalServerError
+import models.fileSubmission.FileStatus
+import models.fileSubmission.FileStatus.{Failed, Passed}
+import models.{DocTypeIndic, ExtractedFileDetails, MessageTypeIndic}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
+import pages.ExtractedFileDetailsPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.StubService
+import types.ResultT
 import views.html.upload.FileFailedChecksView
 
 class FileFailedChecksControllerSpec extends SpecBase {
 
   private val mockStubService: StubService = mock[StubService]
 
-  private val messageRefId =
-    "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001"
+  private val extractedFileDetails = ExtractedFileDetails(
+    messageRefId =
+      "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001",
+    sendingEntityIn = "ZMCAR0123456788",
+    rcaspName = Some("Timmy's Turtles"),
+    messageTypeIndic = MessageTypeIndic.CARF701,
+    hasOtherNexus = false,
+    hasCryptoUsers = true,
+    docTypeIndic = DocTypeIndic.OECD1,
+    isTestData = false,
+    allCryptoUsersAreCorrections = false,
+    allCryptoUsersAreDeletions = false
+  )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -41,13 +56,14 @@ class FileFailedChecksControllerSpec extends SpecBase {
 
   "FileFailedChecksController" - {
 
-    "must return OK and render the view when the result status is Failed" in {
+    "must return OK and render the view when status is Failed and ExtractedFileDetailsPage is present" in {
 
-      when(mockStubService.getFileCheckResult(any[String]()))
-        .thenReturn(Some(FileCheckResult(Failed, messageRefId)))
+      when(mockStubService.getFileStatus(any[String]())).thenReturn(ResultT.fromValue[FileStatus](Failed))
+
+      val userAnswers = emptyUserAnswers.withPage(ExtractedFileDetailsPage, extractedFileDetails)
 
       val application =
-        applicationBuilder()
+        applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[StubService].toInstance(mockStubService))
           .build()
 
@@ -57,17 +73,21 @@ class FileFailedChecksControllerSpec extends SpecBase {
         val view    = application.injector.instanceOf[FileFailedChecksView]
 
         status(result)          mustEqual OK
-        contentAsString(result) mustEqual view(messageRefId)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(extractedFileDetails.messageRefId)(
+          request,
+          messages(application)
+        ).toString
       }
     }
 
-    "must redirect to Journey Recovery when the result status is Passed" in {
+    "must redirect to Journey Recovery when status is Passed" in {
 
-      when(mockStubService.getFileCheckResult(any[String]()))
-        .thenReturn(Some(FileCheckResult(Passed, messageRefId)))
+      when(mockStubService.getFileStatus(any[String]())).thenReturn(ResultT.fromValue[FileStatus](Passed))
+
+      val userAnswers = emptyUserAnswers.withPage(ExtractedFileDetailsPage, extractedFileDetails)
 
       val application =
-        applicationBuilder()
+        applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[StubService].toInstance(mockStubService))
           .build()
 
@@ -80,18 +100,17 @@ class FileFailedChecksControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Journey Recovery when the result status is Virus" in {
+    "must redirect to Journey Recovery when status is Failed but ExtractedFileDetailsPage is missing" in {
 
-      when(mockStubService.getFileCheckResult(any[String]()))
-        .thenReturn(Some(FileCheckResult(Virus, messageRefId)))
+      when(mockStubService.getFileStatus(any[String]())).thenReturn(ResultT.fromValue[FileStatus](Failed))
 
       val application =
-        applicationBuilder()
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(bind[StubService].toInstance(mockStubService))
           .build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.FilePassedChecksController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.FileFailedChecksController.onPageLoad().url)
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
@@ -99,13 +118,32 @@ class FileFailedChecksControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Journey Recovery when no file-check result is found" in {
+    "must redirect to Journey Recovery when there is no UserAnswers at all" in {
 
-      when(mockStubService.getFileCheckResult(any[String]()))
-        .thenReturn(None)
+      when(mockStubService.getFileStatus(any[String]())).thenReturn(ResultT.fromValue[FileStatus](Failed))
 
       val application =
-        applicationBuilder()
+        applicationBuilder(userAnswers = None)
+          .overrides(bind[StubService].toInstance(mockStubService))
+          .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.FileFailedChecksController.onPageLoad().url)
+        val result  = route(application, request).value
+
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery when getFileStatus returns an error" in {
+
+      when(mockStubService.getFileStatus(any[String]())).thenReturn(ResultT.fromError[FileStatus](InternalServerError))
+
+      val userAnswers = emptyUserAnswers.withPage(ExtractedFileDetailsPage, extractedFileDetails)
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[StubService].toInstance(mockStubService))
           .build()
 
