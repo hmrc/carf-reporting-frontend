@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.rcasp
+package models.responses
 
 import play.api.libs.json.{Json, Reads}
 

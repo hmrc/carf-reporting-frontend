@@ -20,9 +20,9 @@ import generators.Generators
 import models.*
 import models.DocTypeIndic.*
 import models.MessageTypeIndic.*
+import models.responses.*
 import models.upscan.*
 import models.upscan.UploadStatus.*
-import models.rcasp.{IndividualRcaspDetails, OrganisationRcaspDetails, RcaspContactDetails}
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryList, SummaryListRow}
 import viewmodels.govuk.all.{ActionItemViewModel, FluentActionItem, SummaryListRowViewModel, ValueViewModel}
@@ -78,25 +78,90 @@ trait TestData extends Generators {
   val testRcaspId      = "ZMCAR0123456787"
   val testRcaspName    = "Timmy's Turtles"
 
+  val testFirstName   = "Nemona"
+  val testLastName    = "Champion"
+  val testContactName = s"$testFirstName $testLastName"
+  val testEmail       = "john.doe@example.com"
+
   val organisationRegisteredBusinessRcaspDetails =
-    OrganisationRcaspDetails(
+    OrganisationRcaspDetailsRcaspUser(
       RCASPID = testRcaspId,
       IsRCASPUser = true,
+      RCASPName = testRcaspName
+    )
+
+  val organisationStandardRcaspDetails =
+    OrganisationRcaspDetailsStandard(
+      RCASPID = "ZMCAR0123456786",
+      IsRCASPUser = false,
       RCASPName = testRcaspName,
-      PrimaryContactDetails = None,
-      SecondaryContactDetails = None
+      PrimaryContactDetails = RcaspContactDetails(ContactName = testContactName, EmailAddress = testEmail),
+      SecondaryContactDetails = Some(RcaspContactDetails(ContactName = "Clavell", EmailAddress = "clavell@uva.edu.org"))
     )
 
   val individualRcaspDetails =
     IndividualRcaspDetails(
       RCASPID = "ZMCAR0123456788",
       IsRCASPUser = false,
-      FirstName = "Nemona",
-      LastName = "Champion",
-      PrimaryContactDetails = Some(
-        RcaspContactDetails(ContactName = "Clavell", EmailAddress = "clavell@uva.edu.org")
+      FirstName = testFirstName,
+      LastName = testLastName,
+      PrimaryContactDetails = RcaspContactDetails(ContactName = testContactName, EmailAddress = testEmail)
+    )
+
+  val displaySubscriptionIndividual = DisplaySubscriptionIndividual(testFirstName, testLastName)
+
+  val displaySubscriptionOrganisation = DisplaySubscriptionOrganisation(testContactName)
+
+  val displaySubscriptionResponseIndividual = DisplaySubscriptionResponse(
+    success = DisplaySubscriptionSuccess(
+      processingDate = "2024-01-25T09:26:17Z",
+      carfSubscriptionDetails = DisplaySubscriptionDetails(
+        carfReference = testCarfId,
+        primaryContact = DisplaySubscriptionContact(
+          individual = Some(
+            DisplaySubscriptionIndividual(
+              firstName = "Joe",
+              lastName = "Smith"
+            )
+          ),
+          organisation = None,
+          email = "GroupRep@FATCACRS.com"
+        ),
+        secondaryContact = None
       )
     )
+  )
+
+  val subscriptionDetailsIndividual = SubscriptionDetails(
+    primaryUserDetails = SubscriptionContactDetails("Joe Smith", "GroupRep@FATCACRS.com"),
+    secondaryUserDetails = None
+  )
+
+  val displaySubscriptionResponseOrganisation = DisplaySubscriptionResponse(
+    success = DisplaySubscriptionSuccess(
+      processingDate = "2024-01-25T09:26:17Z",
+      carfSubscriptionDetails = DisplaySubscriptionDetails(
+        carfReference = testCarfId,
+        primaryContact = DisplaySubscriptionContact(
+          individual = None,
+          organisation = Some(DisplaySubscriptionOrganisation(name = "John Doe")),
+          email = "GroupRep@FATCACRS.com"
+        ),
+        secondaryContact = Some(
+          DisplaySubscriptionContact(
+            individual = None,
+            organisation = Some(DisplaySubscriptionOrganisation(name = "Jane Doe")),
+            email = "GroupRep2@FATCACRS.com"
+          )
+        )
+      )
+    )
+  )
+
+  val subscriptionDetailsOrganisation = SubscriptionDetails(
+    primaryUserDetails = SubscriptionContactDetails("John Doe", "GroupRep@FATCACRS.com"),
+    secondaryUserDetails = Some(SubscriptionContactDetails("Jane Doe", "GroupRep2@FATCACRS.com"))
+  )
 
   lazy val testSummaryListRow: SummaryListRow =
     SummaryListRowViewModel(

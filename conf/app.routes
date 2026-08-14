@@ -1,35 +1,37 @@
 # microservice specific routes
 
-->          /hmrc-frontend                     hmrcfrontend.Routes
+->          /hmrc-frontend                              hmrcfrontend.Routes
 
-GET         /assets/*file                      controllers.Assets.versioned(path = "/public", file: Asset)
+GET         /assets/*file                               controllers.Assets.versioned(path = "/public", file: Asset)
 
-GET         /                                  controllers.IndexController.onPageLoad()
+GET         /                                           controllers.IndexController.onPageLoad()
 
-GET         /refresh-session                   controllers.KeepAliveController.keepAlive()
+GET         /refresh-session                            controllers.KeepAliveController.keepAlive()
 
-GET         /there-is-a-problem                controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /there-is-a-problem                         controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /placeholder                       controllers.PlaceholderController.onPageLoad(message: String)
+GET         /placeholder                                controllers.PlaceholderController.onPageLoad(message: String)
 
-GET         /account/sign-out-survey           controllers.auth.AuthController.signOut()
-GET         /account/sign-out                  controllers.auth.AuthController.signOutNoSurvey()
-GET         /account/signed-out                controllers.auth.SignedOutController.onPageLoad()
+GET         /account/sign-out-survey                    controllers.auth.AuthController.signOut()
+GET         /account/sign-out                           controllers.auth.AuthController.signOutNoSurvey()
+GET         /account/signed-out                         controllers.auth.SignedOutController.onPageLoad()
 
-GET         /unauthorised                      controllers.UnauthorisedController.onPageLoad()
+GET         /unauthorised                               controllers.UnauthorisedController.onPageLoad()
 
-GET         /upload-file                       controllers.upload.UploadXmlController.onPageLoad()
-GET         /status                            controllers.upload.UploadXmlController.getUploadStatusAndRedirect(uploadId: upscan.UploadId)
-GET         /error                             controllers.upload.UploadXmlController.showError(errorCode: String, errorMessage: String, errorRequestId: String)
+GET         /upload-file                                controllers.upload.UploadXmlController.onPageLoad()
+GET         /status                                     controllers.upload.UploadXmlController.getUploadStatusAndRedirect(uploadId: upscan.UploadId)
+GET         /error                                      controllers.upload.UploadXmlController.showError(errorCode: String, errorMessage: String, errorRequestId: String)
 
-GET         /problem/invalid-xml               controllers.problem.InvalidXmlController.onPageLoad()
+GET         /problem/invalid-xml                        controllers.problem.InvalidXmlController.onPageLoad()
 
-GET         /problem/data-errors               controllers.problem.DataErrorsController.onPageLoad()
+GET         /problem/data-errors                        controllers.problem.DataErrorsController.onPageLoad()
 
-GET         /problem/rcasp-not-matching        controllers.problem.RcaspNotMatchingController.onPageLoad()
+GET         /save-rcasp-and-subscription-details        controllers.RcaspAndSubscriptionDetailsController.onPageLoad()    
 
-GET         /check-your-file-details           controllers.CheckYourFileDetailsController.onPageLoad()
+GET         /problem/rcasp-not-matching                 controllers.problem.RcaspNotMatchingController.onPageLoad()
 
-GET         /send-your-file                    controllers.SendYourFileController.onPageLoad()
-POST        /send-your-file                    controllers.SendYourFileController.onSubmit()
-GET         /send-your-file/status             controllers.SendYourFileController.getFileStatusAndRedirect()
+GET         /check-your-file-details                    controllers.CheckYourFileDetailsController.onPageLoad()
+
+GET         /send-your-file                             controllers.SendYourFileController.onPageLoad()
+POST        /send-your-file                             controllers.SendYourFileController.onSubmit()
+GET         /send-your-file/status                      controllers.SendYourFileController.getFileStatusAndRedirect()

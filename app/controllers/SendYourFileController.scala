@@ -20,7 +20,7 @@ import cats.syntax.all.*
 import config.FrontendAppConfig
 import controllers.actions.*
 import models.ReportType
-import models.rcasp.getName
+import models.responses.getName
 import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*

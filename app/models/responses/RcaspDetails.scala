@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package models.rcasp
+package models.responses
 
 import play.api.libs.json.{Json, OFormat, Reads, Writes}
 
 sealed trait RcaspDetails {
   val RCASPID: String
   val IsRCASPUser: Boolean
-  val PrimaryContactDetails: Option[RcaspContactDetails]
 }
 
 extension (rcaspDetails: RcaspDetails) {
@@ -30,6 +29,17 @@ extension (rcaspDetails: RcaspDetails) {
       case individual: IndividualRcaspDetails     => s"${individual.FirstName} ${individual.LastName}"
       case organisation: OrganisationRcaspDetails => organisation.RCASPName
     }
+
+  def getEmails: List[String] =
+    rcaspDetails match {
+      case individual: IndividualRcaspDetails            => List(individual.PrimaryContactDetails.EmailAddress)
+      case rcaspUser: OrganisationRcaspDetailsRcaspUser  => List.empty
+      case standardOrg: OrganisationRcaspDetailsStandard =>
+        List(
+          Some(standardOrg.PrimaryContactDetails.EmailAddress),
+          standardOrg.SecondaryContactDetails.map(_.EmailAddress)
+        ).flatten
+    }
 }
 
 case class IndividualRcaspDetails(
@@ -37,29 +47,47 @@ case class IndividualRcaspDetails(
     IsRCASPUser: Boolean,
     FirstName: String,
     LastName: String,
-    PrimaryContactDetails: Option[RcaspContactDetails]
+    PrimaryContactDetails: RcaspContactDetails
 ) extends RcaspDetails
 
-case class OrganisationRcaspDetails(
+sealed trait OrganisationRcaspDetails extends RcaspDetails {
+  val RCASPName: String
+}
+
+case class OrganisationRcaspDetailsRcaspUser(
+    RCASPID: String,
+    IsRCASPUser: Boolean,
+    RCASPName: String
+) extends OrganisationRcaspDetails
+
+case class OrganisationRcaspDetailsStandard(
     RCASPID: String,
     IsRCASPUser: Boolean,
     RCASPName: String,
-    PrimaryContactDetails: Option[RcaspContactDetails],
+    PrimaryContactDetails: RcaspContactDetails,
     SecondaryContactDetails: Option[RcaspContactDetails]
-) extends RcaspDetails
+) extends OrganisationRcaspDetails
 
 object RcaspDetails {
 
   implicit val reads: Reads[RcaspDetails] = Reads { json =>
     (json \ "RCASPName").validateOpt[String].flatMap {
-      case Some(_) => json.validate[OrganisationRcaspDetails]
+      case Some(_) =>
+        (json \ "IsRCASPUser").validate[Boolean].flatMap {
+          case true  => json.validate[OrganisationRcaspDetailsRcaspUser]
+          case false => json.validate[OrganisationRcaspDetailsStandard]
+        }
       case None    => json.validate[IndividualRcaspDetails]
     }
   }
 
   implicit val writes: Writes[RcaspDetails] = {
     case i: IndividualRcaspDetails   => IndividualRcaspDetails.format.writes(i)
-    case o: OrganisationRcaspDetails => OrganisationRcaspDetails.format.writes(o)
+    case o: OrganisationRcaspDetails =>
+      o match {
+        case rcaspUser: OrganisationRcaspDetailsRcaspUser => OrganisationRcaspDetailsRcaspUser.format.writes(rcaspUser)
+        case standard: OrganisationRcaspDetailsStandard   => OrganisationRcaspDetailsStandard.format.writes(standard)
+      }
   }
 }
 
@@ -67,8 +95,12 @@ object IndividualRcaspDetails {
   implicit val format: OFormat[IndividualRcaspDetails] = Json.format[IndividualRcaspDetails]
 }
 
-object OrganisationRcaspDetails {
-  implicit val format: OFormat[OrganisationRcaspDetails] = Json.format[OrganisationRcaspDetails]
+object OrganisationRcaspDetailsRcaspUser {
+  implicit val format: OFormat[OrganisationRcaspDetailsRcaspUser] = Json.format[OrganisationRcaspDetailsRcaspUser]
+}
+
+object OrganisationRcaspDetailsStandard {
+  implicit val format: OFormat[OrganisationRcaspDetailsStandard] = Json.format[OrganisationRcaspDetailsStandard]
 }
 
 case class RcaspContactDetails(ContactName: String, EmailAddress: String)
