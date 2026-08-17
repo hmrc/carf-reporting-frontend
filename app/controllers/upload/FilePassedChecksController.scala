@@ -44,12 +44,9 @@ class FilePassedChecksController @Inject() (
 
   def onPageLoad(): Action[AnyContent] =
     (identify() andThen getData() andThen requireData).async { implicit request =>
-      val messageRefId =
-        request.userAnswers.get(ExtractedFileDetailsPage).map(_.messageRefId)
-
       stubService.getFileStatus(request.carfId).value.map {
         case Right(Passed) =>
-          messageRefId match {
+          request.userAnswers.get(ExtractedFileDetailsPage).map(_.messageRefId) match {
             case Some(value) =>
               val summaryList =
                 fileCheckResultHelper.summaryList(
@@ -68,15 +65,11 @@ class FilePassedChecksController @Inject() (
           }
 
         case Right(otherStatus) =>
-          LoggerUtil.logWarn(
-            s"[FilePassedChecksController][onPageLoad] File status was: $otherStatus"
-          )
+          LoggerUtil.logWarn(s"[FilePassedChecksController][onPageLoad] File status was: $otherStatus")
           Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
 
         case Left(error) =>
-          LoggerUtil.logWarn(
-            s"[FilePassedChecksController][onPageLoad] Error retrieving file status: $error"
-          )
+          LoggerUtil.logWarn(s"[FilePassedChecksController][onPageLoad] Error retrieving file status: $error")
           Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
       }
     }

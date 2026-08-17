@@ -44,12 +44,9 @@ class FileFailedChecksController @Inject() (
 
   def onPageLoad(): Action[AnyContent] =
     (identify() andThen getData() andThen requireData).async { implicit request =>
-      val messageRefId =
-        request.userAnswers.get(ExtractedFileDetailsPage).map(_.messageRefId)
-
       stubService.getFileStatus(request.carfId).value.map {
         case Right(Failed) =>
-          messageRefId match {
+          request.userAnswers.get(ExtractedFileDetailsPage).map(_.messageRefId) match {
             case Some(value) =>
               val summaryList =
                 fileCheckResultHelper.summaryList(
