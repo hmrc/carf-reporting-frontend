@@ -58,7 +58,7 @@ case class DisplaySubscriptionContact(
   def toSubscriptionContactDetails: Option[SubscriptionContactDetails] =
     (individual, organisation) match {
       case (Some(individualDetails), None)   =>
-        Some(SubscriptionContactDetails(s"${individualDetails.firstName} ${individualDetails.lastName}", email))
+        Some(SubscriptionContactDetails(individualDetails.fullName, email))
       case (None, Some(organisationDetails)) =>
         Some(SubscriptionContactDetails(organisationDetails.name, email))
       case _                                 => None
@@ -69,7 +69,9 @@ object DisplaySubscriptionContact {
   implicit val format: OFormat[DisplaySubscriptionContact] = Json.format[DisplaySubscriptionContact]
 }
 
-case class DisplaySubscriptionIndividual(firstName: String, lastName: String)
+case class DisplaySubscriptionIndividual(firstName: String, lastName: String) {
+  val fullName: String = s"$firstName $lastName"
+}
 
 object DisplaySubscriptionIndividual {
   implicit val format: OFormat[DisplaySubscriptionIndividual] = Json.format[DisplaySubscriptionIndividual]
