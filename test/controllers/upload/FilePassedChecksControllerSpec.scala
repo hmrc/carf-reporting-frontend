@@ -179,5 +179,17 @@ class FilePassedChecksControllerSpec extends SpecBase {
         verifyNoInteractions(mockFileCheckResultHelper)
       }
     }
+
+    "must redirect to Journey Recovery when user answers do not exist" in {
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.FilePassedChecksController.onPageLoad().url)
+        val result  = route(application, request).value
+
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
   }
 }

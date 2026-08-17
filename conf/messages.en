@@ -142,8 +142,6 @@ fileStatus.problem = Problem
 filePassedChecks.title = Your file has passed our checks
 filePassedChecks.heading = Your file has passed our checks
 filePassedChecks.summary.messageRefId.label = File ID (MessageRefId)
-filePassedChecks.summary.result.label = Result of automatic checks
-filePassedChecks.summary.result.value = Passed
 filePassedChecks.button = Go to confirmation
 
 fileFailedChecks.title = Your file has failed our checks
