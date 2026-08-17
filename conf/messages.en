@@ -142,13 +142,13 @@ fileStatus.problem = Problem
 filePassedChecks.title = Your file has passed our checks
 filePassedChecks.heading = Your file has passed our checks
 filePassedChecks.summary.messageRefId.label = File ID (MessageRefId)
+filePassedChecks.summary.result.label = Result of automatic checks
 filePassedChecks.button = Go to confirmation
 
 fileFailedChecks.title = Your file has failed our checks
 fileFailedChecks.heading = Your file has failed our checks
 fileFailedChecks.summary.messageRefId.label = File ID (MessageRefId)
 fileFailedChecks.summary.result.label = Result of automatic checks
-fileFailedChecks.summary.result.value = Failed
 fileFailedChecks.warning = You must send another version. Not sending another report on time may result in a penalty for the reporting cryptoasset service provider (RCASP).
 fileFailedChecks.button = Check errors
 
