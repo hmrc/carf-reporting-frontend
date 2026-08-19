@@ -43,3 +43,5 @@ GET         /file-passed-checks                controllers.upload.FilePassedChec
 GET         /file-failed-checks                controllers.upload.FileFailedChecksController.onPageLoad()
 
 GET         /problem/virus-found               controllers.problem.VirusFoundController.onPageLoad()
+
+GET         /problem/rules-errors              controllers.problem.RulesErrorsController.onPageLoad()
