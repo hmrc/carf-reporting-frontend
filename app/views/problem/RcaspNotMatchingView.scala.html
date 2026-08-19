@@ -16,11 +16,10 @@
 
 @this(
         layout: templates.Layout,
-        link: components.Link,
-        appConfig: config.FrontendAppConfig
+        link: components.Link
 )
 
-@(sendingEntityIn: String)(implicit request: Request[_], messages: Messages)
+@(sendingEntityIn: String, yourRcaspsUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("rcaspNotMatching.title")), showBackLink = false) {
 
@@ -45,7 +44,7 @@
  <h2 class="govuk-heading-m">@messages("rcaspNotMatching.heading.3")</h2>
  <p class="govuk-body">
   @link(
-   href = appConfig.yourRcaspsUrl,
+   href = yourRcaspsUrl,
    key = "rcaspNotMatching.p3.link.text"
   )
   @messages("rcaspNotMatching.p3.text")

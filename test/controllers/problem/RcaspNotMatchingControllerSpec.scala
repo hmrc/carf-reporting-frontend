@@ -17,18 +17,30 @@
 package controllers.problem
 
 import base.SpecBase
+import config.FrontendAppConfig
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import pages.ExtractedFileDetailsPage
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import views.html.problem.RcaspNotMatchingView
 
 class RcaspNotMatchingControllerSpec extends SpecBase {
 
+  val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
+
   "RcaspNotMatchingController" - {
 
     "must return OK and the correct view for a GET when ExtractedFileDetails is present in user answers" in {
+      when(mockAppConfig.yourRcaspsUrl) thenReturn "yourRcaspsUrl"
+      when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
+
       val userAnswers = emptyUserAnswers.withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, routes.RcaspNotMatchingController.onPageLoad().url)
@@ -36,7 +48,7 @@ class RcaspNotMatchingControllerSpec extends SpecBase {
         val view    = application.injector.instanceOf[RcaspNotMatchingView]
 
         status(result)          mustEqual OK
-        contentAsString(result) mustEqual view(testRcaspId)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(testRcaspId, "yourRcaspsUrl")(request, messages(application)).toString
       }
     }
 

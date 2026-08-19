@@ -33,3 +33,5 @@ GET         /check-your-file-details           controllers.CheckYourFileDetailsC
 GET         /send-your-file                    controllers.SendYourFileController.onPageLoad()
 POST        /send-your-file                    controllers.SendYourFileController.onSubmit()
 GET         /send-your-file/status             controllers.SendYourFileController.getFileStatusAndRedirect()
+
+GET         /still-checking-your-file          controllers.StillCheckingYourFileController.onPageLoad()

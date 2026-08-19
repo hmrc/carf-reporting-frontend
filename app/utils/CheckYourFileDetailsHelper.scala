@@ -20,7 +20,7 @@ import models.{ExtractedFileDetails, ReportType}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.{ActionItem, Actions, SummaryList, SummaryListRow}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
-import viewmodels.govuk.all.{ActionItemViewModel, FluentSummaryList, KeyViewModel, SummaryListViewModel, ValueViewModel}
+import viewmodels.govuk.all.{ActionItemViewModel, FluentKey, FluentSummaryList, FluentValue, KeyViewModel, SummaryListViewModel, ValueViewModel}
 
 class CheckYourFileDetailsHelper {
 
@@ -69,8 +69,8 @@ class CheckYourFileDetailsHelper {
       maybeActionItem: Option[ActionItem] = None
   ) =
     SummaryListRow(
-      key = KeyViewModel(content = Text(key)),
-      value = ValueViewModel(content = Text(value)),
+      key = KeyViewModel(content = Text(key)).withCssClass("govuk-summary-check-details__key"),
+      value = ValueViewModel(content = Text(value)).withCssClass("govuk-summary-check-details__value"),
       classes = classes,
       actions = maybeActionItem.map(actionItem => Actions(items = Seq(actionItem)))
     )
