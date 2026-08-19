@@ -22,6 +22,7 @@
 @this(
         layout: templates.Layout,
         govukTable: GovukTable,
+        link: components.Link,
         printLink: PrintLink
 )
 
@@ -48,11 +49,14 @@
                     </li>
                     <li>@messages("rulesErrors.list.2")</li>
                     <li>
-                        @* TODO CARF-595: replace with real link once ready *@
-                        <a
-                        href="#"
-                        class="govuk-link print-url"
-                        >@messages("rulesErrors.list.3.linkText")</a> @messages("rulesErrors.list.3.after")
+                        @link(
+                            href = controllers.routes.PlaceholderController
+                            .onPageLoad("TODO: Technical guidance for XML files link - CARF-595")
+                            .url,
+                            key = "rulesErrors.list.3.linkText",
+                            classes = "govuk-link print-url"
+                        )
+                        @messages("rulesErrors.list.3.after")
                     </li>
                     <li>
                         <span class="print-hidden">
@@ -98,8 +102,11 @@
 
     <div class="govuk-grid-row manage-reports-link-print-hidden">
         <div class="govuk-grid-column-two-thirds">
-            <p class="govuk-!-padding-top-5">
-                <a class="govuk-link" href="@managementUrl">@messages("rulesErrors.back.linkText")</a>
+            <p class="govuk-body govuk-!-padding-top-5">
+            @link(
+                href = managementUrl,
+                key = "rulesErrors.back.linkText"
+            )
             </p>
         </div>
     </div>

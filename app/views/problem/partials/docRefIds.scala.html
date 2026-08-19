@@ -17,7 +17,11 @@
 @(docRefIds: Seq[String])
 
 <div class="doc-ref-ids">
-    @for(docRefId <- docRefIds) {
-        <p class="govuk-body">@docRefId</p>
+    @if(docRefIds.isEmpty) {
+        <p class="govuk-body">N/A</p>
+    } else {
+        @for(docRefId <- docRefIds) {
+            <p class="govuk-body">@docRefId</p>
+        }
     }
 </div>
