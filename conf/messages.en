@@ -150,3 +150,39 @@ fileStatus.pending = Pending
 fileStatus.passed = Passed
 fileStatus.failed = Failed
 fileStatus.problem = Problem
+
+filePassedChecks.title = Your file has passed our checks
+filePassedChecks.heading = Your file has passed our checks
+filePassedChecks.summary.messageRefId.label = File ID (MessageRefId)
+filePassedChecks.summary.result.label = Result of automatic checks
+filePassedChecks.button = Go to confirmation
+
+stillCheckingYourFile.title = We need a few more minutes to check your file
+stillCheckingYourFile.heading = We need a few more minutes to check your file
+stillCheckingYourFile.p1 = You can refresh the page for updates on the status of our automatic checks.
+stillCheckingYourFile.p2.dontWait = If you do not want to wait, then you can
+stillCheckingYourFile.signOut = sign out
+stillCheckingYourFile.p2.or = or
+stillCheckingYourFile.uploadAnotherFile = upload another file if needed
+stillCheckingYourFile.p2.email.rcaspUser = We’ll email you if this file has passed the checks. You can also check the results in the service later.
+stillCheckingYourFile.p2.email.standard = We’ll email you and your contacts for {0} if this file has passed the checks. You can also check the results in the service later.
+stillCheckingYourFile.fileId.key = File ID (MessageRefId)
+stillCheckingYourFile.result.key = Result of automatic checks
+stillCheckingYourFile.refresh = Refresh for updates
+
+fileStatus.pending = Pending
+fileStatus.passed = Passed
+fileStatus.failed = Failed
+fileStatus.problem = Problem
+
+fileFailedChecks.title = Your file has failed our checks
+fileFailedChecks.heading = Your file has failed our checks
+fileFailedChecks.summary.messageRefId.label = File ID (MessageRefId)
+fileFailedChecks.summary.result.label = Result of automatic checks
+fileFailedChecks.warning = You must send another version. Not sending another report on time may result in a penalty for the reporting cryptoasset service provider (RCASP).
+fileFailedChecks.button = Check errors
+
+virusFound.title = There is a virus in your file
+virusFound.heading = There is a virus in your file
+virusFound.p1 = We cannot accept this file as it contains a virus.
+virusFound.link1 = Upload a different file
