@@ -18,15 +18,12 @@ package services
 
 import models.DocTypeIndic.*
 import models.MessageTypeIndic.*
-import models.filecheck.FileCheckStatus.{Failed, Passed, Virus}
 import models.errors.ApiError.InternalServerError
 import models.fileSubmission.FileStatus
 import models.fileSubmission.FileStatus.*
 import models.{ExtractedFileDetails, UserAnswers}
 import pages.FileStatusPage
 import repositories.SessionRepository
-import models.fileSubmission.FileStatus
-import models.fileSubmission.FileStatus.*
 import types.ResultT
 
 import javax.inject.Inject
@@ -207,7 +204,6 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
 
     ResultT.fromValue(status)
   }
-}
 
   def getFileStatus(carfId: String, userAnswers: UserAnswers)(implicit ec: ExecutionContext): ResultT[FileStatus] =
     if (carfId.takeRight(2).take(1) == "0") {

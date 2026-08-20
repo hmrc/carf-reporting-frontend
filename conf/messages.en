@@ -173,4 +173,3 @@ virusFound.title = There is a virus in your file
 virusFound.heading = There is a virus in your file
 virusFound.p1 = We cannot accept this file as it contains a virus.
 virusFound.link1 = Upload a different file
-virusFound.link2 = Back to manage your cryptoasset reports

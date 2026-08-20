@@ -68,23 +68,11 @@ class StillCheckingYourFileController @Inject() (
                   )
                 )
               case FileStatus.Passed                 =>
-                Redirect(
-                  controllers.routes.PlaceholderController
-                    .onPageLoad("Should redirect to /file-passed-checks (CARF-617)")
-                    .url
-                )
+                Redirect(controllers.upload.routes.FilePassedChecksController.onPageLoad())
               case FileStatus.Failed                 =>
-                Redirect(
-                  controllers.routes.PlaceholderController
-                    .onPageLoad("Should redirect to /file-failed-checks (CARF-617)")
-                    .url
-                )
+                Redirect(controllers.upload.routes.FileFailedChecksController.onPageLoad())
               case FileStatus.VirusFound             =>
-                Redirect(
-                  controllers.routes.PlaceholderController
-                    .onPageLoad("Should redirect to /problem/virus-found (CARF-617)")
-                    .url
-                )
+                Redirect(controllers.problem.routes.VirusFoundController.onPageLoad())
               case FileStatus.UnprocessableErrorFile =>
                 Redirect(
                   controllers.routes.PlaceholderController

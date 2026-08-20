@@ -147,8 +147,8 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.PlaceholderController
-          .onPageLoad("Should redirect to /file-passed-checks (CARF-617)")
+        redirectLocation(result).value mustEqual controllers.upload.routes.FilePassedChecksController
+          .onPageLoad()
           .url
 
         verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
@@ -176,8 +176,8 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.PlaceholderController
-          .onPageLoad("Should redirect to /file-failed-checks (CARF-617)")
+        redirectLocation(result).value mustEqual controllers.upload.routes.FileFailedChecksController
+          .onPageLoad()
           .url
 
         verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
@@ -205,8 +205,8 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.PlaceholderController
-          .onPageLoad("Should redirect to /problem/virus-found (CARF-617)")
+        redirectLocation(result).value mustEqual controllers.problem.routes.VirusFoundController
+          .onPageLoad()
           .url
 
         verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
