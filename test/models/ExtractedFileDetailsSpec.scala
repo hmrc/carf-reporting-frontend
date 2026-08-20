@@ -26,7 +26,19 @@ class ExtractedFileDetailsSpec extends SpecBase {
 
   val booleanGen: Gen[Boolean]                   = oneOf(Seq(true, false))
   val messageTypeIndicGen: Gen[MessageTypeIndic] = oneOf(Seq(CARF701, CARF702, CARF703))
-  val docTypeIndicGen: Gen[DocTypeIndic]         = oneOf(Seq(OECD0, OECD1, OECD2, OECD3, OECD10, OECD11, OECD12, OECD13))
+  val docTypeIndicGen: Gen[Option[DocTypeIndic]] = oneOf(
+    Seq(
+      Some(OECD0),
+      Some(OECD1),
+      Some(OECD2),
+      Some(OECD3),
+      Some(OECD10),
+      Some(OECD11),
+      Some(OECD12),
+      Some(OECD13),
+      None
+    )
+  )
 
   "ExtractedFileDetails" - {
     ".getReportType" - {
@@ -76,7 +88,7 @@ class ExtractedFileDetailsSpec extends SpecBase {
               messageTypeIndic = CARF701,
               hasOtherNexus = hasOtherNexus,
               hasCryptoUsers = hasCryptoUsers,
-              docTypeIndic = OECD0,
+              docTypeIndic = Some(OECD0),
               isTestData = false,
               allCryptoUsersAreCorrections = booleanGen.sample.get,
               allCryptoUsersAreDeletions = booleanGen.sample.get
@@ -95,7 +107,9 @@ class ExtractedFileDetailsSpec extends SpecBase {
               messageTypeIndic = CARF701,
               hasOtherNexus = hasOtherNexus,
               hasCryptoUsers = hasCryptoUsers,
-              docTypeIndic = oneOf(Seq(OECD1, OECD2, OECD3, OECD10, OECD11, OECD12, OECD13)).sample.get,
+              docTypeIndic = oneOf(
+                Seq(Some(OECD1), Some(OECD2), Some(OECD3), Some(OECD10), Some(OECD11), Some(OECD12), Some(OECD13), None)
+              ).sample.get,
               isTestData = false,
               allCryptoUsersAreCorrections = booleanGen.sample.get,
               allCryptoUsersAreDeletions = booleanGen.sample.get
@@ -114,7 +128,7 @@ class ExtractedFileDetailsSpec extends SpecBase {
               messageTypeIndic = CARF702,
               hasOtherNexus = booleanGen.sample.get,
               hasCryptoUsers = booleanGen.sample.get,
-              docTypeIndic = OECD3,
+              docTypeIndic = Some(OECD3),
               isTestData = false,
               allCryptoUsersAreCorrections = booleanGen.sample.get,
               allCryptoUsersAreDeletions = booleanGen.sample.get
@@ -135,7 +149,7 @@ class ExtractedFileDetailsSpec extends SpecBase {
                 messageTypeIndic = CARF702,
                 hasOtherNexus = booleanGen.sample.get,
                 hasCryptoUsers = hasCryptoUsers,
-                docTypeIndic = oneOf(Seq(OECD0, OECD2)).sample.get,
+                docTypeIndic = oneOf(Seq(Some(OECD0), Some(OECD2))).sample.get,
                 isTestData = false,
                 allCryptoUsersAreCorrections = allCryptoUsersAreCorrections,
                 allCryptoUsersAreDeletions = booleanGen.sample.get
@@ -152,7 +166,7 @@ class ExtractedFileDetailsSpec extends SpecBase {
                 messageTypeIndic = CARF702,
                 hasOtherNexus = booleanGen.sample.get,
                 hasCryptoUsers = true,
-                docTypeIndic = OECD0,
+                docTypeIndic = Some(OECD0),
                 isTestData = false,
                 allCryptoUsersAreCorrections = false,
                 allCryptoUsersAreDeletions = true
@@ -163,7 +177,7 @@ class ExtractedFileDetailsSpec extends SpecBase {
 
             "when allCryptoUsersAreCorrections is false, hasCryptoUsers is true and (DocTypeIndic is OECD2 or allCryptoUsersAreDeletions is false)" in {
               val (docTypeIndic, allCryptoUsersAreDeletions) =
-                oneOf(Seq((OECD0, false), (OECD2, true), (OECD2, false))).sample.get
+                oneOf(Seq((Some(OECD0), false), (Some(OECD2), true), (Some(OECD2), false))).sample.get
 
               val extractedFileDetails = ExtractedFileDetails(
                 messageRefId = testMessageRefId,
@@ -190,7 +204,9 @@ class ExtractedFileDetailsSpec extends SpecBase {
               messageTypeIndic = CARF702,
               hasOtherNexus = booleanGen.sample.get,
               hasCryptoUsers = booleanGen.sample.get,
-              docTypeIndic = oneOf(Seq(OECD1, OECD10, OECD11, OECD12, OECD13)).sample.get,
+              docTypeIndic = oneOf(
+                Seq(Some(OECD1), Some(OECD10), Some(OECD11), Some(OECD12), Some(OECD13), None)
+              ).sample.get,
               isTestData = false,
               allCryptoUsersAreCorrections = booleanGen.sample.get,
               allCryptoUsersAreDeletions = booleanGen.sample.get

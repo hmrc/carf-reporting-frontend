@@ -46,7 +46,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF701,
             hasOtherNexus = false,
             hasCryptoUsers = true,
-            docTypeIndic = OECD10,
+            docTypeIndic = Some(OECD10),
             isTestData = true,
             allCryptoUsersAreCorrections = false,
             allCryptoUsersAreDeletions = false
@@ -61,7 +61,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF703,
             hasOtherNexus = false,
             hasCryptoUsers = false,
-            docTypeIndic = OECD11,
+            docTypeIndic = None,
             isTestData = false,
             allCryptoUsersAreCorrections = false,
             allCryptoUsersAreDeletions = false
@@ -76,7 +76,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF701,
             hasOtherNexus = true,
             hasCryptoUsers = false,
-            docTypeIndic = OECD11,
+            docTypeIndic = Some(OECD1),
             isTestData = false,
             allCryptoUsersAreCorrections = false,
             allCryptoUsersAreDeletions = false
@@ -91,7 +91,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF701,
             hasOtherNexus = false,
             hasCryptoUsers = true,
-            docTypeIndic = OECD11,
+            docTypeIndic = Some(OECD1),
             isTestData = false,
             allCryptoUsersAreCorrections = false,
             allCryptoUsersAreDeletions = false
@@ -106,7 +106,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF701,
             hasOtherNexus = false,
             hasCryptoUsers = true,
-            docTypeIndic = OECD0,
+            docTypeIndic = Some(OECD0),
             isTestData = false,
             allCryptoUsersAreCorrections = false,
             allCryptoUsersAreDeletions = false
@@ -121,7 +121,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF702,
             hasOtherNexus = false,
             hasCryptoUsers = true,
-            docTypeIndic = OECD3,
+            docTypeIndic = Some(OECD3),
             isTestData = false,
             allCryptoUsersAreCorrections = false,
             allCryptoUsersAreDeletions = false
@@ -136,7 +136,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF702,
             hasOtherNexus = false,
             hasCryptoUsers = true,
-            docTypeIndic = OECD2,
+            docTypeIndic = Some(OECD2),
             isTestData = false,
             allCryptoUsersAreCorrections = true,
             allCryptoUsersAreDeletions = false
@@ -151,7 +151,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF702,
             hasOtherNexus = false,
             hasCryptoUsers = true,
-            docTypeIndic = OECD0,
+            docTypeIndic = Some(OECD0),
             isTestData = false,
             allCryptoUsersAreCorrections = false,
             allCryptoUsersAreDeletions = true
@@ -166,7 +166,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF702,
             hasOtherNexus = false,
             hasCryptoUsers = true,
-            docTypeIndic = OECD2,
+            docTypeIndic = Some(OECD2),
             isTestData = false,
             allCryptoUsersAreCorrections = false,
             allCryptoUsersAreDeletions = false
@@ -181,7 +181,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
             messageTypeIndic = CARF702,
             hasOtherNexus = false,
             hasCryptoUsers = true,
-            docTypeIndic = OECD12,
+            docTypeIndic = Some(OECD12),
             isTestData = false,
             allCryptoUsersAreCorrections = false,
             allCryptoUsersAreDeletions = false
