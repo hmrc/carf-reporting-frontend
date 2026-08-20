@@ -28,10 +28,10 @@ import javax.inject.Inject
 class FileCheckResultHelper @Inject() () {
 
   def summaryList(
-                   messageRefId: String,
-                   fileStatus: FileStatus,
-                   messagePrefix: String
-                 )(implicit messages: Messages): SummaryList =
+      messageRefId: String,
+      fileStatus: FileStatus,
+      messagePrefix: String
+  )(implicit messages: Messages): SummaryList =
     SummaryListViewModel(
       rows = Seq(
         SummaryListRowViewModel(

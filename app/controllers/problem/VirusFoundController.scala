@@ -30,16 +30,16 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class VirusFoundController @Inject() (
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       appConfig: FrontendAppConfig,
-                                       stubService: StubService,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: VirusFoundView
-                                     )(implicit ec: ExecutionContext)
-  extends FrontendBaseController
+    override val messagesApi: MessagesApi,
+    identify: IdentifierAction,
+    getData: DataRetrievalAction,
+    requireData: DataRequiredAction,
+    appConfig: FrontendAppConfig,
+    stubService: StubService,
+    val controllerComponents: MessagesControllerComponents,
+    view: VirusFoundView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] =

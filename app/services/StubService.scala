@@ -198,7 +198,7 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
       case Some('7') => VirusFound
       case Some('6') => Failed
       case Some('5') => Passed
-      case _ => Pending
+      case _         => Pending
     }
 
     ResultT.fromValue(status)
