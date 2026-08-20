@@ -20,7 +20,7 @@ import cats.syntax.all.*
 import config.FrontendAppConfig
 import controllers.actions.*
 import models.fileSubmission.FileStatus
-import models.rcasp.getName
+import models.responses.getName
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}

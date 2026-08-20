@@ -18,7 +18,7 @@ package controllers
 
 import cats.syntax.all.*
 import controllers.actions.*
-import models.rcasp.getName
+import models.responses.getName
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Results.Redirect

@@ -16,12 +16,12 @@
 
 package pages
 
-import models.responses.RcaspDetails
+import models.responses.SubscriptionDetails
 import play.api.libs.json.JsPath
 
-case object RcaspDetailsPage extends QuestionPage[RcaspDetails] {
+case object SubscriptionDetailsPage extends QuestionPage[SubscriptionDetails] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "rcaspDetails"
+  override def toString: String = "subscriptionDetails"
 }

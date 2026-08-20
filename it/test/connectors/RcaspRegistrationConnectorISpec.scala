@@ -19,9 +19,9 @@ package connectors
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlPathMatching}
 import itutil.ApplicationWithWiremock
 import models.errors.ApiError
-import models.rcasp.RcaspDetails
+import models.responses.RcaspDetails
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.matchers.should.Matchers
+import org.scalatest.matchers.must.Matchers
 import play.api.http.Status.{NOT_FOUND, OK}
 
 class RcaspRegistrationConnectorISpec
@@ -86,6 +86,33 @@ class RcaspRegistrationConnectorISpec
         |            "CountryCode": "GB"
         |          },
         |          "PrimaryContactDetails": {
+        |            "ContactName": "Nemona Champion",
+        |            "EmailAddress": "john.doe@example.com"
+        |          }
+        |        },
+        |        {
+        |          "RCASPID": "ZMCAR0123456786",
+        |          "SubscriptionID": "1A30",
+        |          "IsRCASPUser": false,
+        |          "PartyType": "Organisation",
+        |          "RCASPName": "Timmy's Turtles",
+        |          "TradingName": "Uva Academy",
+        |          "TINDetails": [
+        |            { "TINType": "UTR", "TIN": "1111111111", "IssuedBy": "GB" }
+        |          ],
+        |          "AddressDetails": {
+        |            "AddressLine1": "1 Test",
+        |            "AddressLine2": "Test Street",
+        |            "AddressLine3": "Test Region",
+        |            "AddressLine4": "Testingtown",
+        |            "PostalCode": "B23 2AZ",
+        |            "CountryCode": "GB"
+        |          },
+        |          "PrimaryContactDetails": {
+        |            "ContactName": "Nemona Champion",
+        |            "EmailAddress": "john.doe@example.com"
+        |          },
+        |          "SecondaryContactDetails": {
         |            "ContactName": "Clavell",
         |            "EmailAddress": "clavell@uva.edu.org"
         |          }
@@ -108,8 +135,8 @@ class RcaspRegistrationConnectorISpec
 
       val result = connector.viewRcasps(testCarfId).value.futureValue
 
-      result shouldBe Right(
-        List(organisationRegisteredBusinessRcaspDetails, individualRcaspDetails)
+      result mustBe Right(
+        List(organisationRegisteredBusinessRcaspDetails, individualRcaspDetails, organisationStandardRcaspDetails)
       )
     }
 
@@ -125,7 +152,7 @@ class RcaspRegistrationConnectorISpec
 
       val result = connector.viewRcasps(testCarfId).value.futureValue
 
-      result shouldBe Left(ApiError.JsonValidationError)
+      result mustBe Left(ApiError.JsonValidationError)
     }
 
     "must return an empty list if the backend returns 404" in {
@@ -139,7 +166,7 @@ class RcaspRegistrationConnectorISpec
 
       val result = connector.viewRcasps(testCarfId).value.futureValue
 
-      result shouldBe Right(List.empty)
+      result mustBe Right(List.empty)
     }
 
     "must return an internal server error if an unexpected non-200 status is returned" in {
@@ -153,7 +180,7 @@ class RcaspRegistrationConnectorISpec
 
       val result = connector.viewRcasps(testCarfId).value.futureValue
 
-      result shouldBe Left(ApiError.InternalServerError)
+      result mustBe Left(ApiError.InternalServerError)
     }
   }
 }

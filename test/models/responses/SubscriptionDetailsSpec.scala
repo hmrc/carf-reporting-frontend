@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package pages
+package models.responses
 
-import models.responses.RcaspDetails
-import play.api.libs.json.JsPath
+import base.SpecBase
 
-case object RcaspDetailsPage extends QuestionPage[RcaspDetails] {
+class SubscriptionDetailsSpec extends SpecBase {
 
-  override def path: JsPath = JsPath \ toString
+  "SubscriptionDetails" - {
+    ".getEmails" - {
+      "when there are primary and secondary user details" in {
+        subscriptionDetailsOrganisation.getEmails mustBe List("GroupRep@FATCACRS.com", "GroupRep2@FATCACRS.com")
+      }
 
-  override def toString: String = "rcaspDetails"
+      "when there are only primary user details" in {
+        subscriptionDetailsIndividual.getEmails mustBe List("GroupRep@FATCACRS.com")
+      }
+    }
+  }
+
 }

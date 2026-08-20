@@ -18,7 +18,7 @@ package connectors
 
 import config.FrontendAppConfig
 import models.errors.ApiError.{InternalServerError, JsonValidationError}
-import models.rcasp.{RcaspDetails, ViewRcaspResponse}
+import models.responses.{RcaspDetails, ViewRcaspResponse}
 import play.api.http.Status.{NOT_FOUND, OK}
 import types.ResultT
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
