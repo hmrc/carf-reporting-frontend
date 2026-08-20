@@ -16,12 +16,15 @@
 
 @(docRefIds: Seq[String])
 
-<div class="doc-ref-ids">
-    @if(docRefIds.isEmpty) {
-        <p class="govuk-body">N/A</p>
-    } else {
-        @for(docRefId <- docRefIds) {
-            <p class="govuk-body">@docRefId</p>
+@if(docRefIds.isEmpty) {
+    N/A
+} else {
+    @for((docRefId, index) <- docRefIds.zipWithIndex) {
+        @if(index == 0) {
+            @docRefId
+        } else {
+            <br/>
+            <div class="govuk-!-padding-top-2">@docRefId</div>
         }
     }
-</div>
+}
