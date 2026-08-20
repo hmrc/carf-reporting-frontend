@@ -25,7 +25,6 @@ import models.fileSubmission.FileStatus.*
 import models.{ExtractedFileDetails, UserAnswers}
 import pages.FileStatusPage
 import repositories.SessionRepository
-import types.ResultT
 import models.fileSubmission.FileStatus
 import models.fileSubmission.FileStatus.*
 import types.ResultT
