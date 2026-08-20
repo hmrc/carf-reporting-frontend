@@ -16,15 +16,33 @@
 
 @import models.problem.MessageBlock
 @import models.problem.MessageBlock.{Bullets, Para}
+
 @(blocks: Seq[MessageBlock])
 
-@for(block <- blocks) {
-    @block match {
-        case Para(text) => { <p class="govuk-body">@text</p> }
-        case Bullets(items) => {
-            <ul class="govuk-list govuk-list--bullet">
-            @for(item <- items) { <li>@item</li> }
-            </ul>
+@for((block, index) <- blocks.zipWithIndex) {
+    @defining(blocks.lift(index + 1)) { nextBlock =>
+        @block match {
+            case Para(text) => {
+                @defining(nextBlock match {
+                    case Some(Para(_)) => " govuk-!-margin-bottom-3"
+                    case _             => ""
+                }) { marginClass =>
+                    <p class="govuk-body@marginClass">@text</p>
+                }
+            }
+
+            case Bullets(items) => {
+                @defining(nextBlock match {
+                    case Some(Para(_)) => " govuk-!-margin-bottom-4"
+                    case _             => ""
+                }) { marginClass =>
+                    <ul class="govuk-list govuk-list--bullet@marginClass">
+                    @for(item <- items) {
+                        <li>@item</li>
+                    }
+                    </ul>
+                }
+            }
         }
     }
 }

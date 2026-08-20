@@ -11,16 +11,8 @@ $hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-f
   display: none !important;
 }
 
-.js-hidden {
-  display: inline-block;
-}
-
 .js-enabled .js-visible {
   display: inline-block !important;
-}
-
-.js-enabled .js-hidden {
-  display: none !important;
 }
 
 .long-word {
