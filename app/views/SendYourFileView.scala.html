@@ -28,7 +28,7 @@
     @formHelper(action = routes.SendYourFileController.onSubmit(), args = Symbol("id") -> "sendYourFileForm") {
         <input type="hidden" id="fileStatusRefreshUrl" value="@routes.SendYourFileController.getFileStatusAndRedirect().url" />
         <input type="hidden" id="maxPollingAttempts" value="@maxPollingAttempts" />
-        <input type="hidden" id="slowJourneyUrl" value="@routes.PlaceholderController.onPageLoad("Should redirect to /still-checking-your-file (CARF-616)").url" />
+        <input type="hidden" id="slowJourneyUrl" value="@routes.StillCheckingYourFileController.onPageLoad().url" />
         <input type="hidden" id="technicalDifficultiesRedirectUrl" value="@routes.JourneyRecoveryController.onPageLoad().url" />
         <input type="hidden" id="processingMessage" value="@messages("sendYourFile.processing")" />
 

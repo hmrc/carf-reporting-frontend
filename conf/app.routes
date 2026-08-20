@@ -26,7 +26,7 @@ GET         /problem/invalid-xml                        controllers.problem.Inva
 
 GET         /problem/data-errors                        controllers.problem.DataErrorsController.onPageLoad()
 
-GET         /save-rcasp-and-subscription-details        controllers.RcaspAndSubscriptionDetailsController.onPageLoad()    
+GET         /save-rcasp-and-subscription-details        controllers.RcaspAndSubscriptionDetailsController.onPageLoad()
 
 GET         /problem/rcasp-not-matching                 controllers.problem.RcaspNotMatchingController.onPageLoad()
 
@@ -35,3 +35,5 @@ GET         /check-your-file-details                    controllers.CheckYourFil
 GET         /send-your-file                             controllers.SendYourFileController.onPageLoad()
 POST        /send-your-file                             controllers.SendYourFileController.onSubmit()
 GET         /send-your-file/status                      controllers.SendYourFileController.getFileStatusAndRedirect()
+
+GET         /still-checking-your-file                   controllers.StillCheckingYourFileController.onPageLoad()

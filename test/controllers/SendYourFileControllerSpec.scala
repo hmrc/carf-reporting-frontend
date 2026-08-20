@@ -153,9 +153,7 @@ class SendYourFileControllerSpec extends SpecBase {
           val result  = route(application, request).value
 
           status(result)                 mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.PlaceholderController
-            .onPageLoad("Should submit to FTS (CARF-611), then redirect to /still-checking-your-file (CARF-616)")
-            .url
+          redirectLocation(result).value mustEqual controllers.routes.StillCheckingYourFileController.onPageLoad().url
         }
       }
 

@@ -12,6 +12,7 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
+site.backToManagement = Back to manage your cryptoasset reports
 
 date.day = Day
 date.month = Month
@@ -74,7 +75,6 @@ invalidXml.p4 = To make sure your XML file is formatted correctly, refer to the
 invalidXml.p4.linkText = technical guidance for XML files
 invalidXml.p5.linkText = Print this page
 invalidXml.p6.linkText = Upload a different file
-invalidXml.p7.linkText = Back to manage your cryptoasset reports
 
 dataErrors.title = There is a problem with your file data
 dataErrors.heading = There is a problem with your file data
@@ -89,7 +89,6 @@ dataErrors.hundredPara = Your file has over 100 errors. We only show the first 1
 dataErrors.table.caption = Errors
 dataErrors.table.head.line = Line
 dataErrors.table.head.error = Error
-dataErrors.back.linkText = Back to manage your cryptoasset reports
 
 rcaspNotMatching.title = There is a problem with the RCASP ID in your file
 rcaspNotMatching.heading = There is a problem with the RCASP ID in your file
@@ -133,3 +132,21 @@ sendYourFile.heading = Send your file
 sendYourFile.p1 = We’ll now automatically check your file for business rule errors and send you to another page once completed.
 sendYourFile.p2 = By sending this file, you are confirming that the information is correct and complete to the best of your knowledge.
 sendYourFile.processing = We are checking your file. This could take a few minutes.
+
+stillCheckingYourFile.title = We need a few more minutes to check your file
+stillCheckingYourFile.heading = We need a few more minutes to check your file
+stillCheckingYourFile.p1 = You can refresh the page for updates on the status of our automatic checks.
+stillCheckingYourFile.p2.dontWait = If you do not want to wait, then you can
+stillCheckingYourFile.signOut = sign out
+stillCheckingYourFile.p2.or = or
+stillCheckingYourFile.uploadAnotherFile = upload another file if needed
+stillCheckingYourFile.p2.email.rcaspUser = We’ll email you if this file has passed the checks. You can also check the results in the service later.
+stillCheckingYourFile.p2.email.standard = We’ll email you and your contacts for {0} if this file has passed the checks. You can also check the results in the service later.
+stillCheckingYourFile.fileId.key = File ID (MessageRefId)
+stillCheckingYourFile.result.key = Result of automatic checks
+stillCheckingYourFile.refresh = Refresh for updates
+
+fileStatus.pending = Pending
+fileStatus.passed = Passed
+fileStatus.failed = Failed
+fileStatus.problem = Problem
