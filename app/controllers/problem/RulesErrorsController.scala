@@ -25,6 +25,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.RulesErrorsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.problem.RulesErrorsView
+import utils.LoggerUtil.logWarn
 
 class RulesErrorsController @Inject() (
     override val messagesApi: MessagesApi,
@@ -46,8 +47,9 @@ class RulesErrorsController @Inject() (
         Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
       case (errors, _) =>
-        logger.warn(
-          s"Unable to retrieve rules errors or file name for rules-errors page. Errors length: ${errors.map(_.length)}"
+        logWarn(
+          s"[RulesErrorsController][onPageLoad] Unable to retrieve rules errors or file name " +
+            s"for rules-errors page. Errors length: ${errors.map(_.length)}"
         )
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
