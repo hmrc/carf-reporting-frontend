@@ -44,8 +44,7 @@
 
                 <ol class="govuk-list govuk-list--number">
                     <li>
-                        <span class="print-hidden">@printLink(key = "rulesErrors.list.1.linkText", id = Some("print-link"), fullStop = true)</span>
-                        <span class="showPrint">@printLink(key = "rulesErrors.list.1.linkText", fullStop = true)</span>
+                        @printLink(key = "rulesErrors.list.1.linkText", id = Some("print-link"), fullStop = true)
                     </li>
                     <li>@messages("rulesErrors.list.2")</li>
                     <li>
@@ -59,10 +58,11 @@
                         @messages("rulesErrors.list.3.after")
                     </li>
                     <li>
-                        <span class="print-hidden">
-                            <a class="govuk-link" href="@controllers.upload.routes.UploadXmlController.onPageLoad().url">@messages("rulesErrors.list.4.linkText")</a>.
-                        </span>
-                        <span class="showPrint">@messages("rulesErrors.list.4.linkText")</span>
+                        @link(
+                          href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
+                            key = "rulesErrors.list.4.linkText",
+                            fullStop = true
+                        )
                     </li>
                 </ol>
             </div>
@@ -89,7 +89,7 @@
                 head = Some(Seq(
                     HeadCell(content = Text(messages("rulesErrors.table.head.code")), attributes = Map("style" -> "width: 7%;")),
                     HeadCell(content = Text(messages("rulesErrors.table.head.docRefId")), attributes = Map("style" -> "width: 40%;")),
-                    HeadCell(content = Text(messages("rulesErrors.table.head.error")), attributes = Map("style" -> "width: 40%;"))
+                    HeadCell(content = Text(messages("rulesErrors.table.head.error")))
                 )),
                 caption = Some(messages("rulesErrors.table.caption")),
                 captionClasses = "govuk-table__caption--m govuk-!-margin-bottom-2",
@@ -105,7 +105,7 @@
             <p class="govuk-body govuk-!-padding-top-5">
             @link(
                 href = managementUrl,
-                key = "rulesErrors.back.linkText"
+                key = "site.backToManagement"
             )
             </p>
         </div>
