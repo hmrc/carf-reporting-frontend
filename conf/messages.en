@@ -196,4 +196,3 @@ rulesErrors.table.caption = Errors
 rulesErrors.table.head.code = Code
 rulesErrors.table.head.docRefId = DocRefId
 rulesErrors.table.head.error = Error
-rulesErrors.back.linkText = Back to manage your cryptoasset reports
