@@ -30,8 +30,8 @@
 
     @govukSummaryList(summaryList)
 
-    @govukButton(Button(
-        href = Some(controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation link - ticket CARF-645").url),
-        content = Text(messages("filePassedChecks.button"))
-    ))
+    @govukButton(
+        ButtonViewModel(messages("filePassedChecks.button")).withAttribute("id" -> "continue")
+        .asLink(controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation link - ticket CARF-645").url)
+    )
 }

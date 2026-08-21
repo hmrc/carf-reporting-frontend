@@ -36,8 +36,8 @@
         content = Text(messages("fileFailedChecks.warning"))
     ))
 
-    @govukButton(Button(
-        href = Some(controllers.routes.PlaceholderController.onPageLoad("TODO: problem/rules-errors link - ticket CARF-614").url),
-        content = Text(messages("fileFailedChecks.button"))
-    ))
+    @govukButton(
+        ButtonViewModel(messages("fileFailedChecks.button")).withAttribute("id" -> "continue")
+        .asLink(controllers.routes.PlaceholderController.onPageLoad("TODO: problem/rules-errors link - ticket CARF-614").url)
+    )
 }
