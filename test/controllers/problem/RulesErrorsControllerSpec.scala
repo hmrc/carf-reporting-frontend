@@ -18,7 +18,7 @@ package controllers.problem
 
 import base.SpecBase
 import config.FrontendAppConfig
-import models.problem.{BusinessRuleError, RulesErrorsStubData}
+import models.problem.{BusinessRuleError, MessageBlock}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.inject.bind
@@ -31,6 +31,19 @@ class RulesErrorsControllerSpec extends SpecBase {
 
   private val mockService: RulesErrorsStubService = mock[RulesErrorsStubService]
 
+  private def errors(count: Int): Seq[BusinessRuleError] =
+    (1 to count).map { index =>
+      BusinessRuleError(
+        errorCode = s"error-$index",
+        docRefIds = Seq.empty,
+        message = Seq(MessageBlock.Para(s"Error message $index"))
+      )
+    }
+
+  private val belowMaxErrors   = errors(99)
+  private val exactlyMaxErrors = errors(100)
+  private val aboveMaxErrors   = errors(101)
+
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockService)
@@ -38,10 +51,10 @@ class RulesErrorsControllerSpec extends SpecBase {
 
   "RulesErrors Controller" - {
 
-    "must return OK and the correct view when errors and filename are both present, under the max" in {
+    "must return OK and the correct view when errors and filename are both present, below the max" in {
 
       when(mockService.getFileName(any())).thenReturn(Some("filename.xml"))
-      when(mockService.getRulesErrors(any())).thenReturn(Some(RulesErrorsStubData.fewErrors))
+      when(mockService.getRulesErrors(any())).thenReturn(Some(belowMaxErrors))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(bind[RulesErrorsStubService].toInstance(mockService))
@@ -52,12 +65,36 @@ class RulesErrorsControllerSpec extends SpecBase {
         val request   = FakeRequest(GET, routes.RulesErrorsController.onPageLoad().url)
 
         val result = route(application, request).value
+        val view   = application.injector.instanceOf[RulesErrorsView]
 
-        val view = application.injector.instanceOf[RulesErrorsView]
-
-        status(result)          mustEqual OK
+        status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view("filename.xml", RulesErrorsStubData.fewErrors, hasMoreThanMax = false, appConfig.managementUrl)(
+          view("filename.xml", belowMaxErrors, hasMoreThanMax = false, appConfig.managementUrl)(
+            request,
+            messages(application)
+          ).toString
+      }
+    }
+
+    "must return OK and not show the over-100 message when errors equal the max" in {
+
+      when(mockService.getFileName(any())).thenReturn(Some("filename.xml"))
+      when(mockService.getRulesErrors(any())).thenReturn(Some(exactlyMaxErrors))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[RulesErrorsStubService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        val appConfig = application.injector.instanceOf[FrontendAppConfig]
+        val request   = FakeRequest(GET, routes.RulesErrorsController.onPageLoad().url)
+
+        val result = route(application, request).value
+        val view   = application.injector.instanceOf[RulesErrorsView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual
+          view("filename.xml", exactlyMaxErrors, hasMoreThanMax = false, appConfig.managementUrl)(
             request,
             messages(application)
           ).toString
@@ -67,7 +104,7 @@ class RulesErrorsControllerSpec extends SpecBase {
     "must return OK and truncate to 100 rows with hasMoreThanMax true when errors exceed the max" in {
 
       when(mockService.getFileName(any())).thenReturn(Some("filename.xml"))
-      when(mockService.getRulesErrors(any())).thenReturn(Some(RulesErrorsStubData.manyErrors))
+      when(mockService.getRulesErrors(any())).thenReturn(Some(aboveMaxErrors))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(bind[RulesErrorsStubService].toInstance(mockService))
@@ -78,14 +115,13 @@ class RulesErrorsControllerSpec extends SpecBase {
         val request   = FakeRequest(GET, routes.RulesErrorsController.onPageLoad().url)
 
         val result = route(application, request).value
+        val view   = application.injector.instanceOf[RulesErrorsView]
 
-        val view = application.injector.instanceOf[RulesErrorsView]
-
-        status(result)          mustEqual OK
+        status(result) mustEqual OK
         contentAsString(result) mustEqual
           view(
             "filename.xml",
-            RulesErrorsStubData.manyErrors.take(100),
+            aboveMaxErrors.take(100),
             hasMoreThanMax = true,
             appConfig.managementUrl
           )(
@@ -116,7 +152,7 @@ class RulesErrorsControllerSpec extends SpecBase {
     "must redirect to Journey Recovery when filename is missing but errors are present" in {
 
       when(mockService.getFileName(any())).thenReturn(None)
-      when(mockService.getRulesErrors(any())).thenReturn(Some(RulesErrorsStubData.fewErrors))
+      when(mockService.getRulesErrors(any())).thenReturn(Some(belowMaxErrors))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(bind[RulesErrorsStubService].toInstance(mockService))
@@ -150,3 +186,4 @@ class RulesErrorsControllerSpec extends SpecBase {
     }
   }
 }
+
