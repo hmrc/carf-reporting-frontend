@@ -67,7 +67,7 @@ class RulesErrorsControllerSpec extends SpecBase {
         val result = route(application, request).value
         val view   = application.injector.instanceOf[RulesErrorsView]
 
-        status(result) mustEqual OK
+        status(result)          mustEqual OK
         contentAsString(result) mustEqual
           view("filename.xml", belowMaxErrors, hasMoreThanMax = false, appConfig.managementUrl)(
             request,
@@ -92,7 +92,7 @@ class RulesErrorsControllerSpec extends SpecBase {
         val result = route(application, request).value
         val view   = application.injector.instanceOf[RulesErrorsView]
 
-        status(result) mustEqual OK
+        status(result)          mustEqual OK
         contentAsString(result) mustEqual
           view("filename.xml", exactlyMaxErrors, hasMoreThanMax = false, appConfig.managementUrl)(
             request,
@@ -117,7 +117,7 @@ class RulesErrorsControllerSpec extends SpecBase {
         val result = route(application, request).value
         val view   = application.injector.instanceOf[RulesErrorsView]
 
-        status(result) mustEqual OK
+        status(result)          mustEqual OK
         contentAsString(result) mustEqual
           view(
             "filename.xml",
@@ -186,4 +186,3 @@ class RulesErrorsControllerSpec extends SpecBase {
     }
   }
 }
-
