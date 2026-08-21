@@ -1,0 +1,82 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@this(
+        layout: templates.Layout,
+        govukSummaryList: GovukSummaryList,
+        govukPanel: GovukPanel,
+        link: components.Link,
+        printLink: components.PrintLink
+)
+
+@(summaryList: SummaryList, dateFormated: String, isRcaspUser: Boolean, manageRCASPUrl: String, emailString: String)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("fileConfirmation.title")), showBackLink = false) {
+
+    @govukPanel(Panel(
+        title = Text(messages("fileConfirmation.label.heading")),
+        content = HtmlContent(s"${messages("fileConfirmation.label.filePassed")}<br><strong>$dateFormated</strong>")
+    ))
+
+    @govukSummaryList(summaryList)
+
+    @defining(
+        emailString
+    ) { emailSentence =>
+        <p class="govuk-body">@emailSentence</p>
+    }
+
+
+    <h2 class="govuk-heading-m">@messages("fileConfirmation.heading.next")</h2>
+    <p class="govuk-body">@messages("fileConfirmation.p1.next")</p>
+
+    <h2 class="govuk-heading-m">@messages("fileConfirmation.heading.before")</h2>
+    <p class="govuk-body">@messages("fileConfirmation.text.before")</p>
+    <p class="govuk-body">
+        @link(
+            routes.PlaceholderController.onPageLoad("Page will be implemented in CARF-369").url,
+            "fileConfirmation.feedback.link",
+            id = Some("exit-survey-link")
+        )
+        @messages("fileConfirmation.feedback.link.text")
+    </p>
+
+    <div class="govuk-!-padding-top-3">
+        <ul class="govuk-list">
+        <li>
+        @printLink(
+            key = "fileConfirmation.link.text.print",
+            id = Some("print-link")
+        )
+        </li>
+        <li>
+        @link(
+            controllers.upload.routes.UploadXmlController.onPageLoad().url,
+            "fileConfirmation.link.text.upload",
+            id = Some("upload-link")
+        )
+        </li>
+        <li>
+        @link(
+            manageRCASPUrl,
+            "fileConfirmation.link.text.manage",
+            id = Some("site.backToManagement")
+        )
+        </li>
+        </ul>
+    </div>
+
+}

@@ -30,7 +30,6 @@ import utils.LoggerUtil.logWarn
 import views.html.SendYourFileView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
 
 class SendYourFileController @Inject() (
     override val messagesApi: MessagesApi,
@@ -40,8 +39,7 @@ class SendYourFileController @Inject() (
     view: SendYourFileView,
     appConfig: FrontendAppConfig,
     val controllerComponents: MessagesControllerComponents
-)(implicit ec: ExecutionContext)
-    extends FrontendBaseController
+) extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen requireData) { implicit request =>

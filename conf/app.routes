@@ -45,3 +45,5 @@ GET         /file-failed-checks                controllers.upload.FileFailedChec
 GET         /problem/virus-found               controllers.problem.VirusFoundController.onPageLoad()
 
 GET         /problem/rules-errors              controllers.problem.RulesErrorsController.onPageLoad()
+
+GET         /file-confirmation                          controllers.FileConfirmationController.onPageLoad()
