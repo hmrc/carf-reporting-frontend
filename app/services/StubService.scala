@@ -191,6 +191,19 @@ class StubService @Inject() (sessionRepository: SessionRepository) {
     }
   }
 
+  def getFileStatus(carfId: String): ResultT[FileStatus] = {
+    val status = carfId.dropRight(1).lastOption match {
+      case Some('9') => UnexpectedError
+      case Some('8') => UnprocessableErrorFile
+      case Some('7') => VirusFound
+      case Some('6') => Failed
+      case Some('5') => Passed
+      case _         => Pending
+    }
+
+    ResultT.fromValue(status)
+  }
+
   def getFileStatus(carfId: String, userAnswers: UserAnswers)(implicit ec: ExecutionContext): ResultT[FileStatus] =
     if (carfId.takeRight(2).take(1) == "0") {
       ResultT.fromError(InternalServerError)
