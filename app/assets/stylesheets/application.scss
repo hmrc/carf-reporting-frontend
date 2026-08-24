@@ -76,6 +76,10 @@ $hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-f
   margin-bottom: 0.4em;
 }
 
+.rules-error-table-wrapper {
+  overflow-x: auto;
+}
+
 .rules-error-table .govuk-body,
 .rules-error-table .govuk-list {
   margin-bottom: 0.4em;
