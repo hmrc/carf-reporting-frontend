@@ -20,28 +20,24 @@
 @(blocks: Seq[MessageBlock])
 
 @for((block, index) <- blocks.zipWithIndex) {
-    @defining(blocks.lift(index + 1)) { nextBlock =>
+    @defining(if (index == 0) None else blocks.lift(index - 1)) { previousBlock =>
         @block match {
             case Para(text) => {
-                @defining(nextBlock match {
-                    case Some(Para(_)) => " govuk-!-margin-bottom-3"
-                    case _             => ""
+                @defining(previousBlock match {
+                    case Some(_: Bullets) => " govuk-!-margin-bottom-4"
+                    case Some(_: Para)    => " govuk-!-margin-bottom-3"
+                    case _                => ""
                 }) { marginClass =>
                     <p class="govuk-body@marginClass">@text</p>
                 }
             }
 
             case Bullets(items) => {
-                @defining(nextBlock match {
-                    case Some(Para(_)) => " govuk-!-margin-bottom-4"
-                    case _             => ""
-                }) { marginClass =>
-                    <ul class="govuk-list govuk-list--bullet@marginClass">
-                    @for(item <- items) {
-                        <li>@item</li>
-                    }
-                    </ul>
+                <ul class="govuk-list govuk-list--bullet">
+                @for(item <- items) {
+                    <li>@item</li>
                 }
+                </ul>
             }
         }
     }
