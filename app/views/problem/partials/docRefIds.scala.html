@@ -20,11 +20,7 @@
     N/A
 } else {
     @for((docRefId, index) <- docRefIds.zipWithIndex) {
-        @if(index == 0) {
-            @docRefId
-        } else {
-            <br/>
-            <div class="govuk-!-padding-top-2">@docRefId</div>
-        }
+        @if(index != 0) { <br/> }
+        <div class="@if(index != 0) {govuk-!-padding-top-2}">@docRefId</div>
     }
 }
