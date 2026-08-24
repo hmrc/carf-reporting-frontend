@@ -25,7 +25,7 @@ import viewmodels.govuk.all.{KeyViewModel, SummaryListRowViewModel, SummaryListV
 
 import javax.inject.Inject
 
-class FileCheckResultHelper @Inject() () {
+class FileCheckResultHelper @Inject() {
 
   def summaryList(
       messageRefId: String,

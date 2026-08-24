@@ -7,18 +7,13 @@ $("#uploadForm").submit(function (e) {
     var errorRequestId = $("[name='x-amz-meta-request-id']").val();
 
     if (fileLength === 0) {
-        var errorUrl = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=filenotselected&errorRequestId=" + errorRequestId;
-        window.location = errorUrl;
+        window.location = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=filenotselected&errorRequestId=" + errorRequestId;
     } else if (isFileEmpty()) {
-        var errorUrl = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=fileisempty&errorRequestId=" + errorRequestId;
-        window.location = errorUrl;
+        window.location = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=fileisempty&errorRequestId=" + errorRequestId;
     } else if (isFileNameInvalidLength()) {
-        var errorUrl = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=invalidfilenamelength&errorRequestId=" + errorRequestId;
-        console.log(errorUrl);
-        window.location = errorUrl;
+        window.location = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=invalidfilenamelength&errorRequestId=" + errorRequestId;
     } else if (isFileNameContainsDisallowedCharacters()) {
-        var errorUrl = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=disallowedcharacters&errorRequestId=" + errorRequestId;
-        window.location = errorUrl;
+        window.location = $("#upScanErrorRedirectUrl").val() + "?errorCode=invalidargument&errorMessage=disallowedcharacters&errorRequestId=" + errorRequestId;
     } else {
         function disableFileUpload() {
             $("#file-upload-input").attr('disabled', 'disabled')
@@ -45,10 +40,8 @@ $("#uploadForm").submit(function (e) {
 function isFileNameInvalidLength() {
     var fileName = $("#file-upload-input")[0].files[0].name;
     var trimmedFileName = fileName.replace(/\.xml$/i, "");
-    if (trimmedFileName.length > 100) {
-        return true;
-    }
-    return false;
+    return trimmedFileName.length > 100;
+
 }
 
 function isFileNameContainsDisallowedCharacters() {
