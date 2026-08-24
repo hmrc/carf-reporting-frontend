@@ -55,25 +55,29 @@ $hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-f
   width: 15% !important;
 }
 
-.rules-error-table table div {
+.rules-error-table div {
   word-break: break-word;
 }
 
-.rules-error-table table div:not(:last-child) {
+.rules-error-table div:not(:last-child) {
   padding-bottom: 1em;
 }
 
-.rules-error-table table ul {
+.rules-error-table ul {
   margin-bottom: 0.4em !important;
 }
 
-.rules-error-table table p:last-child {
+.rules-error-table p:last-child {
   margin-bottom: 0;
 }
 
 .rules-error-table p {
   word-break: break-word;
   margin-bottom: 0.4em;
+}
+
+.rules-error-table-wrapper {
+  overflow-x: auto;
 }
 
 .rules-error-table .govuk-body,

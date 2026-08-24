@@ -1,0 +1,113 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import models.problem.BusinessRuleError
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.components.PrintLink
+@import views.html.problem.partials.{docRefIds, messageBlocks}
+
+@this(
+        layout: templates.Layout,
+        govukTable: GovukTable,
+        link: components.Link,
+        printLink: PrintLink
+)
+
+@(fileName: String, errors: Seq[BusinessRuleError], hasMoreThanMax: Boolean, managementUrl: String)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("rulesErrors.title")), showBackLink = false, fullWidth = true) {
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+
+            <h1 class="govuk-heading-l">@messages("rulesErrors.heading")</h1>
+
+            <div class="govuk-!-padding-bottom-3">
+                <p class="govuk-body">@messages("rulesErrors.p1", fileName)</p>
+            </div>
+
+            <div>
+                <h2 class="govuk-heading-m">@messages("rulesErrors.h2")</h2>
+
+                <ol class="govuk-list govuk-list--number">
+                    <li>
+                        @printLink(key = "rulesErrors.list.1.linkText", id = Some("print-link"), fullStop = true)
+                    </li>
+                    <li>@messages("rulesErrors.list.2")</li>
+                    <li>
+                        @link(
+                            href = controllers.routes.PlaceholderController
+                            .onPageLoad("TODO: Technical guidance for XML files link - CARF-595")
+                            .url,
+                            key = "rulesErrors.list.3.linkText",
+                            classes = "govuk-link print-url"
+                        )
+                        @messages("rulesErrors.list.3.after")
+                    </li>
+                    <li>
+                        @link(
+                          href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
+                            key = "rulesErrors.list.4.linkText",
+                            fullStop = true
+                        )
+                    </li>
+                </ol>
+            </div>
+
+            @if(hasMoreThanMax) {
+                <p class="govuk-body" id="hundred-para">@messages("rulesErrors.hundredPara")</p>
+            }
+
+        </div>
+    </div>
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+
+            <div class="rules-error-table-wrapper govuk-!-padding-top-1">
+            @govukTable(Table(
+                rows = errors.map { error =>
+                    Seq(
+                        TableRow(content = Text(error.errorCode)),
+                        TableRow(content = HtmlContent(docRefIds(error.docRefIds))),
+                        TableRow(content = HtmlContent(messageBlocks(error.message)))
+                    )
+                },
+                head = Some(Seq(
+                    HeadCell(content = Text(messages("rulesErrors.table.head.code")), attributes = Map("style" -> "width: 7%;")),
+                    HeadCell(content = Text(messages("rulesErrors.table.head.docRefId")), attributes = Map("style" -> "width: 40%;")),
+                    HeadCell(content = Text(messages("rulesErrors.table.head.error")))
+                )),
+                caption = Some(messages("rulesErrors.table.caption")),
+                captionClasses = "govuk-table__caption--m govuk-!-margin-bottom-2",
+                classes = "rules-error-table"
+            ))
+            </div>
+
+        </div>
+    </div>
+
+    <div class="govuk-grid-row manage-reports-link-print-hidden">
+        <div class="govuk-grid-column-two-thirds">
+            <p class="govuk-body govuk-!-padding-top-5">
+            @link(
+                href = managementUrl,
+                key = "site.backToManagement"
+            )
+            </p>
+        </div>
+    </div>
+}
