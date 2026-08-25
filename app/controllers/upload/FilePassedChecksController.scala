@@ -16,12 +16,12 @@
 
 package controllers.upload
 
-import controllers.actions._
+import controllers.actions.*
 import models.fileSubmission.FileStatus.Passed
-import pages.ExtractedFileDetailsPage
+import pages.{ExtractedFileDetailsPage, UploadIdPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.StubService
+import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{FileCheckResultHelper, LoggerUtil}
 import views.html.upload.FilePassedChecksView
@@ -34,7 +34,8 @@ class FilePassedChecksController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
-    stubService: StubService,
+    uploadCompletionLock: UploadCompletionLockAction,
+    stubService: XmlFileDetailsStubService,
     fileCheckResultHelper: FileCheckResultHelper,
     val controllerComponents: MessagesControllerComponents,
     view: FilePassedChecksView
@@ -43,21 +44,32 @@ class FilePassedChecksController @Inject() (
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] =
-    (identify andThen getData() andThen requireData).async { implicit request =>
+    (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
       stubService.getFileStatus(request.carfId).value.map {
         case Right(Passed) =>
-          request.userAnswers.get(ExtractedFileDetailsPage).map(_.messageRefId) match {
-            case Some(value) =>
+          request.userAnswers.get(ExtractedFileDetailsPage) match {
+            case Some(extractedFileDetails) =>
               val summaryList =
                 fileCheckResultHelper.summaryList(
-                  messageRefId = value,
+                  messageRefId = extractedFileDetails.messageRefId,
                   fileStatus = Passed,
                   messagePrefix = "filePassedChecks"
                 )
 
-              Ok(view(summaryList))
-
-            case None =>
+              request.userAnswers
+                .get(UploadIdPage)
+                .map(_.value)
+                .fold {
+                  LoggerUtil.logWarn(
+                    "[FilePassedChecksController][onPageLoad] UploadIdPage is missing from UserAnswers"
+                  )
+                  Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+                } { uploadId =>
+                  Ok(
+                    view(summaryList, extractedFileDetails.sendingEntityIn, uploadId)
+                  )
+                }
+            case None                       =>
               LoggerUtil.logWarn(
                 "[FilePassedChecksController][onPageLoad] ExtractedFileDetailsPage missing from UserAnswers"
               )

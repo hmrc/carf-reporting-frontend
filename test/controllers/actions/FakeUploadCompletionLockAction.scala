@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package config
+package controllers.actions
 
-object Constants {
+import models.requests.OptionalDataRequest
 
-  val fileNameAllowedCharacters = "^[A-Za-z0-9_.-]+$"
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
-  val bytesInMb = 1048576
+class FakeUploadCompletionLockAction @Inject() (implicit ec: ExecutionContext) extends UploadCompletionLockAction {
 
-  val maxErrorsShown: Int = 100
+  override protected def executionContext: ExecutionContext = ec
 
-  inline final val ukTimeZoneStringId = "Europe/London"
-
-  inline val tempUploadIdStub = "123456"
+  override protected def filter[A](request: OptionalDataRequest[A]): Future[Option[play.api.mvc.Result]] =
+    Future.successful(None)
 }

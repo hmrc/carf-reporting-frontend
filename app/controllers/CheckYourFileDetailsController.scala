@@ -35,25 +35,27 @@ class CheckYourFileDetailsController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     checkYourFileDetailsHelper: CheckYourFileDetailsHelper,
     view: CheckYourFileDetailsView,
     val controllerComponents: MessagesControllerComponents
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen requireData) { implicit request =>
-    val userAnswers = request.userAnswers
+  def onPageLoad(): Action[AnyContent] =
+    (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
+      val userAnswers = request.userAnswers
 
-    (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
-      .mapN { (rcaspDetails, extractedFileDetails) =>
-        val fileDetailsSummaryList = checkYourFileDetailsHelper.fileDetailsSummaryList(extractedFileDetails)
-        Ok(view(rcaspDetails.getName, fileDetailsSummaryList))
-      }
-      .getOrElse {
-        logWarn(
-          "[CheckYourFileDetailsController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
-        )
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-      }
-  }
+      (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
+        .mapN { (rcaspDetails, extractedFileDetails) =>
+          val fileDetailsSummaryList = checkYourFileDetailsHelper.fileDetailsSummaryList(extractedFileDetails)
+          Ok(view(rcaspDetails.getName, fileDetailsSummaryList))
+        }
+        .getOrElse {
+          logWarn(
+            "[CheckYourFileDetailsController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
+          )
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        }
+    }
 }

@@ -26,13 +26,13 @@ import org.mockito.Mockito._
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.StubService
+import services.XmlFileDetailsStubService
 import types.ResultT
 import views.html.problem.VirusFoundView
 
 class VirusFoundControllerSpec extends SpecBase {
 
-  private val mockStubService: StubService = mock[StubService]
+  private val mockStubService: XmlFileDetailsStubService = mock[XmlFileDetailsStubService]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -47,7 +47,7 @@ class VirusFoundControllerSpec extends SpecBase {
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(bind[StubService].toInstance(mockStubService))
+          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
           .build()
 
       running(application) {
@@ -68,7 +68,7 @@ class VirusFoundControllerSpec extends SpecBase {
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(bind[StubService].toInstance(mockStubService))
+          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
           .build()
 
       running(application) {
@@ -86,7 +86,7 @@ class VirusFoundControllerSpec extends SpecBase {
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(bind[StubService].toInstance(mockStubService))
+          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
           .build()
 
       running(application) {

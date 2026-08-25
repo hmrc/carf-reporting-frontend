@@ -36,28 +36,30 @@ class SendYourFileController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     view: SendYourFileView,
     appConfig: FrontendAppConfig,
     val controllerComponents: MessagesControllerComponents
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen requireData) { implicit request =>
-    val userAnswers = request.userAnswers
+  def onPageLoad(): Action[AnyContent] =
+    (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
+      val userAnswers = request.userAnswers
 
-    (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
-      .mapN { (rcaspDetails, extractedFileDetails) =>
-        val maybeWarningMessage =
-          ReportType.warningMessageForReportType(extractedFileDetails.getReportType, rcaspDetails.getName)
-        Ok(view(maybeWarningMessage, appConfig.spinnerMaxPollingAttempts))
-      }
-      .getOrElse {
-        logWarn(
-          "[SendYourFileController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
-        )
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
-      }
-  }
+      (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
+        .mapN { (rcaspDetails, extractedFileDetails) =>
+          val maybeWarningMessage =
+            ReportType.warningMessageForReportType(extractedFileDetails.getReportType, rcaspDetails.getName)
+          Ok(view(maybeWarningMessage, appConfig.spinnerMaxPollingAttempts))
+        }
+        .getOrElse {
+          logWarn(
+            "[SendYourFileController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
+          )
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
+        }
+    }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData() andThen requireData) { implicit request =>
     // TODO: Build request for FTS (details TBC) and call submission connector (CARF-611)

@@ -21,7 +21,7 @@ import controllers.actions._
 import models.fileSubmission.FileStatus.VirusFound
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.StubService
+import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil._
 import views.html.problem.VirusFoundView
@@ -35,7 +35,7 @@ class VirusFoundController @Inject() (
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
     appConfig: FrontendAppConfig,
-    stubService: StubService,
+    stubService: XmlFileDetailsStubService,
     val controllerComponents: MessagesControllerComponents,
     view: VirusFoundView
 )(implicit ec: ExecutionContext)

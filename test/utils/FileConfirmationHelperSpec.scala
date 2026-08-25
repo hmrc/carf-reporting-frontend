@@ -17,8 +17,7 @@
 package utils
 
 import base.SpecBase
-import models.{ExtractedFileDetails, ReportType}
-import pages.ExtractedFileDetailsPage
+import models.ReportType
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.HtmlContent
 import viewmodels.govuk.all.{SummaryListRowViewModel, ValueViewModel}
@@ -32,11 +31,9 @@ class FileConfirmationHelperSpec extends SpecBase {
 
   "FileConfirmationHelper" - {
     ".rows" - {
-      "must return summaryRows containing 4 resultingRows when ExtractedFileDetails is present and rcaspName is defined" in {
-        val fileDetails = extractedFileDetailsTestData
-        val userAnswers = emptyUserAnswers.withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
-
-        val resultingRows = helper.rows(userAnswers, organisationStandardRcaspDetails.RCASPName).get
+      "must return summaryRows containing 4 resultingRows when rcaspName is defined" in {
+        val fileDetails   = extractedFileDetailsTestData
+        val resultingRows = helper.rows(fileDetails, organisationStandardRcaspDetails.RCASPName)
 
         resultingRows.size mustEqual 4
 
@@ -67,11 +64,10 @@ class FileConfirmationHelperSpec extends SpecBase {
         )
       }
 
-      "must return summaryRows containing 4 resultingRows when ExtractedFileDetails is present but rcaspName is missing" in {
+      "must return summaryRows containing 4 resultingRows when rcaspName is missing" in {
         val fileDetailsWithoutName  = extractedFileDetailsTestData.copy(rcaspName = None)
         val rcaspNameFromManagement = organisationStandardRcaspDetails.RCASPName
-        val userAnswers             = emptyUserAnswers.withPage(ExtractedFileDetailsPage, fileDetailsWithoutName)
-        val resultingRows           = helper.rows(userAnswers, rcaspNameFromManagement).get
+        val resultingRows           = helper.rows(fileDetailsWithoutName, rcaspNameFromManagement)
 
         resultingRows.size mustEqual 4
 
@@ -100,11 +96,6 @@ class FileConfirmationHelperSpec extends SpecBase {
           ),
           actions = Seq.empty
         )
-      }
-
-      "must return None when ExtractedFileDetailsPage is missing from UserAnswers" in {
-        val result = helper.rows(emptyUserAnswers, organisationStandardRcaspDetails.RCASPName)
-        result mustBe None
       }
     }
   }

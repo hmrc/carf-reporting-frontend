@@ -24,7 +24,7 @@ import models.responses.getName
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.StubService
+import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.logWarn
 import utils.StillCheckingYourFileHelper
@@ -41,7 +41,7 @@ class StillCheckingYourFileController @Inject() (
     view: StillCheckingYourFileView,
     stillCheckingYourFileHelper: StillCheckingYourFileHelper,
     appConfig: FrontendAppConfig,
-    stubService: StubService,
+    stubService: XmlFileDetailsStubService,
     val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package config
+package models
 
-object Constants {
+import models.fileSubmission.FileStatus
+import models.responses.{RcaspDetails, SubscriptionDetails}
 
-  val fileNameAllowedCharacters = "^[A-Za-z0-9_.-]+$"
+import java.time.LocalDateTime
 
-  val bytesInMb = 1048576
-
-  val maxErrorsShown: Int = 100
-
-  inline final val ukTimeZoneStringId = "Europe/London"
-
-  inline val tempUploadIdStub = "123456"
-}
+case class CachedFileDetails(
+    dateTime: Option[LocalDateTime],
+    fileStatus: FileStatus,
+    subscriptionDetails: SubscriptionDetails,
+    rcaspDetails: RcaspDetails,
+    extractedFileDetails: Option[ExtractedFileDetails]
+)

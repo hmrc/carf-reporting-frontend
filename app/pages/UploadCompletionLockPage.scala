@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package config
+package pages
 
-object Constants {
+import play.api.libs.json.JsPath
 
-  val fileNameAllowedCharacters = "^[A-Za-z0-9_.-]+$"
-
-  val bytesInMb = 1048576
-
-  val maxErrorsShown: Int = 100
-
-  inline final val ukTimeZoneStringId = "Europe/London"
-
-  inline val tempUploadIdStub = "123456"
+case object UploadCompletionLockPage extends QuestionPage[Boolean] {
+  override def path: JsPath = JsPath \ "uploadCompletionLock"
 }

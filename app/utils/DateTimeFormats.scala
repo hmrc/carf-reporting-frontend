@@ -16,19 +16,22 @@
 
 package utils
 
-import java.time.LocalDateTime
+import config.Constants.ukTimeZoneStringId
+
 import java.time.format.DateTimeFormatter
-import java.util.Locale
+import java.time.{LocalDateTime, ZoneId}
 
 object DateTimeFormats {
 
-  private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.ENGLISH)
+  private val datetimeFormatter: DateTimeFormatter = DateTimeFormatter
+    .ofPattern("d MMMM yyyy 'at' h:mma")
+    .withZone(ZoneId.of(ukTimeZoneStringId))
 
   def dateTimeToString(dateTime: LocalDateTime): String =
     dateTime
-      .format(dateFormatter)
+      .format(datetimeFormatter)
+      .replace("12:00AM", "midnight")
+      .replace("12:00PM", "midday")
       .replace("AM", "am")
       .replace("PM", "pm")
-      .replace("00:00", "midnight")
-      .replace("12:00", "midday")
 }

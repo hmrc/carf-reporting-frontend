@@ -26,8 +26,9 @@ import models.upscan.UploadStatus.*
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryList, SummaryListRow}
 import viewmodels.govuk.all.{ActionItemViewModel, FluentActionItem, SummaryListRowViewModel, ValueViewModel}
+import models.fileSubmission.FileStatus.Passed
 
-import java.time.{Clock, Instant, ZoneId}
+import java.time.{Clock, Instant, LocalDateTime, ZoneId}
 
 trait TestData extends Generators {
 
@@ -204,4 +205,14 @@ trait TestData extends Generators {
       allCryptoUsersAreCorrections = false,
       allCryptoUsersAreDeletions = false
     )
+
+  lazy val testDateTime: LocalDateTime = LocalDateTime.of(2026, 8, 17, 16, 48)
+
+  val orgFileDetails = CachedFileDetails(
+    Some(testDateTime),
+    Passed,
+    subscriptionDetailsOrganisation,
+    organisationStandardRcaspDetails.copy(IsRCASPUser = true),
+    Some(extractedFileDetailsTestData)
+  )
 }

@@ -16,67 +16,102 @@
 
 package controllers
 
-import cats.syntax.all.*
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import models.fileSubmission.FileStatus.Passed
 import models.responses.{getEmails, getName}
-import pages.RcaspDetailsPage
+import pages.UploadCompletionLockPage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import repositories.SessionRepository
+import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{DateTimeFormats, FileConfirmationHelper}
-import views.html.FileConfirmationView
 import viewmodels.govuk.all.SummaryListViewModel
 import viewmodels.govuk.summarylist.FluentSummaryList
+import views.html.FileConfirmationView
 
-import java.time.{Clock, LocalDateTime}
 import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class FileConfirmationController @Inject (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
+    stubService: XmlFileDetailsStubService,
+    sessionRepository: SessionRepository,
     view: FileConfirmationView,
     config: FrontendAppConfig,
     helper: FileConfirmationHelper,
-    clock: Clock,
     val controllerComponents: MessagesControllerComponents
-) extends FrontendBaseController
-    with I18nSupport {
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
-  lazy private val recovery = Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
-    val userAnswers = request.userAnswers
-
-    userAnswers.get(RcaspDetailsPage).fold(recovery) { rcaspDetails =>
-      helper
-        .rows(userAnswers, rcaspDetails.getName)
-        .fold(recovery) { summaryListRows =>
-          val summary = SummaryListViewModel(rows = summaryListRows).withCssClass("govuk-!-margin-bottom-5")
-
-          val formattedDate    = DateTimeFormats.dateTimeToString(LocalDateTime.now(clock))
-          val isRcaspUser      = rcaspDetails.IsRCASPUser
-          val emailAddressHtml = generateEmailAddressHtml(rcaspDetails.getEmails, isRcaspUser)
-
-          Ok(view(summary, formattedDate, isRcaspUser, config.managementUrl, emailAddressHtml))
-        }
-    }
+  private def recovery(message: String) = {
+    logger.warn(s"[FileConfirmationController][onPageLoad] $message")
+    Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
   }
 
-  private def generateEmailAddressHtml(emailAddresses: List[String], isRCASPUser: Boolean)(implicit
+  def onPageLoad(rcaspId: String, uploadId: String): Action[AnyContent] =
+    (identify() andThen getData() andThen requireData).async { implicit request =>
+      val cachedFileDetails = stubService.getCachedFileDetails(
+        request.carfId,
+        rcaspId,
+        uploadId
+      ) // TODO getCachedFileDetails will be reworked when repository implementation is complete and will not use rcaspID
+
+      if (cachedFileDetails.fileStatus == Passed) {
+        cachedFileDetails.dateTime
+          .fold(Future.successful(recovery("Missing success datetime in cached file details"))) { datetime =>
+            cachedFileDetails.extractedFileDetails.fold(
+              Future.successful(recovery("Missing ExtractedFileDetails in cached file details"))
+            ) { extractedFileDetails =>
+              for {
+                updatedUserAnswers <- Future.fromTry(request.userAnswers.set(UploadCompletionLockPage, true))
+                _                  <- sessionRepository.set(updatedUserAnswers)
+              } yield {
+                val userEmailAddresses = cachedFileDetails.subscriptionDetails.getEmails
+                val rcaspDetails       = cachedFileDetails.rcaspDetails
+                val summaryListRows    = helper.rows(extractedFileDetails, rcaspDetails.getName)
+
+                val summary = SummaryListViewModel(rows = summaryListRows).withCssClass("govuk-!-margin-bottom-5")
+
+                val formattedDate       = DateTimeFormats.dateTimeToString(datetime)
+                val isRcaspUser         = rcaspDetails.IsRCASPUser
+                val rcaspEmailAddresses = rcaspDetails.getEmails
+                val emailAddressHtml    = generateEmailAddressHtml(userEmailAddresses, isRcaspUser, rcaspEmailAddresses)
+
+                Ok(view(summary, formattedDate, config.managementUrl, emailAddressHtml))
+              }
+            }
+          }
+      } else {
+        Future.successful(recovery(s"The file with upload id ($uploadId) has not passed automated checks"))
+      }
+    }
+
+  private def generateEmailAddressHtml(
+      emailAddresses: List[String],
+      isRCASPUser: Boolean,
+      rcaspEmailAddresses: List[String]
+  )(implicit
       messages: Messages
   ): String =
     emailAddresses match {
       case primary :: secondary :: Nil if isRCASPUser =>
         messages("fileConfirmation.2.email.sent", primary, secondary)
-      case primary :: Nil                             =>
+      case primary :: Nil if isRCASPUser              =>
         messages("fileConfirmation.1.email.sent", primary)
-      case Nil                                        => ""
       case _                                          =>
-        val emailToApplyComma = emailAddresses.take(emailAddresses.size - 1)
-        val lastEmail         = emailAddresses.last
+        val flEmailAddresses       = rcaspEmailAddresses
+        val completeEmailAddresses = emailAddresses ++ flEmailAddresses
+
+        val emailToApplyComma = completeEmailAddresses.take(emailAddresses.size - 1)
+        val lastEmail         = completeEmailAddresses.last
         messages("fileConfirmation.2.email.sent", emailToApplyComma.mkString(", "), lastEmail)
     }
 }
