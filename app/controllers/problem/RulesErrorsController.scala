@@ -30,6 +30,8 @@ import utils.LoggerUtil.logWarn
 class RulesErrorsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    getData: DataRetrievalAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     appConfig: FrontendAppConfig,
     rulesErrorsStubService: RulesErrorsStubService,
     val controllerComponents: MessagesControllerComponents,
@@ -38,20 +40,21 @@ class RulesErrorsController @Inject() (
     with I18nSupport
     with Logging {
 
-  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
-    val carfId = request.carfId
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen uploadCompletionLock) {
+    implicit request =>
+      val carfId = request.carfId
 
-    (rulesErrorsStubService.getRulesErrors(carfId), rulesErrorsStubService.getFileName(carfId)) match {
-      case (Some(errors), Some(fileName)) if errors.nonEmpty =>
-        val hasMoreThanMax = errors.length > Constants.maxErrorsShown
-        Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
+      (rulesErrorsStubService.getRulesErrors(carfId), rulesErrorsStubService.getFileName(carfId)) match {
+        case (Some(errors), Some(fileName)) if errors.nonEmpty =>
+          val hasMoreThanMax = errors.length > Constants.maxErrorsShown
+          Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
-      case (errors, _) =>
-        logWarn(
-          s"[RulesErrorsController][onPageLoad] Unable to retrieve rules errors or file name " +
-            s"for rules-errors page. Errors length: ${errors.map(_.length)}"
-        )
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-    }
+        case (errors, _) =>
+          logWarn(
+            s"[RulesErrorsController][onPageLoad] Unable to retrieve rules errors or file name " +
+              s"for rules-errors page. Errors length: ${errors.map(_.length)}"
+          )
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+      }
   }
 }

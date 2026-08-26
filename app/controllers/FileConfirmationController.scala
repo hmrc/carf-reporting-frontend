@@ -29,7 +29,6 @@ import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{DateTimeFormats, FileConfirmationHelper}
 import viewmodels.govuk.all.SummaryListViewModel
-import viewmodels.govuk.summarylist.FluentSummaryList
 import views.html.FileConfirmationView
 
 import javax.inject.Inject
@@ -78,7 +77,7 @@ class FileConfirmationController @Inject (
                 val rcaspDetails       = cachedFileDetails.rcaspDetails
                 val summaryListRows    = helper.rows(extractedFileDetails, rcaspDetails.getName)
 
-                val summary = SummaryListViewModel(rows = summaryListRows).withCssClass("govuk-!-margin-bottom-5")
+                val summary = SummaryListViewModel(rows = summaryListRows)
 
                 val formattedDate       = DateTimeFormats.dateTimeToString(datetime)
                 val isRcaspUser         = rcaspDetails.IsRCASPUser
@@ -110,7 +109,7 @@ class FileConfirmationController @Inject (
         val flEmailAddresses       = rcaspEmailAddresses
         val completeEmailAddresses = emailAddresses ++ flEmailAddresses
 
-        val emailToApplyComma = completeEmailAddresses.take(emailAddresses.size - 1)
+        val emailToApplyComma = completeEmailAddresses.take(completeEmailAddresses.size - 1)
         val lastEmail         = completeEmailAddresses.last
         messages("fileConfirmation.2.email.sent", emailToApplyComma.mkString(", "), lastEmail)
     }

@@ -18,8 +18,6 @@ package controllers.problem
 
 import config.{Constants, FrontendAppConfig}
 import controllers.actions.*
-
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.DataErrorsStubService
@@ -27,9 +25,13 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.*
 import views.html.problem.DataErrorsView
 
+import javax.inject.Inject
+
 class DataErrorsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    getData: DataRetrievalAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     appConfig: FrontendAppConfig,
     dataErrorsStubService: DataErrorsStubService,
     val controllerComponents: MessagesControllerComponents,
@@ -37,19 +39,20 @@ class DataErrorsController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
-    val carfId = request.carfId
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen uploadCompletionLock) {
+    implicit request =>
+      val carfId = request.carfId
 
-    (dataErrorsStubService.getDataErrors(carfId), dataErrorsStubService.getFileName(carfId)) match {
-      case (Some(errors), Some(fileName)) if errors.nonEmpty =>
-        val hasMoreThanMax = errors.length > Constants.maxErrorsShown
-        Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
+      (dataErrorsStubService.getDataErrors(carfId), dataErrorsStubService.getFileName(carfId)) match {
+        case (Some(errors), Some(fileName)) if errors.nonEmpty =>
+          val hasMoreThanMax = errors.length > Constants.maxErrorsShown
+          Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
-      case (errors, _) =>
-        logWarn(
-          s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${errors.map(_.length)}"
-        )
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-    }
+        case (errors, _) =>
+          logWarn(
+            s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${errors.map(_.length)}"
+          )
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+      }
   }
 }

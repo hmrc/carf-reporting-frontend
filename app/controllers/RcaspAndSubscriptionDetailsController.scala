@@ -31,6 +31,7 @@ class RcaspAndSubscriptionDetailsController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     sessionRepository: SessionRepository,
     rcaspRegistrationConnector: RcaspRegistrationConnector,
     subscriptionConnector: SubscriptionConnector,
@@ -39,7 +40,7 @@ class RcaspAndSubscriptionDetailsController @Inject() (
     extends FrontendBaseController {
 
   def onPageLoad(): Action[AnyContent] =
-    (identify andThen getData() andThen requireData).async { implicit request =>
+    (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
       request.userAnswers
         .get(ExtractedFileDetailsPage)
         .fold {

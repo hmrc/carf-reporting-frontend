@@ -27,7 +27,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import services.XmlFileDetailsStubService
 import utils.{DateTimeFormats, FileConfirmationHelper}
-import viewmodels.govuk.summarylist.*
 import views.html.FileConfirmationView
 
 import java.time.LocalDateTime
@@ -79,7 +78,7 @@ class FileConfirmationControllerSpec extends SpecBase {
           status(result)          mustEqual OK
           contentAsString(result)      must include(expectedEmailHtml)
           contentAsString(result) mustEqual view(
-            testSummaryList.withCssClass("govuk-!-margin-bottom-5"),
+            testSummaryList,
             formattedDateTime,
             managementUrl,
             expectedEmailHtml

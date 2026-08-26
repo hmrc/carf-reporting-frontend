@@ -32,21 +32,23 @@ class RcaspNotMatchingController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     val controllerComponents: MessagesControllerComponents,
     view: RcaspNotMatchingView,
     appConfig: FrontendAppConfig
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen requireData) { implicit request =>
-    request.userAnswers.get(ExtractedFileDetailsPage) match {
-      case Some(extractedFileDetails) =>
-        Ok(view(extractedFileDetails.sendingEntityIn, appConfig.yourRcaspsUrl))
-      case None                       =>
-        logWarn(
-          "[RcaspNotMatchingController][onPageLoad] ExtractedFileDetails not found in user answers, redirecting to Journey Recovery"
-        )
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+  def onPageLoad(): Action[AnyContent] =
+    (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
+      request.userAnswers.get(ExtractedFileDetailsPage) match {
+        case Some(extractedFileDetails) =>
+          Ok(view(extractedFileDetails.sendingEntityIn, appConfig.yourRcaspsUrl))
+        case None                       =>
+          logWarn(
+            "[RcaspNotMatchingController][onPageLoad] ExtractedFileDetails not found in user answers, redirecting to Journey Recovery"
+          )
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+      }
     }
-  }
 }

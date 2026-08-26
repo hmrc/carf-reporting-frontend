@@ -25,32 +25,71 @@ class DateTimeFormatsSpec extends SpecBase {
 
     ".dateTimeToString" - {
 
-      "must format a morning time correctly (am)" in {
-        val dateTime = LocalDateTime.of(2026, 8, 17, 9, 30)
-        val result   = DateTimeFormats.dateTimeToString(dateTime)
+      "during BST" - {
+        "must format a morning time correctly (am)" in {
+          val dateTime = LocalDateTime.of(2026, 8, 17, 8, 30)
+          val result   = DateTimeFormats.dateTimeToString(dateTime)
 
-        result mustEqual "17 August 2026 at 9:30am"
+          result mustEqual "17 August 2026 at 9:30am"
+        }
+
+        "must format an afternoon time correctly (pm)" in {
+          val dateTime = LocalDateTime.of(2026, 8, 17, 15, 48)
+          val result   = DateTimeFormats.dateTimeToString(dateTime)
+
+          result mustEqual "17 August 2026 at 4:48pm"
+        }
+
+        "must format midnight as 'midnight' instead of 12:00am" in {
+          val dateTime = LocalDateTime.of(2026, 8, 16, 23, 0)
+          val result   = DateTimeFormats.dateTimeToString(dateTime)
+
+          result mustEqual "17 August 2026 at midnight"
+        }
+
+        "must format noon as 'midday' instead of 12:00pm" in {
+          val dateTime = LocalDateTime.of(2026, 8, 17, 11, 0)
+          val result   = DateTimeFormats.dateTimeToString(dateTime)
+
+          result mustEqual "17 August 2026 at midday"
+        }
       }
 
-      "must format an afternoon time correctly (pm)" in {
-        val dateTime = LocalDateTime.of(2026, 8, 17, 16, 48)
-        val result   = DateTimeFormats.dateTimeToString(dateTime)
+      "during GMT" - {
+        "must format a morning time correctly (am)" in {
+          val dateTime = LocalDateTime.of(2026, 1, 17, 9, 30)
+          val result   = DateTimeFormats.dateTimeToString(dateTime)
 
-        result mustEqual "17 August 2026 at 4:48pm"
-      }
+          result mustEqual "17 January 2026 at 9:30am"
+        }
 
-      "must format midnight as 'midnight' instead of 12:00am" in {
-        val dateTime = LocalDateTime.of(2026, 8, 17, 0, 0)
-        val result   = DateTimeFormats.dateTimeToString(dateTime)
+        "must format a morning time correctly (am) single digit day" in {
+          val dateTime = LocalDateTime.of(2026, 1, 1, 9, 30)
+          val result   = DateTimeFormats.dateTimeToString(dateTime)
 
-        result mustEqual "17 August 2026 at midnight"
-      }
+          result mustEqual "1 January 2026 at 9:30am"
+        }
 
-      "must format noon as 'midday' instead of 12:00pm" in {
-        val dateTime = LocalDateTime.of(2026, 8, 17, 12, 0)
-        val result   = DateTimeFormats.dateTimeToString(dateTime)
+        "must format an afternoon time correctly (pm)" in {
+          val dateTime = LocalDateTime.of(2026, 1, 17, 16, 48)
+          val result   = DateTimeFormats.dateTimeToString(dateTime)
 
-        result mustEqual "17 August 2026 at midday"
+          result mustEqual "17 January 2026 at 4:48pm"
+        }
+
+        "must format midnight as 'midnight' instead of 12:00am" in {
+          val dateTime = LocalDateTime.of(2026, 1, 17, 0, 0)
+          val result   = DateTimeFormats.dateTimeToString(dateTime)
+
+          result mustEqual "17 January 2026 at midnight"
+        }
+
+        "must format noon as 'midday' instead of 12:00pm" in {
+          val dateTime = LocalDateTime.of(2026, 1, 17, 12, 0)
+          val result   = DateTimeFormats.dateTimeToString(dateTime)
+
+          result mustEqual "17 January 2026 at midday"
+        }
       }
     }
   }

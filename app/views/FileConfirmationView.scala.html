@@ -31,7 +31,7 @@
         content = HtmlContent(s"${messages("fileConfirmation.label.filePassed")}<br><strong>$dateFormatted</strong>")
     ))
 
-    @govukSummaryList(summaryList)
+    @govukSummaryList(summaryList.withCssClass("govuk-!-margin-bottom-5"))
 
     @defining(
         emailString
@@ -55,7 +55,7 @@
         @messages("fileConfirmation.feedback.link.text")
     </p>
 
-    <div class="govuk-!-padding-top-3 govuk-link govuk-!-display-none-print">
+    <div class="govuk-!-padding-top-3 govuk-!-display-none-print">
         <ul class="govuk-list">
         <li>
         @printLink(
@@ -73,7 +73,8 @@
         <li>
         @link(
             href = manageRCASPUrl,
-            key = "site.backToManagement"
+            key = "site.backToManagement",
+            id = Some("management-link")
         )
         </li>
         </ul>
