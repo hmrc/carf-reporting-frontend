@@ -18,6 +18,7 @@ package utils
 
 import base.SpecBase
 import models.fileSubmission.FileStatus.{Failed, Passed}
+import play.api.i18n.Messages
 
 class FileCheckResultHelperSpec extends SpecBase {
 
@@ -28,7 +29,7 @@ class FileCheckResultHelperSpec extends SpecBase {
     ".summaryList" - {
 
       "must build the correct rows when file status is Passed" in {
-        implicit val msgs = messages(app)
+        implicit val msgs: Messages = messages(app)
 
         val result = helper.summaryList(
           messageRefId = testMessageRefId,
@@ -53,7 +54,7 @@ class FileCheckResultHelperSpec extends SpecBase {
       }
 
       "must build the correct rows when file status is Failed" in {
-        implicit val msgs = messages(app)
+        implicit val msgs: Messages = messages(app)
 
         val result = helper.summaryList(
           messageRefId = testMessageRefId,
