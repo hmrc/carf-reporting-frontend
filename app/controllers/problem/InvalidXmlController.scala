@@ -37,7 +37,7 @@ class InvalidXmlController @Inject() (
   // TODO: replace hardcoded filename with the actual uploaded filename from UserAnswers once available (CARF-596)
   private val fileName: String = "filename.xml"
 
-  def onPageLoad: Action[AnyContent] = identify() { implicit request =>
+  def onPageLoad: Action[AnyContent] = identify { implicit request =>
     Ok(view(fileName, appConfig.managementUrl))
   }
 }

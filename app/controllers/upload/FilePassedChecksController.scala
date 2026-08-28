@@ -43,7 +43,7 @@ class FilePassedChecksController @Inject() (
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] =
-    (identify() andThen getData() andThen requireData).async { implicit request =>
+    (identify andThen getData() andThen requireData).async { implicit request =>
       stubService.getFileStatus(request.carfId).value.map {
         case Right(Passed) =>
           request.userAnswers.get(ExtractedFileDetailsPage).map(_.messageRefId) match {

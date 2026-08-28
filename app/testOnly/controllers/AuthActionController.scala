@@ -32,7 +32,7 @@ class AuthActionController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()).async { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData()).async { implicit request =>
     val carfId: String = s"CARF-ID = ${request.carfId}"
     Future.successful(Ok(carfId))
   }

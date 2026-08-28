@@ -44,9 +44,4 @@ class FakeIdentifierAction @Inject() (
 
   override protected def executionContext: ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
-
-  override def apply(
-      redirect: Boolean = true
-  ): ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest] = this
-
 }

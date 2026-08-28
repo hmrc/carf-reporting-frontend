@@ -45,7 +45,7 @@ class SaveExtractedFileDetailsController @Inject() (
     with Logging {
 
   def onPageLoad(sendingEntityIn: String): Action[AnyContent] =
-    (identify() andThen getData()).async { implicit request =>
+    (identify andThen getData()).async { implicit request =>
       stubService
         .getExtractedFileDetails(request.carfId, sendingEntityIn)
         .fold {

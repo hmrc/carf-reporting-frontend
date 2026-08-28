@@ -38,7 +38,7 @@ class RcaspNotMatchingController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen requireData) { implicit request =>
     request.userAnswers.get(ExtractedFileDetailsPage) match {
       case Some(extractedFileDetails) =>
         Ok(view(extractedFileDetails.sendingEntityIn, appConfig.yourRcaspsUrl))

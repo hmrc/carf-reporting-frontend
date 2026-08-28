@@ -44,7 +44,7 @@ class SendYourFileController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen requireData) { implicit request =>
     val userAnswers = request.userAnswers
 
     (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
@@ -61,7 +61,7 @@ class SendYourFileController @Inject() (
       }
   }
 
-  def onSubmit(): Action[AnyContent] = (identify() andThen getData() andThen requireData) { implicit request =>
+  def onSubmit(): Action[AnyContent] = (identify andThen getData() andThen requireData) { implicit request =>
     // TODO: Build request for FTS (details TBC) and call submission connector (CARF-611)
     request.userAnswers
       .get(ExtractedFileDetailsPage)
@@ -73,7 +73,7 @@ class SendYourFileController @Inject() (
       }
   }
 
-  def getFileStatusAndRedirect(): Action[AnyContent] = (identify() andThen getData() andThen requireData) {
+  def getFileStatusAndRedirect(): Action[AnyContent] = (identify andThen getData() andThen requireData) {
     implicit request =>
       // TODO: Call backend to check file status (CARF-621)
       Redirect(
