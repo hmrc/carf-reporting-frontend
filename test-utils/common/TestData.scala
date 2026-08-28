@@ -185,7 +185,7 @@ trait TestData extends Generators {
       messageTypeIndic = CARF701,
       hasOtherNexus = false,
       hasCryptoUsers = true,
-      docTypeIndic = OECD10,
+      docTypeIndic = Some(OECD10),
       isTestData = true,
       allCryptoUsersAreCorrections = false,
       allCryptoUsersAreDeletions = false
@@ -199,7 +199,7 @@ trait TestData extends Generators {
       messageTypeIndic = CARF703,
       hasOtherNexus = false,
       hasCryptoUsers = false,
-      docTypeIndic = OECD11,
+      docTypeIndic = None,
       isTestData = false,
       allCryptoUsersAreCorrections = false,
       allCryptoUsersAreDeletions = false

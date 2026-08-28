@@ -26,7 +26,7 @@ case class ExtractedFileDetails(
     messageTypeIndic: MessageTypeIndic,
     hasOtherNexus: Boolean,
     hasCryptoUsers: Boolean,
-    docTypeIndic: DocTypeIndic,
+    docTypeIndic: Option[DocTypeIndic],
     isTestData: Boolean,
     allCryptoUsersAreCorrections: Boolean,
     allCryptoUsersAreDeletions: Boolean
@@ -38,17 +38,17 @@ case class ExtractedFileDetails(
       messageTypeIndic match {
         case MessageTypeIndic.CARF701 =>
           if (hasOtherNexus && !hasCryptoUsers) NotificationOfReportingOutsideUk
-          else if (docTypeIndic == DocTypeIndic.OECD0) AdditionalInformationForExistingReport
+          else if (docTypeIndic.contains(DocTypeIndic.OECD0)) AdditionalInformationForExistingReport
           else NewInformation
         case MessageTypeIndic.CARF702 =>
           docTypeIndic match {
-            case DocTypeIndic.OECD3                      => DeletionOfExistingReport
-            case DocTypeIndic.OECD0 | DocTypeIndic.OECD2 =>
+            case Some(DocTypeIndic.OECD3)                            => DeletionOfExistingReport
+            case Some(DocTypeIndic.OECD0) | Some(DocTypeIndic.OECD2) =>
               if (allCryptoUsersAreCorrections || !hasCryptoUsers) CorrectedInformationForExistingReport
-              else if (docTypeIndic == DocTypeIndic.OECD0 && allCryptoUsersAreDeletions)
+              else if (docTypeIndic.contains(DocTypeIndic.OECD0) && allCryptoUsersAreDeletions)
                 DeletedInformationForExistingReport
               else CorrectedAndDeletedInformationForExistingReport
-            case _                                       => ReportableInformationFallback
+            case _                                                   => ReportableInformationFallback
           }
         case MessageTypeIndic.CARF703 => NilReport
       }
