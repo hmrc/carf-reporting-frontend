@@ -38,7 +38,7 @@ class RulesErrorsController @Inject() (
     with I18nSupport
     with Logging {
 
-  def onPageLoad(): Action[AnyContent] = identify() { implicit request =>
+  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
     val carfId = request.carfId
 
     (rulesErrorsStubService.getRulesErrors(carfId), rulesErrorsStubService.getFileName(carfId)) match {

@@ -39,7 +39,7 @@ class RcaspAndSubscriptionDetailsController @Inject() (
     extends FrontendBaseController {
 
   def onPageLoad(): Action[AnyContent] =
-    (identify() andThen getData() andThen requireData).async { implicit request =>
+    (identify andThen getData() andThen requireData).async { implicit request =>
       request.userAnswers
         .get(ExtractedFileDetailsPage)
         .fold {

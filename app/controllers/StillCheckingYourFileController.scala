@@ -47,7 +47,7 @@ class StillCheckingYourFileController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData() andThen requireData).async { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
 
     (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))

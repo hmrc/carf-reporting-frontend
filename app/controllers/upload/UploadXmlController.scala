@@ -61,12 +61,12 @@ class UploadXmlController @Inject() (
 
   val form: Form[String] = formProvider()
 
-  def onPageLoad(): Action[AnyContent] = (identify() andThen getData()).async { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData()).async { implicit request =>
     initialUpscanCall(form)
   }
 
   def showError(errorCode: String, errorMessage: String, errorRequestId: String): Action[AnyContent] =
-    (identify() andThen getData()).async { implicit request =>
+    (identify andThen getData()).async { implicit request =>
 
       val formWithErrors: Form[String] = ErrorCode.fromCode(errorCode) match {
         case Some(ErrorCode.EntityTooLarge)      => form.withError("file-upload", "uploadXml.error.file.size.large")
@@ -114,7 +114,7 @@ class UploadXmlController @Inject() (
   }
 
   def getUploadStatusAndRedirect(uploadId: UploadId): Action[AnyContent] =
-    (identify() andThen getData() andThen requireData).async { implicit request =>
+    (identify andThen getData() andThen requireData).async { implicit request =>
       def errorRedirect(errorCode: String, errorMessage: String, errorRequestId: String): Result =
         Redirect(controllers.upload.routes.UploadXmlController.showError(errorCode, errorMessage, errorRequestId).url)
 
