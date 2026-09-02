@@ -49,7 +49,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
     secondaryUserDetails = Some(SubscriptionContactDetails("Jane Doe", "GroupRep2@FATCACRS.com"))
   )
 
-  private val testDate = LocalDateTime.now(clock)
+  private def testDate = LocalDateTime.now(clock)
 
   def getCachedFileDetails(carfId: String, sendingEntityIn: String, uploadId: String): CachedFileDetails = {
     val _                     = uploadId // TODO Will be used to fetch correct file for RCASP Submission
