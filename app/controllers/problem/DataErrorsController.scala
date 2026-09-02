@@ -39,20 +39,19 @@ class DataErrorsController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen uploadCompletionLock) {
-    implicit request =>
-      val carfId = request.carfId
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen uploadCompletionLock) { implicit request =>
+    val carfId = request.carfId
 
-      (dataErrorsStubService.getDataErrors(carfId), dataErrorsStubService.getFileName(carfId)) match {
-        case (Some(errors), Some(fileName)) if errors.nonEmpty =>
-          val hasMoreThanMax = errors.length > Constants.maxErrorsShown
-          Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
+    (dataErrorsStubService.getDataErrors(carfId), dataErrorsStubService.getFileName(carfId)) match {
+      case (Some(errors), Some(fileName)) if errors.nonEmpty =>
+        val hasMoreThanMax = errors.length > Constants.maxErrorsShown
+        Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
-        case (errors, _) =>
-          logWarn(
-            s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${errors.map(_.length)}"
-          )
-          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-      }
+      case (errors, _) =>
+        logWarn(
+          s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${errors.map(_.length)}"
+        )
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 }

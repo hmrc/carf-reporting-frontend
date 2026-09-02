@@ -33,6 +33,7 @@ import views.html.FileConfirmationView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import utils.LoggerUtil.logWarn
 
 class FileConfirmationController @Inject (
     override val messagesApi: MessagesApi,
@@ -51,12 +52,12 @@ class FileConfirmationController @Inject (
     with Logging {
 
   private def recovery(message: String) = {
-    logger.warn(s"[FileConfirmationController][onPageLoad] $message")
+    logWarn(s"[FileConfirmationController][onPageLoad] $message")
     Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
   }
 
   def onPageLoad(rcaspId: String, uploadId: String): Action[AnyContent] =
-    (identify() andThen getData() andThen requireData).async { implicit request =>
+    (identify andThen getData() andThen requireData).async { implicit request =>
       val cachedFileDetails = stubService.getCachedFileDetails(
         request.carfId,
         rcaspId,
