@@ -20,6 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import pages.UploadSuccessDetailsPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -29,25 +30,52 @@ class InvalidXmlControllerSpec extends SpecBase {
 
   val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
 
+  lazy val invalidXmlRoute: String = controllers.problem.routes.InvalidXmlController.onPageLoad().url
+
   "InvalidXml Controller" - {
 
     "must return OK and the correct view for a GET" in {
       when(mockAppConfig.managementUrl) thenReturn "managementUrl"
       when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val userAnswers = emptyUserAnswers.withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.InvalidXmlController.onPageLoad().url)
-
-        val result = route(application, request).value
+        val request = FakeRequest(GET, invalidXmlRoute)
+        val result  = route(application, request).value
 
         val view = application.injector.instanceOf[InvalidXmlView]
 
         status(result)          mustEqual OK
-        contentAsString(result) mustEqual view("filename.xml", "managementUrl")(request, messages(application)).toString
+        contentAsString(result) mustEqual view(testFileName, "managementUrl")(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when user answers do not contain UploadSuccessDetails" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, invalidXmlRoute)
+        val result  = route(application, request).value
+
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when user answers do not exist" in {
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request = FakeRequest(GET, invalidXmlRoute)
+        val result  = route(application, request).value
+
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

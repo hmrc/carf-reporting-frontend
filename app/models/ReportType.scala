@@ -16,7 +16,6 @@
 
 package models
 
-import models.ReportType.*
 import play.api.i18n.Messages
 
 enum ReportType {

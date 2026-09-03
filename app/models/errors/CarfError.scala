@@ -16,6 +16,8 @@
 
 package models.errors
 
+import play.api.libs.json.*
+
 sealed trait CarfError
 
 case object ConversionError extends CarfError
@@ -34,3 +36,25 @@ object ApiError {
 
   case object JsonValidationError extends ApiError
 }
+
+sealed trait XmlValidationError extends CarfError
+
+object XmlValidationError {
+
+  private val xmlErrorsFormat: OFormat[XmlErrors] = Json.format[XmlErrors]
+
+  implicit val reads: Reads[XmlValidationError] = (json: JsValue) => {
+    val jsObject = json.asInstanceOf[JsObject]
+    jsObject.value.get("_type") match {
+      case Some(JsString("InvalidXmlError")) => JsSuccess(InvalidXmlError)
+      case Some(JsString("XmlErrors"))       => Json.fromJson[XmlErrors](jsObject)(xmlErrorsFormat)
+      case Some(value)                       => JsError(s"Unexpected value of _type: $value")
+      case None                              => JsError("Missing _type field")
+    }
+  }
+
+}
+
+case object InvalidXmlError extends XmlValidationError
+
+case class XmlErrors(errors: Seq[XmlError]) extends XmlValidationError

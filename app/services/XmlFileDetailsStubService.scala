@@ -16,6 +16,7 @@
 
 package services
 
+import cats.syntax.all.*
 import models.DocTypeIndic.*
 import models.MessageTypeIndic.*
 import models.errors.ApiError.InternalServerError
@@ -23,7 +24,7 @@ import models.fileSubmission.FileStatus
 import models.fileSubmission.FileStatus.*
 import models.responses.{OrganisationRcaspDetailsStandard, RcaspContactDetails, SubscriptionContactDetails, SubscriptionDetails}
 import models.{CachedFileDetails, ExtractedFileDetails, UserAnswers}
-import pages.FileStatusPage
+import pages.{ExtractedFileDetailsPage, FileStatusPage, RcaspDetailsPage, SubscriptionDetailsPage}
 import repositories.SessionRepository
 import types.ResultT
 
@@ -51,11 +52,35 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
 
   private def testDate = LocalDateTime.now(clock)
 
-  def getCachedFileDetails(carfId: String, sendingEntityIn: String, uploadId: String): CachedFileDetails = {
-    val _                     = uploadId // TODO Will be used to fetch correct file for RCASP Submission
+  def getCachedFileDetails(
+      carfId: String,
+      maybeUserAnswers: Option[UserAnswers],
+      uploadId: String
+  ): CachedFileDetails = {
+    val _ = uploadId // TODO Will be used to fetch correct file for RCASP Submission
+
+    val maybeExtractedFileDetails = maybeUserAnswers.flatMap(_.get(ExtractedFileDetailsPage))
+    val maybeRcaspDetails         = maybeUserAnswers.flatMap(_.get(RcaspDetailsPage))
+    val maybeSubscriptionDetails  = maybeUserAnswers.flatMap(_.get(SubscriptionDetailsPage))
+
+    (maybeExtractedFileDetails, maybeRcaspDetails, maybeSubscriptionDetails)
+      .mapN { (extractedFileDetails, rcaspDetails, subscriptionDetails) =>
+        CachedFileDetails(
+          Some(testDate),
+          Passed,
+          subscriptionDetails,
+          rcaspDetails,
+          Some(extractedFileDetails)
+        )
+      }
+      .getOrElse(hardcodedCachedFileDetails(carfId))
+  }
+
+  private def hardcodedCachedFileDetails(carfId: String): CachedFileDetails = {
     val testMessageRefId      =
       "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001"
     val testRcaspNameFromFile = "Timmy's Turtles"
+    val testSendingEntityIn   = "ZMCAR0123456786"
 
     carfId.takeRight(1) match {
       case "1" => // TestData
@@ -67,7 +92,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = Some(testRcaspNameFromFile),
               messageTypeIndic = CARF701,
               hasOtherNexus = false,
@@ -88,7 +113,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = None,
               messageTypeIndic = CARF703,
               hasOtherNexus = false,
@@ -109,7 +134,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = Some(testRcaspNameFromFile),
               messageTypeIndic = CARF701,
               hasOtherNexus = true,
@@ -130,7 +155,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = Some(testRcaspNameFromFile),
               messageTypeIndic = CARF701,
               hasOtherNexus = false,
@@ -151,7 +176,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = Some(testRcaspNameFromFile),
               messageTypeIndic = CARF701,
               hasOtherNexus = false,
@@ -172,7 +197,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = Some(testRcaspNameFromFile),
               messageTypeIndic = CARF702,
               hasOtherNexus = false,
@@ -193,7 +218,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = Some(testRcaspNameFromFile),
               messageTypeIndic = CARF702,
               hasOtherNexus = false,
@@ -214,7 +239,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = Some(testRcaspNameFromFile),
               messageTypeIndic = CARF702,
               hasOtherNexus = false,
@@ -235,7 +260,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = Some(testRcaspNameFromFile),
               messageTypeIndic = CARF702,
               hasOtherNexus = false,
@@ -256,7 +281,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           Some(
             ExtractedFileDetails(
               messageRefId = testMessageRefId,
-              sendingEntityIn = sendingEntityIn,
+              sendingEntityIn = testSendingEntityIn,
               rcaspName = Some(testRcaspNameFromFile),
               messageTypeIndic = CARF702,
               hasOtherNexus = false,

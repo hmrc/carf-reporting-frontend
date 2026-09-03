@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import controllers.actions.*
 import models.fileSubmission.FileStatus
 import models.responses.getName
-import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
+import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, UploadIdPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.XmlFileDetailsStubService
@@ -52,8 +52,8 @@ class StillCheckingYourFileController @Inject() (
     (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
       val userAnswers = request.userAnswers
 
-      (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
-        .mapN { (rcaspDetails, extractedFileDetails) =>
+      (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage), userAnswers.get(UploadIdPage))
+        .mapN { (rcaspDetails, extractedFileDetails, uploadId) =>
           // TODO: Replace StubService method with actual call to check file status (CARF-621)
           stubService.getFileStatus(request.carfId, userAnswers).value.map {
             case Right(fileStatus) =>
@@ -70,11 +70,11 @@ class StillCheckingYourFileController @Inject() (
                     )
                   )
                 case FileStatus.Passed                 =>
-                  Redirect(controllers.upload.routes.FilePassedChecksController.onPageLoad())
+                  Redirect(controllers.routes.FilePassedChecksController.onPageLoad())
                 case FileStatus.Failed                 =>
-                  Redirect(controllers.upload.routes.FileFailedChecksController.onPageLoad())
+                  Redirect(controllers.routes.FileFailedChecksController.onPageLoad())
                 case FileStatus.VirusFound             =>
-                  Redirect(controllers.problem.routes.VirusFoundController.onPageLoad())
+                  Redirect(controllers.problem.routes.VirusFoundController.onPageLoad(uploadId.value))
                 case FileStatus.UnprocessableErrorFile =>
                   Redirect(
                     controllers.routes.PlaceholderController
@@ -91,7 +91,7 @@ class StillCheckingYourFileController @Inject() (
         }
         .getOrElse {
           logWarn(
-            "[StillCheckingYourFileController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
+            "[StillCheckingYourFileController][onPageLoad] Unable to get RCASP details, ExtractedFileDetails or UploadId from user answers"
           )
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))
         }

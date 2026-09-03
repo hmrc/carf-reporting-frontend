@@ -33,7 +33,6 @@ class VirusFoundController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
-    requireData: DataRequiredAction,
     appConfig: FrontendAppConfig,
     uploadCompletionLock: UploadCompletionLockAction,
     stubService: XmlFileDetailsStubService,
@@ -43,8 +42,9 @@ class VirusFoundController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] =
-    (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
+  def onPageLoad(uploadId: String): Action[AnyContent] =
+    (identify andThen getData() andThen uploadCompletionLock).async { implicit request =>
+      // TODO: Replace StubService method with actual call to check file status (CARF-621)
       stubService.getFileStatus(request.carfId).value.map {
         case Right(VirusFound) =>
           Ok(view(appConfig.managementUrl))

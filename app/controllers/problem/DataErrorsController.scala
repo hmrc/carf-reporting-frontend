@@ -18,9 +18,11 @@ package controllers.problem
 
 import config.{Constants, FrontendAppConfig}
 import controllers.actions.*
+import models.problem.SchemaError
+import pages.{UploadSuccessDetailsPage, XmlErrorsPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.DataErrorsStubService
+import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.*
 import views.html.problem.DataErrorsView
@@ -31,27 +33,32 @@ class DataErrorsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
+    requireData: DataRequiredAction,
     uploadCompletionLock: UploadCompletionLockAction,
     appConfig: FrontendAppConfig,
-    dataErrorsStubService: DataErrorsStubService,
     val controllerComponents: MessagesControllerComponents,
     view: DataErrorsView
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen uploadCompletionLock) { implicit request =>
-    val carfId = request.carfId
+  def onPageLoad(): Action[AnyContent] =
+    (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
+      val userAnswers = request.userAnswers
 
-    (dataErrorsStubService.getDataErrors(carfId), dataErrorsStubService.getFileName(carfId)) match {
-      case (Some(errors), Some(fileName)) if errors.nonEmpty =>
-        val hasMoreThanMax = errors.length > Constants.maxErrorsShown
-        Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
+      (userAnswers.get(XmlErrorsPage), userAnswers.get(UploadSuccessDetailsPage).map(_.fileName)) match {
+        case (Some(xmlErrors), Some(fileName)) if xmlErrors.nonEmpty =>
+          val hasMoreThanMax = xmlErrors.length > Constants.maxErrorsShown
+          // TODO: Map XML errors to required content and HTML (CARF-591)
+          val schemaErrors   = xmlErrors.map { error =>
+            SchemaError(error.lineNumber, Text(error.errorMessage).asHtml)
+          }
+          Ok(view(fileName, schemaErrors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
-      case (errors, _) =>
-        logWarn(
-          s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${errors.map(_.length)}"
-        )
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        case (xmlErrors, _) =>
+          logWarn(
+            s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${xmlErrors.map(_.length)}"
+          )
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+      }
     }
-  }
 }
