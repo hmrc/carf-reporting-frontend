@@ -91,7 +91,7 @@ class UploadXmlController @Inject() (
       preparedForm: Form[String]
   )(implicit request: OptionalDataRequest[AnyContent], hc: HeaderCarrier): Future[Result] = {
     val uploadId: UploadId = UploadId.generate
-    val userAnswers        = request.userAnswers.getOrElse(UserAnswers(id = request.userId))
+    val userAnswers        = UserAnswers(id = request.userId)
 
     upscanConnector.upscanFormInitiate(uploadId).value.flatMap {
       case Right(upscanInitiateResponse) =>

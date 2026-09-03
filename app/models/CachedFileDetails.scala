@@ -13,3 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package models
+
+import models.fileSubmission.FileStatus
+import models.responses.{RcaspDetails, SubscriptionDetails}
+
+import java.time.LocalDateTime
+
+case class CachedFileDetails(
+    dateTime: Option[LocalDateTime],
+    fileStatus: FileStatus,
+    subscriptionDetails: SubscriptionDetails,
+    rcaspDetails: RcaspDetails,
+    extractedFileDetails: Option[ExtractedFileDetails]
+)

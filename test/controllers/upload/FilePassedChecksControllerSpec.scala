@@ -21,19 +21,19 @@ import models.errors.ApiError.InternalServerError
 import models.fileSubmission.FileStatus
 import models.fileSubmission.FileStatus.{Failed, Passed}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import org.mockito.Mockito._
-import pages.ExtractedFileDetailsPage
+import org.mockito.Mockito.*
+import pages.{ExtractedFileDetailsPage, UploadIdPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import services.StubService
+import play.api.test.Helpers.*
+import services.XmlFileDetailsStubService
 import types.ResultT
 import utils.FileCheckResultHelper
 import views.html.upload.FilePassedChecksView
 
 class FilePassedChecksControllerSpec extends SpecBase {
 
-  private val mockStubService: StubService = mock[StubService]
+  private val mockStubService: XmlFileDetailsStubService = mock[XmlFileDetailsStubService]
 
   private val mockFileCheckResultHelper: FileCheckResultHelper = mock[FileCheckResultHelper]
 
@@ -57,15 +57,14 @@ class FilePassedChecksControllerSpec extends SpecBase {
       ).thenReturn(testSummaryList)
 
       val userAnswers =
-        emptyUserAnswers.withPage(
-          ExtractedFileDetailsPage,
-          extractedFileDetailsTestData
-        )
+        emptyUserAnswers
+          .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
+          .withPage(UploadIdPage, testUploadId)
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[StubService].toInstance(mockStubService),
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
             bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
           )
           .build()
@@ -76,8 +75,10 @@ class FilePassedChecksControllerSpec extends SpecBase {
         val view    = application.injector.instanceOf[FilePassedChecksView]
 
         status(result)          mustEqual OK
-        contentAsString(result) mustEqual
-          view(testSummaryList)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(testSummaryList, testRcaspId, testUploadId.value)(
+          request,
+          messages(application)
+        ).toString
 
         verify(mockFileCheckResultHelper).summaryList(
           eqTo(testMessageRefId),
@@ -100,7 +101,7 @@ class FilePassedChecksControllerSpec extends SpecBase {
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[StubService].toInstance(mockStubService),
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
             bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
           )
           .build()
@@ -127,7 +128,7 @@ class FilePassedChecksControllerSpec extends SpecBase {
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            bind[StubService].toInstance(mockStubService),
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
             bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
           )
           .build()
@@ -160,7 +161,7 @@ class FilePassedChecksControllerSpec extends SpecBase {
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[StubService].toInstance(mockStubService),
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
             bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
           )
           .build()

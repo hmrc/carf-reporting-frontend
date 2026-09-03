@@ -196,3 +196,28 @@ rulesErrors.table.caption = Errors
 rulesErrors.table.head.code = Code
 rulesErrors.table.head.docRefId = DocRefId
 rulesErrors.table.head.error = Error
+fileConfirmation.title = File successfully sent
+fileConfirmation.label.heading = File successfully sent
+fileConfirmation.label.filePassed = Your file passed our automatic checks on
+
+fileConfirmation.fileId.label = File ID (MessageRefId)
+fileConfirmation.rcaspId.label = RCASP ID (SendingEntityIN)
+fileConfirmation.rcaspName.label = Reporting cryptoasset service provider (RCASP Name)
+fileConfirmation.rcaspName.label.none = Reporting cryptoasset service provider
+fileConfirmation.fileInformation.label = File information
+
+fileConfirmation.1.email.sent = We have sent a confirmation email to {0}.
+fileConfirmation.2.email.sent = We have sent a confirmation email to {0} and {1}.
+fileConfirmation.heading.next = What happens next
+fileConfirmation.p1.next = We will contact you if we have any questions about your report.
+
+
+fileConfirmation.heading.before = Before you go
+fileConfirmation.text.before = Your feedback helps us make our service better.
+fileConfirmation.feedback.link = Take a short survey
+fileConfirmation.feedback.link.text = to share your feedback on this service.
+fileConfirmation.link.text.print = Print this page
+fileConfirmation.link.text.upload = Upload another file
+
+
+

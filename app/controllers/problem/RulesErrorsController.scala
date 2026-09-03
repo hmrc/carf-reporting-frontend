@@ -30,6 +30,8 @@ import utils.LoggerUtil.logWarn
 class RulesErrorsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    getData: DataRetrievalAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     appConfig: FrontendAppConfig,
     rulesErrorsStubService: RulesErrorsStubService,
     val controllerComponents: MessagesControllerComponents,
@@ -38,7 +40,7 @@ class RulesErrorsController @Inject() (
     with I18nSupport
     with Logging {
 
-  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen uploadCompletionLock) { implicit request =>
     val carfId = request.carfId
 
     (rulesErrorsStubService.getRulesErrors(carfId), rulesErrorsStubService.getFileName(carfId)) match {

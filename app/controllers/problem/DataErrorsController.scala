@@ -18,8 +18,6 @@ package controllers.problem
 
 import config.{Constants, FrontendAppConfig}
 import controllers.actions.*
-
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.DataErrorsStubService
@@ -27,9 +25,13 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.*
 import views.html.problem.DataErrorsView
 
+import javax.inject.Inject
+
 class DataErrorsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    getData: DataRetrievalAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     appConfig: FrontendAppConfig,
     dataErrorsStubService: DataErrorsStubService,
     val controllerComponents: MessagesControllerComponents,
@@ -37,7 +39,7 @@ class DataErrorsController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen uploadCompletionLock) { implicit request =>
     val carfId = request.carfId
 
     (dataErrorsStubService.getDataErrors(carfId), dataErrorsStubService.getFileName(carfId)) match {

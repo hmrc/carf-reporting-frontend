@@ -26,7 +26,7 @@ import models.upscan.*
 import models.upscan.UploadStatus.*
 import org.mockito.ArgumentMatchers.{any, argThat, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
-import pages.{FileReferencePage, UploadIdPage}
+import pages.{FileReferencePage, SubscriptionDetailsPage, UploadIdPage}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -55,7 +55,7 @@ class UploadXmlControllerSpec extends SpecBase {
 
   "UploadXml Controller" - {
     ".onPageLoad" - {
-      "must return OK and the correct view for a GET" in {
+      "must return OK and the correct view for a GET (and user answers is reset)" in {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
@@ -63,7 +63,9 @@ class UploadXmlControllerSpec extends SpecBase {
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val userAnswers = emptyUserAnswers.withPage(SubscriptionDetailsPage, subscriptionDetailsOrganisation)
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[UpscanConnector].toInstance(mockUpscanConnector))
           .build()
 
@@ -80,7 +82,10 @@ class UploadXmlControllerSpec extends SpecBase {
           verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
           verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
           verify(mockSessionRepository, times(1)).set(
-            argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
+            argThat(ua =>
+              ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty &&
+                ua.get(SubscriptionDetailsPage).isEmpty
+            )
           )
         }
       }

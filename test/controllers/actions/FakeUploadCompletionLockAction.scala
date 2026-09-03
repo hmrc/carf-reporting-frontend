@@ -13,3 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package controllers.actions
+
+import models.requests.OptionalDataRequest
+
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+
+class FakeUploadCompletionLockAction @Inject() (implicit ec: ExecutionContext) extends UploadCompletionLockAction {
+
+  override protected def executionContext: ExecutionContext = ec
+
+  override protected def filter[A](request: OptionalDataRequest[A]): Future[Option[play.api.mvc.Result]] =
+    Future.successful(None)
+}

@@ -26,14 +26,14 @@ import pages.ExtractedFileDetailsPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.StubService
+import services.XmlFileDetailsStubService
 import types.ResultT
 import utils.FileCheckResultHelper
 import views.html.upload.FileFailedChecksView
 
 class FileFailedChecksControllerSpec extends SpecBase {
 
-  private val mockStubService: StubService = mock[StubService]
+  private val mockStubService: XmlFileDetailsStubService = mock[XmlFileDetailsStubService]
 
   private val mockFileCheckResultHelper: FileCheckResultHelper = mock[FileCheckResultHelper]
 
@@ -65,7 +65,7 @@ class FileFailedChecksControllerSpec extends SpecBase {
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[StubService].toInstance(mockStubService),
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
             bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
           )
           .build()
@@ -100,7 +100,7 @@ class FileFailedChecksControllerSpec extends SpecBase {
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[StubService].toInstance(mockStubService),
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
             bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
           )
           .build()
@@ -127,7 +127,7 @@ class FileFailedChecksControllerSpec extends SpecBase {
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            bind[StubService].toInstance(mockStubService),
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
             bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
           )
           .build()
@@ -160,7 +160,7 @@ class FileFailedChecksControllerSpec extends SpecBase {
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[StubService].toInstance(mockStubService),
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
             bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
           )
           .build()

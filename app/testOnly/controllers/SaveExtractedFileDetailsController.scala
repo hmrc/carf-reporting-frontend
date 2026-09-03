@@ -16,13 +16,14 @@
 
 package testOnly.controllers
 
+import config.Constants.tempUploadIdStub
 import controllers.actions.*
 import models.UserAnswers
 import pages.ExtractedFileDetailsPage
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.StubService
+import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
@@ -38,7 +39,7 @@ class SaveExtractedFileDetailsController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     sessionRepository: SessionRepository,
-    stubService: StubService,
+    stubService: XmlFileDetailsStubService,
     val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -47,7 +48,8 @@ class SaveExtractedFileDetailsController @Inject() (
   def onPageLoad(sendingEntityIn: String): Action[AnyContent] =
     (identify andThen getData()).async { implicit request =>
       stubService
-        .getExtractedFileDetails(request.carfId, sendingEntityIn)
+        .getCachedFileDetails(request.carfId, sendingEntityIn, tempUploadIdStub)
+        .extractedFileDetails
         .fold {
           logger.warn("[RcaspValidationController][onPageLoad] Missing ExtractedFileDetails")
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))

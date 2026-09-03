@@ -16,23 +16,24 @@
 
 package utils
 
-import play.api.i18n.Lang
+import config.Constants.ukTimeZoneStringId
 
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneId, ZoneOffset}
 import java.util.Locale
 
 object DateTimeFormats {
 
-  private val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  private val datetimeFormatter: DateTimeFormatter = DateTimeFormatter
+    .ofPattern("d MMMM yyyy 'at' h:mma", Locale.ENGLISH)
 
-  private val localisedDateTimeFormatters = Map(
-    "en" -> dateTimeFormatter,
-    "cy" -> dateTimeFormatter.withLocale(new Locale("cy"))
-  )
-
-  def dateTimeFormat()(implicit lang: Lang): DateTimeFormatter =
-    localisedDateTimeFormatters.getOrElse(lang.code, dateTimeFormatter)
-
-  val dateTimeHintFormat: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("d M yyyy")
+  def dateTimeToString(dateTime: LocalDateTime): String =
+    dateTime
+      .atZone(ZoneOffset.UTC)
+      .withZoneSameInstant(ZoneId.of(ukTimeZoneStringId))
+      .format(datetimeFormatter)
+      .replace("AM", "am")
+      .replace("PM", "pm")
+      .replace("12:00am", "midnight")
+      .replace("12:00pm", "midday")
 }

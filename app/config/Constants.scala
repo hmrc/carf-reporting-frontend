@@ -23,4 +23,8 @@ object Constants {
   val bytesInMb = 1048576
 
   val maxErrorsShown: Int = 100
+
+  inline final val ukTimeZoneStringId = "Europe/London"
+
+  inline val tempUploadIdStub = "123456"
 }

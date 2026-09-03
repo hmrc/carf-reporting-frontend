@@ -33,7 +33,7 @@ case class ExtractedFileDetails(
 ) {
 
   def getReportType: ReportType =
-    if (isTestData) { TestData }
+    if (isTestData) TestData
     else {
       messageTypeIndic match {
         case MessageTypeIndic.CARF701 =>

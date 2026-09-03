@@ -21,7 +21,7 @@ import models.fileSubmission.FileStatus.Failed
 import pages.ExtractedFileDetailsPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.StubService
+import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{FileCheckResultHelper, LoggerUtil}
 import views.html.upload.FileFailedChecksView
@@ -34,7 +34,7 @@ class FileFailedChecksController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
-    stubService: StubService,
+    stubService: XmlFileDetailsStubService,
     fileCheckResultHelper: FileCheckResultHelper,
     val controllerComponents: MessagesControllerComponents,
     view: FileFailedChecksView

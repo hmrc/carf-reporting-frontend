@@ -27,14 +27,14 @@ import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.StubService
+import services.XmlFileDetailsStubService
 import types.ResultT
 import utils.StillCheckingYourFileHelper
 import views.html.StillCheckingYourFileView
 
 class StillCheckingYourFileControllerSpec extends SpecBase {
 
-  val mockStubService: StubService                                 = mock[StubService]
+  val mockStubService: XmlFileDetailsStubService                   = mock[XmlFileDetailsStubService]
   val mockStillCheckingYourFileHelper: StillCheckingYourFileHelper = mock[StillCheckingYourFileHelper]
   val mockAppConfig: FrontendAppConfig                             = mock[FrontendAppConfig]
 
@@ -63,7 +63,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 
@@ -103,7 +103,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 
@@ -138,7 +138,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 
@@ -167,7 +167,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 
@@ -196,7 +196,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 
@@ -225,7 +225,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 
@@ -254,7 +254,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 
@@ -281,7 +281,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 
@@ -305,7 +305,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 
@@ -329,7 +329,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[StubService].toInstance(mockStubService)
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
         )
         .build()
 

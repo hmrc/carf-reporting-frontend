@@ -38,10 +38,12 @@ GET         /send-your-file/status                      controllers.SendYourFile
 
 GET         /still-checking-your-file                   controllers.StillCheckingYourFileController.onPageLoad()
 
-GET         /file-passed-checks                controllers.upload.FilePassedChecksController.onPageLoad()
+GET         /file-passed-checks                         controllers.upload.FilePassedChecksController.onPageLoad()
 
-GET         /file-failed-checks                controllers.upload.FileFailedChecksController.onPageLoad()
+GET         /file-failed-checks                         controllers.upload.FileFailedChecksController.onPageLoad()
 
-GET         /problem/virus-found               controllers.problem.VirusFoundController.onPageLoad()
+GET         /problem/virus-found                        controllers.problem.VirusFoundController.onPageLoad()
 
-GET         /problem/rules-errors              controllers.problem.RulesErrorsController.onPageLoad()
+GET         /problem/rules-errors                       controllers.problem.RulesErrorsController.onPageLoad()
+
+GET         /file-confirmation/:rcaspId/:uploadId       controllers.FileConfirmationController.onPageLoad(rcaspId, uploadId)

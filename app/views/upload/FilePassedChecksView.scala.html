@@ -22,7 +22,7 @@
         govukButton: GovukButton
 )
 
-@(summaryList: SummaryList)(implicit request: Request[_], messages: Messages)
+@(summaryList: SummaryList, sendingEntityIn: String, uploadId: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("filePassedChecks.title")), showBackLink = false) {
 
@@ -32,6 +32,6 @@
 
     @govukButton(
         ButtonViewModel(messages("filePassedChecks.button")).withAttribute("id" -> "continue")
-        .asLink(controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation link - ticket CARF-645").url)
+        .asLink(controllers.routes.FileConfirmationController.onPageLoad(sendingEntityIn, uploadId).url)
     )
 }

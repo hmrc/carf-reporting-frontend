@@ -24,7 +24,7 @@ import models.responses.getName
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.StubService
+import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.logWarn
 import utils.StillCheckingYourFileHelper
@@ -37,61 +37,63 @@ class StillCheckingYourFileController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     requireData: DataRequiredAction,
     view: StillCheckingYourFileView,
     stillCheckingYourFileHelper: StillCheckingYourFileHelper,
     appConfig: FrontendAppConfig,
-    stubService: StubService,
+    stubService: XmlFileDetailsStubService,
     val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData() andThen requireData).async { implicit request =>
-    val userAnswers = request.userAnswers
+  def onPageLoad(): Action[AnyContent] =
+    (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
+      val userAnswers = request.userAnswers
 
-    (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
-      .mapN { (rcaspDetails, extractedFileDetails) =>
-        // TODO: Replace StubService method with actual call to check file status (CARF-621)
-        stubService.getFileStatus(request.carfId, userAnswers).value.map {
-          case Right(fileStatus) =>
-            fileStatus match {
-              case FileStatus.Pending                =>
-                val summaryList =
-                  stillCheckingYourFileHelper.stillCheckingYourFileSummaryList(extractedFileDetails.messageRefId)
-                Ok(
-                  view(
-                    summaryList,
-                    appConfig.managementUrl,
-                    rcaspDetails.IsRCASPUser,
-                    rcaspDetails.getName
+      (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
+        .mapN { (rcaspDetails, extractedFileDetails) =>
+          // TODO: Replace StubService method with actual call to check file status (CARF-621)
+          stubService.getFileStatus(request.carfId, userAnswers).value.map {
+            case Right(fileStatus) =>
+              fileStatus match {
+                case FileStatus.Pending                =>
+                  val summaryList =
+                    stillCheckingYourFileHelper.stillCheckingYourFileSummaryList(extractedFileDetails.messageRefId)
+                  Ok(
+                    view(
+                      summaryList,
+                      appConfig.managementUrl,
+                      rcaspDetails.IsRCASPUser,
+                      rcaspDetails.getName
+                    )
                   )
-                )
-              case FileStatus.Passed                 =>
-                Redirect(controllers.upload.routes.FilePassedChecksController.onPageLoad())
-              case FileStatus.Failed                 =>
-                Redirect(controllers.upload.routes.FileFailedChecksController.onPageLoad())
-              case FileStatus.VirusFound             =>
-                Redirect(controllers.problem.routes.VirusFoundController.onPageLoad())
-              case FileStatus.UnprocessableErrorFile =>
-                Redirect(
-                  controllers.routes.PlaceholderController
-                    .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
-                    .url
-                )
-              case FileStatus.UnexpectedError        =>
-                Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
-            }
-          case Left(error)       =>
-            logWarn(s"[StillCheckingYourFileController][onPageLoad] Error getting file status: $error")
-            Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
+                case FileStatus.Passed                 =>
+                  Redirect(controllers.upload.routes.FilePassedChecksController.onPageLoad())
+                case FileStatus.Failed                 =>
+                  Redirect(controllers.upload.routes.FileFailedChecksController.onPageLoad())
+                case FileStatus.VirusFound             =>
+                  Redirect(controllers.problem.routes.VirusFoundController.onPageLoad())
+                case FileStatus.UnprocessableErrorFile =>
+                  Redirect(
+                    controllers.routes.PlaceholderController
+                      .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
+                      .url
+                  )
+                case FileStatus.UnexpectedError        =>
+                  Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
+              }
+            case Left(error)       =>
+              logWarn(s"[StillCheckingYourFileController][onPageLoad] Error getting file status: $error")
+              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
+          }
         }
-      }
-      .getOrElse {
-        logWarn(
-          "[StillCheckingYourFileController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
-        )
-        Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))
-      }
-  }
+        .getOrElse {
+          logWarn(
+            "[StillCheckingYourFileController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
+          )
+          Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))
+        }
+    }
 }
