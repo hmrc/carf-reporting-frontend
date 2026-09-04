@@ -1,0 +1,76 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import models.fileSubmission.{FileStatus, NextStepLink, SubmittedFileCheck}
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukTag
+@import viewmodels.ResultOfAutomaticChecksViewModel
+
+@this(govukTag: GovukTag, link: components.Link)
+
+@(submissions: Seq[SubmittedFileCheck])(implicit request: Request[_], messages: Messages)
+
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-visually-hidden">@messages("resultOfAutomaticChecks.heading")</caption>
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header app-custom-class cbc-width-fi">@messages("resultOfAutomaticChecks.table.head.rcasp")</th>
+      <th scope="col" class="govuk-table__header app-custom-class cbc-width-message">@messages("resultOfAutomaticChecks.table.head.messageRefId")</th>
+      <th scope="col" class="govuk-table__header app-custom-class cbc-width-sent">@messages("resultOfAutomaticChecks.table.head.sent")</th>
+      <th scope="col" class="govuk-table__header app-custom-class cbc-width-result">@messages("resultOfAutomaticChecks.table.head.result")</th>
+      <th scope="col" class="govuk-table__header app-custom-class cbc-width-next">@messages("resultOfAutomaticChecks.table.head.nextStep")</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+  @for(submission <- submissions) {
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header" style="word-break: break-all;">@submission.rcaspName</th>
+      <td class="govuk-table__cell" style="word-break: break-all;">@submission.messageRefId</td>
+      <td class="govuk-table__cell">@ResultOfAutomaticChecksViewModel.sent(submission.dateSubmitted)</td>
+      <td class="govuk-table__cell">@govukTag(FileStatus.tagForFileStatus(submission.fileStatus))</td>
+      <td class="govuk-table__cell">@nextStepContent(ResultOfAutomaticChecksViewModel.nextStepLink(submission.fileStatus))</td>
+    </tr>
+  }
+  </tbody>
+</table>
+
+@nextStepContent(nextStepLink: NextStepLink) = {
+  @nextStepLink match {
+    case NextStepLink.GotoConfirmation => {
+      @link(
+        href = controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation page").url,
+        key = "resultOfAutomaticChecks.nextStep.confirmation"
+      )
+    }
+    case NextStepLink.CheckErrors => {
+      @link(href = controllers.problem.routes.RulesErrorsController.onPageLoad().url, key = "resultOfAutomaticChecks.nextStep.checkErrors")
+    }
+    case NextStepLink.UploadFileAgain => {
+      @link(href = controllers.upload.routes.UploadXmlController.onPageLoad().url, key = "resultOfAutomaticChecks.nextStep.uploadAgain")
+    }
+    case NextStepLink.ContactUs => {
+      @link(
+        href = controllers.routes.PlaceholderController.onPageLoad("TODO: file-not-accepted page").url,
+        key = "resultOfAutomaticChecks.nextStep.contactUs"
+      )
+    }
+    case NextStepLink.VirusFound => {
+      @link(href = controllers.problem.routes.VirusFoundController.onPageLoad().url, key = "resultOfAutomaticChecks.nextStep.checkProblem")
+    }
+    case NextStepLink.NoLink => {
+      <span class="govuk-visually-hidden">@messages("resultOfAutomaticChecks.nextStep.none")</span>
+    }
+  }
+}

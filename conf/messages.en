@@ -219,5 +219,20 @@ fileConfirmation.feedback.link.text = to share your feedback on this service.
 fileConfirmation.link.text.print = Print this page
 fileConfirmation.link.text.upload = Upload another file
 
+resultOfAutomaticChecks.title                   = Result of automatic checks
+resultOfAutomaticChecks.heading                 = Result of automatic checks
+resultOfAutomaticChecks.p1                      = This information will be available for 28 days from the date you uploaded the file.
+resultOfAutomaticChecks.nextStep.none           = None
 
+resultOfAutomaticChecks.table.head.rcasp        = RCASP
+resultOfAutomaticChecks.table.head.messageRefId = MessageRefId
+resultOfAutomaticChecks.table.head.sent         = Sent
+resultOfAutomaticChecks.table.head.result       = Result
+resultOfAutomaticChecks.table.head.nextStep     = Next step
+
+resultOfAutomaticChecks.nextStep.confirmation   = Go to confirmation
+resultOfAutomaticChecks.nextStep.checkErrors    = Check errors
+resultOfAutomaticChecks.nextStep.checkProblem   = Check problem
+resultOfAutomaticChecks.nextStep.uploadAgain    = Upload file again
+resultOfAutomaticChecks.nextStep.contactUs      = Contact us
 
