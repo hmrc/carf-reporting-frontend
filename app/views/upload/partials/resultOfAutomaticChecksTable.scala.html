@@ -49,7 +49,10 @@
 @nextStepContent(nextStepLink: NextStepLink) = {
   @nextStepLink match {
     case NextStepLink.GotoConfirmation => {
-      @link(href = controllers.upload.routes.FileConfirmationController.onPageLoad().url, key = "resultOfAutomaticChecks.nextStep.confirmation")
+      @link(
+        href = controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation page").url,
+        key = "resultOfAutomaticChecks.nextStep.confirmation"
+      )
     }
     case NextStepLink.CheckErrors => {
       @link(href = controllers.problem.routes.RulesErrorsController.onPageLoad().url, key = "resultOfAutomaticChecks.nextStep.checkErrors")
@@ -58,7 +61,10 @@
       @link(href = controllers.upload.routes.UploadXmlController.onPageLoad().url, key = "resultOfAutomaticChecks.nextStep.uploadAgain")
     }
     case NextStepLink.ContactUs => {
-      @link(href = controllers.problem.routes.FileNotAcceptedController.onPageLoad().url, key = "resultOfAutomaticChecks.nextStep.contactUs")
+      @link(
+        href = controllers.routes.PlaceholderController.onPageLoad("TODO: file-not-accepted page").url,
+        key = "resultOfAutomaticChecks.nextStep.contactUs"
+      )
     }
     case NextStepLink.VirusFound => {
       @link(href = controllers.problem.routes.VirusFoundController.onPageLoad().url, key = "resultOfAutomaticChecks.nextStep.checkProblem")
