@@ -32,9 +32,9 @@ class FileValidationConnectorISpec
 
   lazy val connector: FileValidationConnector = app.injector.instanceOf[FileValidationConnector]
 
-  ".validateUploadedFile" - {
+  ".validateAndExtract" - {
 
-    val testUrl = "/carf-reporting/validate-xml"
+    val testUrl = "/carf-reporting/validate-extract-xml"
 
     val extractedFileDetailsResponseBody: String =
       s"""
@@ -91,7 +91,7 @@ class FileValidationConnectorISpec
           )
       )
 
-      val result = connector.validateUploadedFile(testDownloadUrl).value.futureValue
+      val result = connector.validateAndExtract(testDownloadUrl).value.futureValue
 
       result mustBe Right(extractedFileDetailsTestData)
     }
@@ -106,7 +106,7 @@ class FileValidationConnectorISpec
           )
       )
 
-      val result = connector.validateUploadedFile(testDownloadUrl).value.futureValue
+      val result = connector.validateAndExtract(testDownloadUrl).value.futureValue
 
       result mustBe Left(JsonValidationError)
     }
@@ -121,7 +121,7 @@ class FileValidationConnectorISpec
           )
       )
 
-      val result = connector.validateUploadedFile(testDownloadUrl).value.futureValue
+      val result = connector.validateAndExtract(testDownloadUrl).value.futureValue
 
       val expectedXmlErrors = XmlErrors(errors =
         Seq(
@@ -157,7 +157,7 @@ class FileValidationConnectorISpec
           )
       )
 
-      val result = connector.validateUploadedFile(testDownloadUrl).value.futureValue
+      val result = connector.validateAndExtract(testDownloadUrl).value.futureValue
 
       result mustBe Left(InvalidXmlError)
     }
@@ -172,7 +172,7 @@ class FileValidationConnectorISpec
           )
       )
 
-      val result = connector.validateUploadedFile(testDownloadUrl).value.futureValue
+      val result = connector.validateAndExtract(testDownloadUrl).value.futureValue
 
       result mustBe Left(JsonValidationError)
     }
@@ -186,7 +186,7 @@ class FileValidationConnectorISpec
           )
       )
 
-      val result = connector.validateUploadedFile(testDownloadUrl).value.futureValue
+      val result = connector.validateAndExtract(testDownloadUrl).value.futureValue
 
       result mustBe Left(InternalServerError)
     }
@@ -200,7 +200,7 @@ class FileValidationConnectorISpec
           )
       )
 
-      val result = connector.validateUploadedFile(testDownloadUrl).value.futureValue
+      val result = connector.validateAndExtract(testDownloadUrl).value.futureValue
 
       result mustBe Left(InternalServerError)
     }

@@ -36,12 +36,12 @@ import scala.util.{Failure, Success, Try}
 
 class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpClientV2) {
 
-  def validateUploadedFile(
+  def validateAndExtract(
       downloadUrl: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[ExtractedFileDetails] = {
-    val requestUrl = url"${config.carfReportingBaseUrl}/validate-xml"
+    val requestUrl = url"${config.carfReportingBaseUrl}/validate-extract-xml"
 
-    logInfo(s"[FileValidationConnector][validateUploadedFile] Calling endpoint: ${requestUrl.toURI}")
+    logInfo(s"[FileValidationConnector][validateAndExtract] Calling endpoint: ${requestUrl.toURI}")
 
     ResultT.fromFuture {
       http
@@ -55,7 +55,7 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
                 case Success(extractedFileDetails) => Right(extractedFileDetails)
                 case Failure(_)                    =>
                   logWarn(
-                    s"[FileValidationConnector][validateUploadedFile] Error parsing response body (status 200) from $requestUrl"
+                    s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 200) from $requestUrl"
                   )
                   Left(JsonValidationError)
               }
@@ -64,13 +64,13 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
                 case Success(xmlValidationError) => Left(xmlValidationError)
                 case Failure(_)                  =>
                   logWarn(
-                    s"[FileValidationConnector][validateUploadedFile] Error parsing response body (status 422) from $requestUrl"
+                    s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 422) from $requestUrl"
                   )
                   Left(JsonValidationError)
               }
             case status               =>
-              logWarn(
-                s"[FileValidationConnector][validateUploadedFile] Unexpected response: status $status from $requestUrl"
+              logError(
+                s"[FileValidationConnector][validateAndExtract] Unexpected response: status $status from $requestUrl"
               )
               Left(InternalServerError)
           }

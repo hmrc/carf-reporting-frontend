@@ -47,7 +47,7 @@ class FileValidationController @Inject() (
           logWarn("[FileValidationController][onPageLoad] Missing UploadSuccessDetails from user answers")
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         } { uploadSuccessDetails =>
-          fileValidationConnector.validateUploadedFile(uploadSuccessDetails.downloadUrl).value.flatMap {
+          fileValidationConnector.validateAndExtract(uploadSuccessDetails.downloadUrl).value.flatMap {
             case Right(extractedFileDetails) =>
               for {
                 updatedAnswers <-
@@ -55,7 +55,9 @@ class FileValidationController @Inject() (
                 _              <- sessionRepository.set(updatedAnswers)
               } yield Redirect(controllers.routes.RcaspAndSubscriptionDetailsController.onPageLoad())
             case Left(InvalidXmlError)       =>
-              logWarn("[FileValidationController][onPageLoad] Received InvalidXmlError from file validation")
+              logWarn(
+                "[FileValidationController][onPageLoad] Received InvalidXmlError from file validation (fatal XML error due to malformed XML)"
+              )
               Future.successful(Redirect(controllers.problem.routes.InvalidXmlController.onPageLoad()))
             case Left(XmlErrors(xmlErrors))  =>
               logWarn("[FileValidationController][onPageLoad] Received schema validation errors from file validation")
