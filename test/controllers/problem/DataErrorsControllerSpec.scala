@@ -18,38 +18,33 @@ package controllers.problem
 
 import base.SpecBase
 import config.FrontendAppConfig
-import models.problem.{DataErrorsStubData, SchemaError}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
-import play.api.inject.bind
+import models.problem.SchemaError
+import pages.{UploadSuccessDetailsPage, XmlErrorsPage}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import services.DataErrorsStubService
+import play.api.test.Helpers.*
+import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import views.html.problem.DataErrorsView
 
 class DataErrorsControllerSpec extends SpecBase {
 
-  private val mockService: DataErrorsStubService = mock[DataErrorsStubService]
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(mockService)
-  }
+  lazy val dataErrorsRoute: String = controllers.problem.routes.DataErrorsController.onPageLoad().url
 
   "DataErrors Controller" - {
 
     "must return OK and the correct view when errors and filename are both present, under the max" in {
+      val userAnswers = emptyUserAnswers
+        .withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+        .withPage(XmlErrorsPage, xmlFewErrors)
 
-      when(mockService.getFileName(any())).thenReturn(Some("filename.xml"))
-      when(mockService.getDataErrors(any())).thenReturn(Some(DataErrorsStubData.fewErrors))
+      val schemaErrors = xmlFewErrors.map { error =>
+        SchemaError(error.lineNumber, Text(error.errorMessage).asHtml)
+      }
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[DataErrorsStubService].toInstance(mockService))
-        .build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request   = FakeRequest(GET, routes.DataErrorsController.onPageLoad().url)
+        val request   = FakeRequest(GET, dataErrorsRoute)
 
         val result = route(application, request).value
 
@@ -57,7 +52,7 @@ class DataErrorsControllerSpec extends SpecBase {
 
         status(result)          mustEqual OK
         contentAsString(result) mustEqual
-          view("filename.xml", DataErrorsStubData.fewErrors, hasMoreThanMax = false, appConfig.managementUrl)(
+          view(testFileName, schemaErrors, hasMoreThanMax = false, appConfig.managementUrl)(
             request,
             messages(application)
           ).toString
@@ -65,17 +60,19 @@ class DataErrorsControllerSpec extends SpecBase {
     }
 
     "must return OK and truncate to 100 rows with hasMoreThanMax true when errors exceed the max" in {
+      val userAnswers = emptyUserAnswers
+        .withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+        .withPage(XmlErrorsPage, xmlManyErrors)
 
-      when(mockService.getFileName(any())).thenReturn(Some("filename.xml"))
-      when(mockService.getDataErrors(any())).thenReturn(Some(DataErrorsStubData.manyErrors))
+      val schemaErrors = xmlManyErrors.map { error =>
+        SchemaError(error.lineNumber, Text(error.errorMessage).asHtml)
+      }
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[DataErrorsStubService].toInstance(mockService))
-        .build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request   = FakeRequest(GET, routes.DataErrorsController.onPageLoad().url)
+        val request   = FakeRequest(GET, dataErrorsRoute)
 
         val result = route(application, request).value
 
@@ -83,7 +80,7 @@ class DataErrorsControllerSpec extends SpecBase {
 
         status(result)          mustEqual OK
         contentAsString(result) mustEqual
-          view("filename.xml", DataErrorsStubData.manyErrors.take(100), hasMoreThanMax = true, appConfig.managementUrl)(
+          view(testFileName, schemaErrors.take(100), hasMoreThanMax = true, appConfig.managementUrl)(
             request,
             messages(application)
           ).toString
@@ -91,16 +88,10 @@ class DataErrorsControllerSpec extends SpecBase {
     }
 
     "must redirect to Journey Recovery when both errors and filename are missing" in {
-
-      when(mockService.getFileName(any())).thenReturn(None)
-      when(mockService.getDataErrors(any())).thenReturn(None)
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[DataErrorsStubService].toInstance(mockService))
-        .build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.DataErrorsController.onPageLoad().url)
+        val request = FakeRequest(GET, dataErrorsRoute)
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
@@ -109,16 +100,12 @@ class DataErrorsControllerSpec extends SpecBase {
     }
 
     "must redirect to Journey Recovery when filename is missing but errors are present" in {
+      val userAnswers = emptyUserAnswers.withPage(XmlErrorsPage, xmlFewErrors)
 
-      when(mockService.getFileName(any())).thenReturn(None)
-      when(mockService.getDataErrors(any())).thenReturn(Some(DataErrorsStubData.fewErrors))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[DataErrorsStubService].toInstance(mockService))
-        .build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.DataErrorsController.onPageLoad().url)
+        val request = FakeRequest(GET, dataErrorsRoute)
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
@@ -127,16 +114,24 @@ class DataErrorsControllerSpec extends SpecBase {
     }
 
     "must redirect to Journey Recovery when errors are empty but filename is present" in {
+      val userAnswers = emptyUserAnswers.withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
 
-      when(mockService.getFileName(any())).thenReturn(Some("filename.xml"))
-      when(mockService.getDataErrors(any())).thenReturn(Some(Seq.empty[SchemaError]))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[DataErrorsStubService].toInstance(mockService))
-        .build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.DataErrorsController.onPageLoad().url)
+        val request = FakeRequest(GET, dataErrorsRoute)
+        val result  = route(application, request).value
+
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when user answers do not exist" in {
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request = FakeRequest(GET, dataErrorsRoute)
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER

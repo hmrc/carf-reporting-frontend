@@ -18,9 +18,11 @@ package controllers.problem
 
 import config.FrontendAppConfig
 import controllers.actions.*
+import pages.UploadSuccessDetailsPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.LoggerUtil.logWarn
 import views.html.problem.InvalidXmlView
 
 import javax.inject.Inject
@@ -29,6 +31,7 @@ class InvalidXmlController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
+    requireData: DataRequiredAction,
     uploadCompletionLock: UploadCompletionLockAction,
     val controllerComponents: MessagesControllerComponents,
     view: InvalidXmlView,
@@ -36,10 +39,15 @@ class InvalidXmlController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  // TODO: replace hardcoded filename with the actual uploaded filename from UserAnswers once available (CARF-596)
-  private val fileName: String = "filename.xml"
-
-  def onPageLoad: Action[AnyContent] = (identify andThen getData() andThen uploadCompletionLock) { implicit request =>
-    Ok(view(fileName, appConfig.managementUrl))
-  }
+  def onPageLoad: Action[AnyContent] =
+    (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
+      request.userAnswers
+        .get(UploadSuccessDetailsPage)
+        .fold {
+          logWarn("[InvalidXmlController][onPageLoad] Missing file name from user answers")
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        } { uploadSuccessDetails =>
+          Ok(view(uploadSuccessDetails.fileName, appConfig.managementUrl))
+        }
+    }
 }

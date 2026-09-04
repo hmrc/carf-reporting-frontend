@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.upload
+package controllers
 
 import base.SpecBase
 import models.errors.ApiError.InternalServerError
@@ -29,9 +29,9 @@ import play.api.test.Helpers.*
 import services.XmlFileDetailsStubService
 import types.ResultT
 import utils.FileCheckResultHelper
-import views.html.upload.FilePassedChecksView
+import views.html.upload.FileFailedChecksView
 
-class FilePassedChecksControllerSpec extends SpecBase {
+class FileFailedChecksControllerSpec extends SpecBase {
 
   private val mockStubService: XmlFileDetailsStubService = mock[XmlFileDetailsStubService]
 
@@ -42,24 +42,23 @@ class FilePassedChecksControllerSpec extends SpecBase {
     reset(mockStubService, mockFileCheckResultHelper)
   }
 
-  "FilePassedChecksController" - {
+  "FileFailedChecksController" - {
 
-    "must return OK and render the view when file status is Passed and ExtractedFileDetailsPage exists" in {
+    "must return OK and render the view when file status is Failed and user answers contains the required data" in {
       when(mockStubService.getFileStatus(any[String]()))
-        .thenReturn(ResultT.fromValue[FileStatus](Passed))
+        .thenReturn(ResultT.fromValue[FileStatus](Failed))
 
       when(
         mockFileCheckResultHelper.summaryList(
           eqTo(testMessageRefId),
-          eqTo(Passed),
-          eqTo("filePassedChecks")
+          eqTo(Failed),
+          eqTo("fileFailedChecks")
         )(any)
       ).thenReturn(testSummaryList)
 
-      val userAnswers =
-        emptyUserAnswers
-          .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
-          .withPage(UploadIdPage, testUploadId)
+      val userAnswers = emptyUserAnswers
+        .withPage(ExtractedFileDetailsPage, extractedFileDetailsNilReport)
+        .withPage(UploadIdPage, testUploadId)
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
@@ -70,33 +69,29 @@ class FilePassedChecksControllerSpec extends SpecBase {
           .build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.FilePassedChecksController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.FileFailedChecksController.onPageLoad().url)
         val result  = route(application, request).value
-        val view    = application.injector.instanceOf[FilePassedChecksView]
+        val view    = application.injector.instanceOf[FileFailedChecksView]
 
         status(result)          mustEqual OK
-        contentAsString(result) mustEqual view(testSummaryList, testRcaspId, testUploadId.value)(
-          request,
-          messages(application)
-        ).toString
+        contentAsString(result) mustEqual
+          view(testSummaryList, testUploadId.value)(request, messages(application)).toString
 
         verify(mockFileCheckResultHelper).summaryList(
           eqTo(testMessageRefId),
-          eqTo(Passed),
-          eqTo("filePassedChecks")
+          eqTo(Failed),
+          eqTo("fileFailedChecks")
         )(any)
       }
     }
 
-    "must redirect to Journey Recovery when file status is not Passed" in {
+    "must redirect to Journey Recovery when file status is not Failed" in {
       when(mockStubService.getFileStatus(any[String]()))
-        .thenReturn(ResultT.fromValue[FileStatus](Failed))
+        .thenReturn(ResultT.fromValue[FileStatus](Passed))
 
-      val userAnswers =
-        emptyUserAnswers.withPage(
-          ExtractedFileDetailsPage,
-          extractedFileDetailsTestData
-        )
+      val userAnswers = emptyUserAnswers
+        .withPage(ExtractedFileDetailsPage, extractedFileDetailsNilReport)
+        .withPage(UploadIdPage, testUploadId)
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
@@ -110,39 +105,11 @@ class FilePassedChecksControllerSpec extends SpecBase {
         val result =
           route(
             application,
-            FakeRequest(GET, routes.FilePassedChecksController.onPageLoad().url)
+            FakeRequest(GET, routes.FileFailedChecksController.onPageLoad().url)
           ).value
 
         status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual
-          controllers.routes.JourneyRecoveryController.onPageLoad().url
-
-        verifyNoInteractions(mockFileCheckResultHelper)
-      }
-    }
-
-    "must redirect to Journey Recovery when ExtractedFileDetailsPage is missing" in {
-      when(mockStubService.getFileStatus(any[String]()))
-        .thenReturn(ResultT.fromValue[FileStatus](Passed))
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[XmlFileDetailsStubService].toInstance(mockStubService),
-            bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
-          )
-          .build()
-
-      running(application) {
-        val result =
-          route(
-            application,
-            FakeRequest(GET, routes.FilePassedChecksController.onPageLoad().url)
-          ).value
-
-        status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual
-          controllers.routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
         verifyNoInteractions(mockFileCheckResultHelper)
       }
@@ -152,11 +119,9 @@ class FilePassedChecksControllerSpec extends SpecBase {
       when(mockStubService.getFileStatus(any[String]()))
         .thenReturn(ResultT.fromError[FileStatus](InternalServerError))
 
-      val userAnswers =
-        emptyUserAnswers.withPage(
-          ExtractedFileDetailsPage,
-          extractedFileDetailsTestData
-        )
+      val userAnswers = emptyUserAnswers
+        .withPage(ExtractedFileDetailsPage, extractedFileDetailsNilReport)
+        .withPage(UploadIdPage, testUploadId)
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
@@ -170,12 +135,62 @@ class FilePassedChecksControllerSpec extends SpecBase {
         val result =
           route(
             application,
-            FakeRequest(GET, routes.FilePassedChecksController.onPageLoad().url)
+            FakeRequest(GET, routes.FileFailedChecksController.onPageLoad().url)
           ).value
 
         status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual
-          controllers.routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+        verifyNoInteractions(mockFileCheckResultHelper)
+      }
+    }
+
+    "must redirect to Journey Recovery when ExtractedFileDetailsPage is missing" in {
+      val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
+            bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
+          )
+          .build()
+
+      running(application) {
+        val result =
+          route(
+            application,
+            FakeRequest(GET, routes.FileFailedChecksController.onPageLoad().url)
+          ).value
+
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+        verifyNoInteractions(mockFileCheckResultHelper)
+      }
+    }
+
+    "must redirect to Journey Recovery when UploadIdPage is missing" in {
+      val userAnswers = emptyUserAnswers
+        .withPage(ExtractedFileDetailsPage, extractedFileDetailsNilReport)
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[XmlFileDetailsStubService].toInstance(mockStubService),
+            bind[FileCheckResultHelper].toInstance(mockFileCheckResultHelper)
+          )
+          .build()
+
+      running(application) {
+        val result =
+          route(
+            application,
+            FakeRequest(GET, routes.FileFailedChecksController.onPageLoad().url)
+          ).value
+
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
         verifyNoInteractions(mockFileCheckResultHelper)
       }
@@ -185,7 +200,7 @@ class FilePassedChecksControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.FilePassedChecksController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.FileFailedChecksController.onPageLoad().url)
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER

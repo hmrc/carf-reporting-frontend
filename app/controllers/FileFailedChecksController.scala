@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package controllers.upload
+package controllers
 
-import controllers.actions._
+import cats.syntax.all.*
+import controllers.actions.*
 import models.fileSubmission.FileStatus.Failed
-import pages.ExtractedFileDetailsPage
+import pages.{ExtractedFileDetailsPage, UploadIdPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.{FileCheckResultHelper, LoggerUtil}
+import utils.FileCheckResultHelper
+import utils.LoggerUtil.*
 import views.html.upload.FileFailedChecksView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class FileFailedChecksController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
+    uploadCompletionLock: UploadCompletionLockAction,
     stubService: XmlFileDetailsStubService,
     fileCheckResultHelper: FileCheckResultHelper,
     val controllerComponents: MessagesControllerComponents,
@@ -43,33 +46,34 @@ class FileFailedChecksController @Inject() (
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] =
-    (identify andThen getData() andThen requireData).async { implicit request =>
-      stubService.getFileStatus(request.carfId).value.map {
-        case Right(Failed) =>
-          request.userAnswers.get(ExtractedFileDetailsPage).map(_.messageRefId) match {
-            case Some(value) =>
+    (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
+      (request.userAnswers.get(ExtractedFileDetailsPage), request.userAnswers.get(UploadIdPage))
+        .mapN { (extractedFileDetails, uploadId) =>
+          // TODO: Replace StubService method with actual call to check file status (CARF-621)
+          stubService.getFileStatus(request.carfId).value.map {
+            case Right(Failed) =>
               val summaryList =
                 fileCheckResultHelper.summaryList(
-                  messageRefId = value,
+                  messageRefId = extractedFileDetails.messageRefId,
                   fileStatus = Failed,
                   messagePrefix = "fileFailedChecks"
                 )
+              Ok(view(summaryList, uploadId.value))
 
-              Ok(view(summaryList))
+            case Right(otherStatus) =>
+              logWarn(s"[FileFailedChecksController][onPageLoad] File status was: $otherStatus")
+              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
 
-            case None =>
-              LoggerUtil
-                .logWarn("[FileFailedChecksController][onPageLoad] ExtractedFileDetailsPage missing from UserAnswers")
+            case Left(error) =>
+              logWarn(s"[FileFailedChecksController][onPageLoad] Error retrieving file status: $error")
               Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
           }
-
-        case Right(otherStatus) =>
-          LoggerUtil.logWarn(s"[FileFailedChecksController][onPageLoad] File status was: $otherStatus")
-          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-
-        case Left(error) =>
-          LoggerUtil.logWarn(s"[FileFailedChecksController][onPageLoad] Error retrieving file status: $error")
-          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-      }
+        }
+        .getOrElse {
+          logWarn(
+            "[FileFailedChecksController][onPageLoad] ExtractedFileDetailsPage or UploadId missing from UserAnswers"
+          )
+          Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        }
     }
 }

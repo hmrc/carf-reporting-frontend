@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package controllers.upload
+package controllers
 
+import cats.syntax.all.*
 import controllers.actions.*
 import models.fileSubmission.FileStatus.Passed
 import pages.{ExtractedFileDetailsPage, UploadIdPage}
@@ -23,11 +24,12 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.{FileCheckResultHelper, LoggerUtil}
+import utils.LoggerUtil.logWarn
+import utils.FileCheckResultHelper
 import views.html.upload.FilePassedChecksView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class FilePassedChecksController @Inject() (
     override val messagesApi: MessagesApi,
@@ -45,44 +47,33 @@ class FilePassedChecksController @Inject() (
 
   def onPageLoad(): Action[AnyContent] =
     (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
-      stubService.getFileStatus(request.carfId).value.map {
-        case Right(Passed) =>
-          request.userAnswers.get(ExtractedFileDetailsPage) match {
-            case Some(extractedFileDetails) =>
+      (request.userAnswers.get(ExtractedFileDetailsPage), request.userAnswers.get(UploadIdPage))
+        .mapN { (extractedFileDetails, uploadId) =>
+          // TODO: Replace StubService method with actual call to check file status (CARF-621)
+          stubService.getFileStatus(request.carfId).value.map {
+            case Right(Passed) =>
               val summaryList =
                 fileCheckResultHelper.summaryList(
                   messageRefId = extractedFileDetails.messageRefId,
                   fileStatus = Passed,
                   messagePrefix = "filePassedChecks"
                 )
+              Ok(view(summaryList, uploadId.value))
 
-              request.userAnswers
-                .get(UploadIdPage)
-                .map(_.value)
-                .fold {
-                  LoggerUtil.logWarn(
-                    "[FilePassedChecksController][onPageLoad] UploadIdPage is missing from UserAnswers"
-                  )
-                  Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-                } { uploadId =>
-                  Ok(
-                    view(summaryList, extractedFileDetails.sendingEntityIn, uploadId)
-                  )
-                }
-            case None                       =>
-              LoggerUtil.logWarn(
-                "[FilePassedChecksController][onPageLoad] ExtractedFileDetailsPage missing from UserAnswers"
-              )
+            case Right(otherStatus) =>
+              logWarn(s"[FilePassedChecksController][onPageLoad] File status was: $otherStatus")
+              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+
+            case Left(error) =>
+              logWarn(s"[FilePassedChecksController][onPageLoad] Error retrieving file status: $error")
               Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
           }
-
-        case Right(otherStatus) =>
-          LoggerUtil.logWarn(s"[FilePassedChecksController][onPageLoad] File status was: $otherStatus")
-          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-
-        case Left(error) =>
-          LoggerUtil.logWarn(s"[FilePassedChecksController][onPageLoad] Error retrieving file status: $error")
-          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-      }
+        }
+        .getOrElse {
+          logWarn(
+            "[FileFailedChecksController][onPageLoad] ExtractedFileDetailsPage or UploadId missing from UserAnswers"
+          )
+          Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        }
     }
 }

@@ -22,6 +22,8 @@ GET         /upload-file                                controllers.upload.Uploa
 GET         /status                                     controllers.upload.UploadXmlController.getUploadStatusAndRedirect(uploadId: upscan.UploadId)
 GET         /error                                      controllers.upload.UploadXmlController.showError(errorCode: String, errorMessage: String, errorRequestId: String)
 
+GET         /validate-file                              controllers.upload.FileValidationController.onPageLoad()
+
 GET         /problem/invalid-xml                        controllers.problem.InvalidXmlController.onPageLoad()
 
 GET         /problem/data-errors                        controllers.problem.DataErrorsController.onPageLoad()
@@ -38,12 +40,12 @@ GET         /send-your-file/status                      controllers.SendYourFile
 
 GET         /still-checking-your-file                   controllers.StillCheckingYourFileController.onPageLoad()
 
-GET         /file-passed-checks                         controllers.upload.FilePassedChecksController.onPageLoad()
+GET         /file-passed-checks                         controllers.FilePassedChecksController.onPageLoad()
 
-GET         /file-failed-checks                         controllers.upload.FileFailedChecksController.onPageLoad()
+GET         /file-failed-checks                         controllers.FileFailedChecksController.onPageLoad()
 
-GET         /problem/virus-found                        controllers.problem.VirusFoundController.onPageLoad()
+GET         /problem/virus-found/:uploadId              controllers.problem.VirusFoundController.onPageLoad(uploadId: String)
 
-GET         /problem/rules-errors                       controllers.problem.RulesErrorsController.onPageLoad()
+GET         /problem/rules-errors/:uploadId             controllers.problem.RulesErrorsController.onPageLoad(uploadId: String)
 
-GET         /file-confirmation/:rcaspId/:uploadId       controllers.FileConfirmationController.onPageLoad(rcaspId, uploadId)
+GET         /file-confirmation/:uploadId                controllers.FileConfirmationController.onPageLoad(uploadId: String)
