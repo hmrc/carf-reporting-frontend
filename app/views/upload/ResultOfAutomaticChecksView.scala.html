@@ -14,42 +14,53 @@
  * limitations under the License.
  *@
 
+@import models.fileSubmission.FileStatus
 @import models.fileSubmission.SubmittedFileCheck
+@import viewmodels.ResultOfAutomaticChecksViewModel
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
 @this(
         layout: templates.Layout,
         link: components.Link,
-        resultOfAutomaticChecksTable: views.html.upload.partials.resultOfAutomaticChecksTable
+        govukTable: GovukTable,
+        govukTag: GovukTag
 )
 
 @(submissions: Seq[SubmittedFileCheck], managementUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("resultOfAutomaticChecks.title"))) {
 
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">@messages("resultOfAutomaticChecks.heading")</h1>
 
-            <h1 class="govuk-heading-l">@messages("resultOfAutomaticChecks.heading")</h1>
+    <p class="govuk-body">@messages("resultOfAutomaticChecks.p1")</p>
 
-            <p class="govuk-body">@messages("resultOfAutomaticChecks.p1")</p>
-
-        </div>
-    </div>
-
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-        @resultOfAutomaticChecksTable(submissions)
-        </div>
-    </div>
-
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-            <p class="govuk-!-padding-top-3">
-            @link(
-                href = managementUrl,
-                key = "site.backToManagement"
+    <div class="rules-error-table-wrapper">
+    @govukTable(Table(
+        head = Some(Seq(
+            HeadCell(content = Text(messages("resultOfAutomaticChecks.table.head.rcasp")), classes = "govuk-table__header app-custom-class cbc-width-fi"),
+            HeadCell(content = Text(messages("resultOfAutomaticChecks.table.head.messageRefId")), classes = "govuk-table__header app-custom-class cbc-width-message"),
+            HeadCell(content = Text(messages("resultOfAutomaticChecks.table.head.sent")), classes = "govuk-table__header app-custom-class cbc-width-sent"),
+            HeadCell(content = Text(messages("resultOfAutomaticChecks.table.head.result")), classes = "govuk-table__header app-custom-class cbc-width-result"),
+            HeadCell(content = Text(messages("resultOfAutomaticChecks.table.head.nextStep")), classes = "govuk-table__header app-custom-class cbc-width-next")
+        )),
+        rows = submissions.map { submission =>
+            Seq(
+                TableRow(content = Text(submission.rcaspName), classes = "govuk-table__header long-word"),
+                TableRow(content = Text(submission.messageRefId), classes = "govuk-table__cell long-word-break-all"),
+                TableRow(content = Text(ResultOfAutomaticChecksViewModel.sent(submission.dateSubmitted))),
+                TableRow(content = HtmlContent(govukTag(FileStatus.tagForFileStatus(submission.fileStatus)))),
+                TableRow(content = FileStatus.linkForFileStatus(submission.fileStatus))
             )
-            </p>
-        </div>
+        },
+        caption = Some(messages("resultOfAutomaticChecks.heading")),
+        captionClasses = "govuk-visually-hidden"
+    ))
     </div>
+
+    <p class="govuk-body govuk-!-padding-top-3">
+    @link(
+        href = managementUrl,
+        key = "site.backToManagement"
+    )
+    </p>
 }
