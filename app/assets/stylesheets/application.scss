@@ -19,6 +19,10 @@ $hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-f
   word-wrap: break-word;
 }
 
+.long-word-break-all {
+  word-break: break-all;
+}
+
 .code--slim {
   border: 1px solid #DFE0E7;
   border-radius: 4px;
@@ -96,18 +100,3 @@ $hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-f
   margin-bottom: 0;
 }
 
-.cbc-width-message {
-  width: 35%;
-}
-
-.cbc-width-sent {
-  width: 20%;
-}
-
-.cbc-width-result {
-  width: 15%;
-}
-
-.cbc-width-next {
-  width: 15%;
-}
