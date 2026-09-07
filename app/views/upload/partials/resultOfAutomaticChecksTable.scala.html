@@ -33,17 +33,17 @@
       <th scope="col" class="govuk-table__header app-custom-class cbc-width-next">@messages("resultOfAutomaticChecks.table.head.nextStep")</th>
     </tr>
   </thead>
-  <tbody class="govuk-table__body">
-  @for(submission <- submissions) {
-    <tr class="govuk-table__row">
-      <th scope="row" class="govuk-table__header" style="word-break: break-all;">@submission.rcaspName</th>
-      <td class="govuk-table__cell" style="word-break: break-all;">@submission.messageRefId</td>
-      <td class="govuk-table__cell">@ResultOfAutomaticChecksViewModel.sent(submission.dateSubmitted)</td>
-      <td class="govuk-table__cell">@govukTag(FileStatus.tagForFileStatus(submission.fileStatus))</td>
-      <td class="govuk-table__cell">@nextStepContent(ResultOfAutomaticChecksViewModel.nextStepLink(submission.fileStatus))</td>
-    </tr>
-  }
-  </tbody>
+    <tbody class="govuk-table__body">
+    @for(submission <- submissions) {
+        <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header long-word">@submission.rcaspName</th>
+            <td class="govuk-table__cell long-word">@submission.messageRefId</td>
+            <td class="govuk-table__cell">@ResultOfAutomaticChecksViewModel.sent(submission.dateSubmitted)</td>
+            <td class="govuk-table__cell">@govukTag(FileStatus.tagForFileStatus(submission.fileStatus))</td>
+            <td class="govuk-table__cell">@nextStepContent(ResultOfAutomaticChecksViewModel.nextStepLink(submission.fileStatus))</td>
+        </tr>
+    }
+    </tbody>
 </table>
 
 @nextStepContent(nextStepLink: NextStepLink) = {
