@@ -15,6 +15,7 @@
  *@
 
 @import models.upscan.UpscanInitiateResponse
+
 @this(
         layout: templates.Layout,
         govukErrorSummary: GovukErrorSummary,
@@ -22,7 +23,6 @@
         govukHint: GovukHint,
         govukFileUpload: GovukFileUpload
 )
-
 
 @(form: Form[_], upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[_], messages: Messages)
 
@@ -63,7 +63,7 @@
 
         <p class="govuk-body">
         @govukButton(
-            ButtonViewModel(messages("site.continue")).withAttribute("id" -> "submit").preventingDoubleClick()
+            ButtonViewModel(messages("site.continue")).withAttribute("id" -> "continue").preventingDoubleClick()
         )
         </p>
         <input type="hidden" id="processingMessage" value="@messages("uploadXml.processing")" />
