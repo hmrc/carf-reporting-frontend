@@ -71,7 +71,7 @@ object FileStatus {
       case Passed                 =>
         HtmlContent(
           Link()(
-            href = controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation page").url,
+            href = controllers.routes.FileConfirmationController.onPageLoad().url,
             key = "resultOfAutomaticChecks.nextStep.confirmation"
           )
         )
