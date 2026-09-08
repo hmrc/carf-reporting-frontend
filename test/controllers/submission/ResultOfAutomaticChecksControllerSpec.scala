@@ -21,10 +21,10 @@ import config.FrontendAppConfig
 import models.errors.ApiError.InternalServerError
 import models.fileSubmission.{ResultOfAutomaticChecksStubData, SlicedCachedFileDetails}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.AutomaticChecksStubService
 import types.ResultT
 import views.html.submission.ResultOfAutomaticChecksView
