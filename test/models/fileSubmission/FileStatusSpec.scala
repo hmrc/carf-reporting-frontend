@@ -78,7 +78,7 @@ class FileStatusSpec extends SpecBase {
       "must render a link to the file-confirmation placeholder for Passed" in {
         val content = linkForFileStatus(Passed).asHtml.body
 
-        content must include(controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation page").url)
+        content must include(controllers.routes.FileConfirmationController).url)
         content must include(messages("resultOfAutomaticChecks.nextStep.confirmation"))
       }
 
