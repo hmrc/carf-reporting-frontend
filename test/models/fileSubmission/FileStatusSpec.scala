@@ -96,15 +96,8 @@ class FileStatusSpec extends SpecBase {
         content must include(messages("resultOfAutomaticChecks.nextStep.checkProblem"))
       }
 
-      "must render a link to upload the file again for UnprocessableErrorFile" in {
+      "must render a link to the file-not-accepted placeholder for UnprocessableErrorFile" in {
         val content = linkForFileStatus(UnprocessableErrorFile).asHtml.body
-
-        content must include(controllers.upload.routes.UploadXmlController.onPageLoad().url)
-        content must include(messages("resultOfAutomaticChecks.nextStep.uploadAgain"))
-      }
-
-      "must render a link to the file-not-accepted placeholder for UnexpectedError" in {
-        val content = linkForFileStatus(UnexpectedError).asHtml.body
 
         content must include(
           controllers.routes.PlaceholderController
@@ -113,6 +106,14 @@ class FileStatusSpec extends SpecBase {
         )
         content must include(messages("resultOfAutomaticChecks.nextStep.contactUs"))
       }
+
+      "must render a link to upload the file again for UnexpectedError" in {
+        val content = linkForFileStatus(UnexpectedError).asHtml.body
+
+        content must include(controllers.upload.routes.UploadXmlController.onPageLoad().url)
+        content must include(messages("resultOfAutomaticChecks.nextStep.uploadAgain"))
+      }
+
     }
   }
 }
