@@ -18,7 +18,6 @@ package controllers.submission
 
 import config.FrontendAppConfig
 import controllers.actions._
-import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.AutomaticChecksStubService
@@ -38,8 +37,7 @@ class ResultOfAutomaticChecksController @Inject() (
     view: ResultOfAutomaticChecksView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport
-    with Logging {
+    with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
     val carfId = request.carfId
