@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package viewmodels
-
-import models.fileSubmission.{FileStatus, NextStepLink}
+package models.fileSubmission
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-object ResultOfAutomaticChecksViewModel {
+final case class SlicedCachedFileDetails(
+    rcaspName: String,
+    messageRefId: String,
+    dateSubmitted: LocalDateTime,
+    fileStatus: FileStatus
+) {
 
+  def sentFormatted: String =
+    dateSubmitted
+      .format(SlicedCachedFileDetails.dateFormatter)
+      .replace("AM", "am")
+      .replace("PM", "pm")
+}
+
+object SlicedCachedFileDetails {
   private val dateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy h:mma", Locale.UK)
-
-  def sent(dateSubmitted: LocalDateTime): String =
-    dateSubmitted.format(dateFormatter).toLowerCase(Locale.UK)
-
-  def nextStepLink(fileStatus: FileStatus): NextStepLink =
-    NextStepLink.fromFileStatus(fileStatus)
 }

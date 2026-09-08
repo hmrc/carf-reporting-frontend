@@ -23,49 +23,48 @@ object ResultOfAutomaticChecksStubData {
   private val abcBank: String   = "ABC Bank plc"
   private val myCompany: String = "My Company Ltd"
 
-  val passed: SubmittedFileCheck = SubmittedFileCheck(
+  val passedFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     abcBank,
     "GB2026GB-CAR1234567892_Valid",
     LocalDateTime.now(),
     FileStatus.Passed
   )
 
-  val failedRules: SubmittedFileCheck = SubmittedFileCheck(
+  val failedRulesFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     abcBank,
     "GB2026GB-CAR1234567892_BR-invalid",
     LocalDateTime.now().minusMinutes(5),
     FileStatus.Failed
   )
 
-  val pending: SubmittedFileCheck = SubmittedFileCheck(
+  val pendingFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     abcBank,
     "GB2026GB-CAR1234567892_CADX-down",
     LocalDateTime.now().minusMinutes(10),
     FileStatus.Pending
   )
 
-  val unexpectedError: SubmittedFileCheck = SubmittedFileCheck(
+  val unexpectedErrorFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     abcBank,
     "GB2026GB-CAR1234567892_CADX-error",
     LocalDateTime.of(2023, 7, 24, 9, 0),
     FileStatus.UnexpectedError
   )
 
-  val virusFound: SubmittedFileCheck = SubmittedFileCheck(
+  val virusFoundFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     myCompany,
     "GB2026GB-CAR1234567891_SDES-virus",
     LocalDateTime.of(2023, 7, 23, 13, 0),
     FileStatus.VirusFound
   )
 
-  val unprocessableErrorFile: SubmittedFileCheck = SubmittedFileCheck(
+  val unprocessableErrorFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     myCompany,
     "GB2026GB-CAR1234567891_SDES-error",
     LocalDateTime.of(2023, 7, 22, 15, 10),
     FileStatus.UnprocessableErrorFile
   )
 
-  // One row per status type, most recent first, matching prototype ordering
-  val allStatuses: Seq[SubmittedFileCheck] =
-    Seq(passed, failedRules, pending, unexpectedError, virusFound, unprocessableErrorFile)
+  val allStatuses: Seq[SlicedCachedFileDetails] =
+    Seq(unprocessableErrorFile, virusFoundFile, unexpectedErrorFile, pendingFile, failedRulesFile, passedFile)
 }

@@ -50,4 +50,4 @@ GET         /problem/rules-errors/:uploadId             controllers.problem.Rule
 
 GET         /file-confirmation/:uploadId                controllers.FileConfirmationController.onPageLoad(uploadId: String)
 
-GET         /results-of-automatic-checks                 controllers.upload.ResultOfAutomaticChecksController.onPageLoad()
+GET         /result-of-automatic-checks                  controllers.submission.ResultOfAutomaticChecksController.onPageLoad()

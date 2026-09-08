@@ -15,8 +15,7 @@
  *@
 
 @import models.fileSubmission.FileStatus
-@import models.fileSubmission.SubmittedFileCheck
-@import viewmodels.ResultOfAutomaticChecksViewModel
+@import models.fileSubmission.SlicedCachedFileDetails
 @import uk.gov.hmrc.govukfrontend.views.html.components.*
 
 @this(
@@ -26,7 +25,7 @@
         govukTag: GovukTag
 )
 
-@(submissions: Seq[SubmittedFileCheck], managementUrl: String)(implicit request: Request[_], messages: Messages)
+@(submissions: Seq[SlicedCachedFileDetails], managementUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("resultOfAutomaticChecks.title"))) {
 
@@ -47,7 +46,7 @@
             Seq(
                 TableRow(content = Text(submission.rcaspName), classes = "govuk-table__header long-word"),
                 TableRow(content = Text(submission.messageRefId), classes = "govuk-table__cell long-word-break-all"),
-                TableRow(content = Text(ResultOfAutomaticChecksViewModel.sent(submission.dateSubmitted))),
+                TableRow(content = Text(submission.sentFormatted)),
                 TableRow(content = HtmlContent(govukTag(FileStatus.tagForFileStatus(submission.fileStatus)))),
                 TableRow(content = FileStatus.linkForFileStatus(submission.fileStatus))
             )

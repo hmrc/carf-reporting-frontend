@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package controllers.upload
+package controllers.submission
 
 import config.FrontendAppConfig
 import controllers.actions._
-import javax.inject.Inject
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.AutomaticChecksStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.upload.ResultOfAutomaticChecksView
 import utils.LoggerUtil.logWarn
+import views.html.submission.ResultOfAutomaticChecksView
+
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class ResultOfAutomaticChecksController @Inject() (
     override val messagesApi: MessagesApi,
@@ -34,23 +36,33 @@ class ResultOfAutomaticChecksController @Inject() (
     automaticChecksStubService: AutomaticChecksStubService,
     val controllerComponents: MessagesControllerComponents,
     view: ResultOfAutomaticChecksView
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport
     with Logging {
 
-  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
+  def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
     val carfId = request.carfId
 
-    automaticChecksStubService.getSubmissions(carfId) match {
-      case Some(submissions) =>
-        Ok(view(submissions, appConfig.managementUrl))
-
-      case None =>
-        logWarn(
-          "[ResultOfAutomaticChecksController][onPageLoad] Unable to retrieve submissions " +
-            "for result-of-automatic-checks page."
-        )
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-    }
+    automaticChecksStubService
+      .getSubmissions(carfId)
+      .fold(
+        error => {
+          logWarn(
+            s"[ResultOfAutomaticChecksController][onPageLoad] Unable to retrieve submissions " +
+              s"for result-of-automatic-checks page. Error: $error"
+          )
+          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        },
+        submissions =>
+          if (submissions.nonEmpty) {
+            Ok(view(submissions, appConfig.managementUrl))
+          } else {
+            logWarn(
+              "[ResultOfAutomaticChecksController][onPageLoad] No submissions found for result-of-automatic-checks page."
+            )
+            Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+          }
+      )
   }
 }

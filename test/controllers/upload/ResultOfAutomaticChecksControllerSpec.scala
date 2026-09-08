@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package controllers.upload
+package controllers.submission
 
 import base.SpecBase
 import config.FrontendAppConfig
-import models.fileSubmission.{FileStatus, ResultOfAutomaticChecksStubData, SubmittedFileCheck}
+import models.errors.ApiError.InternalServerError
+import models.fileSubmission.{ResultOfAutomaticChecksStubData, SlicedCachedFileDetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.AutomaticChecksStubService
-import views.html.upload.ResultOfAutomaticChecksView
+import types.ResultT
+import views.html.submission.ResultOfAutomaticChecksView
 
 class ResultOfAutomaticChecksControllerSpec extends SpecBase {
 
   private val mockService: AutomaticChecksStubService = mock[AutomaticChecksStubService]
-
-  private val singlePendingRow: Seq[SubmittedFileCheck] =
-    Seq(ResultOfAutomaticChecksStubData.pending)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -43,7 +42,8 @@ class ResultOfAutomaticChecksControllerSpec extends SpecBase {
 
     "must return OK and the correct view when submissions are found" in {
 
-      when(mockService.getSubmissions(any())).thenReturn(Some(ResultOfAutomaticChecksStubData.allStatuses))
+      when(mockService.getSubmissions(any()))
+        .thenReturn(ResultT.fromValue(ResultOfAutomaticChecksStubData.allStatuses))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(bind[AutomaticChecksStubService].toInstance(mockService))
@@ -65,33 +65,28 @@ class ResultOfAutomaticChecksControllerSpec extends SpecBase {
       }
     }
 
-    "must return OK and render a single row when only one submission is found" in {
+    "must redirect to Journey Recovery when the submissions list is empty" in {
 
-      when(mockService.getSubmissions(any())).thenReturn(Some(singlePendingRow))
+      when(mockService.getSubmissions(any()))
+        .thenReturn(ResultT.fromValue(Seq.empty[SlicedCachedFileDetails]))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(bind[AutomaticChecksStubService].toInstance(mockService))
         .build()
 
       running(application) {
-        val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request   = FakeRequest(GET, routes.ResultOfAutomaticChecksController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.ResultOfAutomaticChecksController.onPageLoad().url)
+        val result  = route(application, request).value
 
-        val result = route(application, request).value
-        val view   = application.injector.instanceOf[ResultOfAutomaticChecksView]
-
-        status(result)          mustEqual OK
-        contentAsString(result) mustEqual
-          view(singlePendingRow, appConfig.managementUrl)(
-            request,
-            messages(application)
-          ).toString
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery when no submissions are found" in {
+    "must redirect to Journey Recovery when the service returns an error" in {
 
-      when(mockService.getSubmissions(any())).thenReturn(None)
+      when(mockService.getSubmissions(any()))
+        .thenReturn(ResultT.fromError[Seq[SlicedCachedFileDetails]](InternalServerError))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(bind[AutomaticChecksStubService].toInstance(mockService))

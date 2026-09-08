@@ -71,7 +71,7 @@ object FileStatus {
       case Passed                 =>
         HtmlContent(
           Link()(
-            href = controllers.routes.FileConfirmationController.onPageLoad().url,
+            href = controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation page").url,
             key = "resultOfAutomaticChecks.nextStep.confirmation"
           )
         )
@@ -92,17 +92,17 @@ object FileStatus {
       case UnprocessableErrorFile =>
         HtmlContent(
           Link()(
-            href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
-            key = "resultOfAutomaticChecks.nextStep.uploadAgain"
+            href = controllers.routes.PlaceholderController
+              .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
+              .url,
+            key = "resultOfAutomaticChecks.nextStep.contactUs"
           )
         )
       case UnexpectedError        =>
         HtmlContent(
           Link()(
-            href = controllers.routes.PlaceholderController
-              .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
-              .url,
-            key = "resultOfAutomaticChecks.nextStep.contactUs"
+            href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
+            key = "resultOfAutomaticChecks.nextStep.uploadAgain"
           )
         )
     }

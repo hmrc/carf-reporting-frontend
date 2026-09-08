@@ -17,7 +17,7 @@
 package models.fileSubmission
 
 import base.SpecBase
-import models.fileSubmission.FileStatus._
+import models.fileSubmission.FileStatus.*
 import play.api.i18n.Messages
 import play.api.libs.json.{JsError, Json}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
@@ -78,7 +78,7 @@ class FileStatusSpec extends SpecBase {
       "must render a link to the file-confirmation placeholder for Passed" in {
         val content = linkForFileStatus(Passed).asHtml.body
 
-        content must include(controllers.routes.FileConfirmationController).url)
+        content must include(controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation page").url)
         content must include(messages("resultOfAutomaticChecks.nextStep.confirmation"))
       }
 

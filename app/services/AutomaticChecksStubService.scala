@@ -16,19 +16,25 @@
 
 package services
 
-import models.fileSubmission.{ResultOfAutomaticChecksStubData, SubmittedFileCheck}
+import models.errors.ApiError.InternalServerError
+import models.fileSubmission.{ResultOfAutomaticChecksStubData, SlicedCachedFileDetails}
+import types.ResultT
 
+import java.time.LocalDateTime
 import javax.inject.Singleton
 
 @Singleton
 class AutomaticChecksStubService {
 
-  // TODO: replace with real lookups from the submissions store once CADX integration exists.
-  def getSubmissions(carfId: String): Option[Seq[SubmittedFileCheck]] = carfId.headOption.map(_.toUpper) match {
-    case Some('Z') => None
-    case Some('X') => Some(Seq(ResultOfAutomaticChecksStubData.pending))
-    case Some('W') => Some(Seq(ResultOfAutomaticChecksStubData.unexpectedError))
-    case Some('V') => Some(Seq(ResultOfAutomaticChecksStubData.failedRules))
-    case _         => Some(ResultOfAutomaticChecksStubData.allStatuses)
+  // TODO: replace with a real connector/repository call returning ResultT[Seq[FileDetails]] once available.
+  def getSubmissions(carfId: String): ResultT[Seq[SlicedCachedFileDetails]] = carfId.headOption.map(_.toUpper) match {
+    case Some('Z') => ResultT.fromError(InternalServerError)
+    case Some('X') => ResultT.fromValue(Seq(ResultOfAutomaticChecksStubData.pendingFile))
+    case Some('W') => ResultT.fromValue(Seq(ResultOfAutomaticChecksStubData.unexpectedErrorFile))
+    case Some('V') => ResultT.fromValue(Seq(ResultOfAutomaticChecksStubData.failedRulesFile))
+    case _         => ResultT.fromValue(sortedByMostRecent(ResultOfAutomaticChecksStubData.allStatuses))
   }
+
+  private def sortedByMostRecent(submissions: Seq[SlicedCachedFileDetails]): Seq[SlicedCachedFileDetails] =
+    submissions.sortBy(_.dateSubmitted)(Ordering[LocalDateTime].reverse)
 }
