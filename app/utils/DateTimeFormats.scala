@@ -27,6 +27,9 @@ object DateTimeFormats {
   private val datetimeFormatter: DateTimeFormatter = DateTimeFormatter
     .ofPattern("d MMMM yyyy 'at' h:mma", Locale.ENGLISH)
 
+  private val datetimeFormatterWithoutAt: DateTimeFormatter = DateTimeFormatter
+    .ofPattern("d MMMM yyyy h:mma", Locale.ENGLISH)
+
   def dateTimeToString(dateTime: LocalDateTime): String =
     dateTime
       .atZone(ZoneOffset.UTC)
@@ -36,4 +39,12 @@ object DateTimeFormats {
       .replace("PM", "pm")
       .replace("12:00am", "midnight")
       .replace("12:00pm", "midday")
+
+  def dateTimeToStringWithoutAt(dateTime: LocalDateTime): String =
+    dateTime
+      .atZone(ZoneOffset.UTC)
+      .withZoneSameInstant(ZoneId.of(ukTimeZoneStringId))
+      .format(datetimeFormatterWithoutAt)
+      .replace("AM", "am")
+      .replace("PM", "pm")
 }

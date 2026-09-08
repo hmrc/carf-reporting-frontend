@@ -16,9 +16,9 @@
 
 package models.fileSubmission
 
+import utils.DateTimeFormats
+
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 final case class SlicedCachedFileDetails(
     rcaspName: String,
@@ -28,12 +28,5 @@ final case class SlicedCachedFileDetails(
 ) {
 
   def sentFormatted: String =
-    dateSubmitted
-      .format(SlicedCachedFileDetails.dateFormatter)
-      .replace("AM", "am")
-      .replace("PM", "pm")
-}
-
-object SlicedCachedFileDetails {
-  private val dateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy h:mma", Locale.UK)
+    DateTimeFormats.dateTimeToStringWithoutAt(dateSubmitted)
 }
