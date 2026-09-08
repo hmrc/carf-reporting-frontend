@@ -18,6 +18,8 @@ package controllers.submission
 
 import config.FrontendAppConfig
 import controllers.actions._
+import models.fileSubmission.SlicedCachedFileDetails
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.AutomaticChecksStubService
@@ -25,6 +27,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.logWarn
 import views.html.submission.ResultOfAutomaticChecksView
 
+import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
@@ -37,7 +40,8 @@ class ResultOfAutomaticChecksController @Inject() (
     view: ResultOfAutomaticChecksView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
     val carfId = request.carfId
@@ -54,7 +58,7 @@ class ResultOfAutomaticChecksController @Inject() (
         },
         submissions =>
           if (submissions.nonEmpty) {
-            Ok(view(submissions, appConfig.managementUrl))
+            Ok(view(sortedByMostRecent(submissions), appConfig.managementUrl))
           } else {
             logWarn(
               "[ResultOfAutomaticChecksController][onPageLoad] No submissions found for result-of-automatic-checks page."
@@ -63,4 +67,7 @@ class ResultOfAutomaticChecksController @Inject() (
           }
       )
   }
+
+  private def sortedByMostRecent(submissions: Seq[SlicedCachedFileDetails]): Seq[SlicedCachedFileDetails] =
+    submissions.sortBy(_.dateSubmitted)(Ordering[LocalDateTime].reverse)
 }

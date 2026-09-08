@@ -20,7 +20,6 @@ import models.errors.ApiError.InternalServerError
 import models.fileSubmission.{ResultOfAutomaticChecksStubData, SlicedCachedFileDetails}
 import types.ResultT
 
-import java.time.LocalDateTime
 import javax.inject.Singleton
 
 @Singleton
@@ -32,9 +31,6 @@ class AutomaticChecksStubService {
     case Some('X') => ResultT.fromValue(Seq(ResultOfAutomaticChecksStubData.pendingFile))
     case Some('W') => ResultT.fromValue(Seq(ResultOfAutomaticChecksStubData.unexpectedErrorFile))
     case Some('V') => ResultT.fromValue(Seq(ResultOfAutomaticChecksStubData.failedRulesFile))
-    case _         => ResultT.fromValue(sortedByMostRecent(ResultOfAutomaticChecksStubData.allStatuses))
+    case _         => ResultT.fromValue(ResultOfAutomaticChecksStubData.allStatuses)
   }
-
-  private def sortedByMostRecent(submissions: Seq[SlicedCachedFileDetails]): Seq[SlicedCachedFileDetails] =
-    submissions.sortBy(_.dateSubmitted)(Ordering[LocalDateTime].reverse)
 }

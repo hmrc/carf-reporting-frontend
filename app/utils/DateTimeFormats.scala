@@ -28,7 +28,7 @@ object DateTimeFormats {
     .ofPattern("d MMMM yyyy 'at' h:mma", Locale.ENGLISH)
 
   private val datetimeFormatterWithoutAt: DateTimeFormatter = DateTimeFormatter
-    .ofPattern("d MMMM yyyy h:mma", Locale.ENGLISH)
+    .ofPattern("d MMM yyyy h:mma", Locale.ENGLISH)
 
   def dateTimeToString(dateTime: LocalDateTime): String =
     dateTime

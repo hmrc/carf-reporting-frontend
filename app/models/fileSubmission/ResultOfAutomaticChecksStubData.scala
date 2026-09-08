@@ -61,7 +61,7 @@ object ResultOfAutomaticChecksStubData {
   val unprocessableErrorFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     myCompany,
     "GB2026GB-CAR1234567892_CADX-error",
-    LocalDateTime.of(2023, 7, 24, 9, 0),
+    LocalDateTime.of(2023, 7, 24, 8, 0),
     FileStatus.UnprocessableErrorFile
   )
 

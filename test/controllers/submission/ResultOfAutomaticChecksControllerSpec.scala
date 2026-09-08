@@ -29,6 +29,8 @@ import services.AutomaticChecksStubService
 import types.ResultT
 import views.html.submission.ResultOfAutomaticChecksView
 
+import java.time.LocalDateTime
+
 class ResultOfAutomaticChecksControllerSpec extends SpecBase {
 
   private val mockService: AutomaticChecksStubService = mock[AutomaticChecksStubService]
@@ -42,8 +44,7 @@ class ResultOfAutomaticChecksControllerSpec extends SpecBase {
 
     "must return OK and the correct view when submissions are found" in {
 
-      when(mockService.getSubmissions(any()))
-        .thenReturn(ResultT.fromValue(ResultOfAutomaticChecksStubData.allStatuses))
+      when(mockService.getSubmissions(any())).thenReturn(ResultT.fromValue(ResultOfAutomaticChecksStubData.allStatuses))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(bind[AutomaticChecksStubService].toInstance(mockService))
@@ -56,12 +57,12 @@ class ResultOfAutomaticChecksControllerSpec extends SpecBase {
         val result = route(application, request).value
         val view   = application.injector.instanceOf[ResultOfAutomaticChecksView]
 
+        val expectedSorted =
+          ResultOfAutomaticChecksStubData.allStatuses.sortBy(_.dateSubmitted)(Ordering[LocalDateTime].reverse)
+
         status(result)          mustEqual OK
         contentAsString(result) mustEqual
-          view(ResultOfAutomaticChecksStubData.allStatuses, appConfig.managementUrl)(
-            request,
-            messages(application)
-          ).toString
+          view(expectedSorted, appConfig.managementUrl)(request, messages(application)).toString
       }
     }
 
@@ -98,6 +99,35 @@ class ResultOfAutomaticChecksControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must render submissions with the most recent at the top" in {
+
+      val unsorted = Seq(
+        ResultOfAutomaticChecksStubData.unprocessableErrorFile,
+        ResultOfAutomaticChecksStubData.virusFoundFile,
+        ResultOfAutomaticChecksStubData.passedFile
+      )
+
+      when(mockService.getSubmissions(any())).thenReturn(ResultT.fromValue(unsorted))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[AutomaticChecksStubService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        val appConfig = application.injector.instanceOf[FrontendAppConfig]
+        val request   = FakeRequest(GET, routes.ResultOfAutomaticChecksController.onPageLoad().url)
+
+        val result = route(application, request).value
+        val view   = application.injector.instanceOf[ResultOfAutomaticChecksView]
+
+        val expectedSorted = unsorted.sortBy(_.dateSubmitted)(Ordering[LocalDateTime].reverse)
+
+        status(result)          mustEqual OK
+        contentAsString(result) mustEqual
+          view(expectedSorted, appConfig.managementUrl)(request, messages(application)).toString
       }
     }
   }
