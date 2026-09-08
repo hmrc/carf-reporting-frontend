@@ -46,8 +46,8 @@ object ResultOfAutomaticChecksStubData {
 
   val unexpectedErrorFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     abcBank,
-    "GB2026GB-CAR1234567892_CADX-error",
-    LocalDateTime.of(2023, 7, 24, 9, 0),
+    "GB2026GB-CAR1234567891_SDES-error",
+    LocalDateTime.of(2023, 7, 22, 15, 10),
     FileStatus.UnexpectedError
   )
 
@@ -60,8 +60,8 @@ object ResultOfAutomaticChecksStubData {
 
   val unprocessableErrorFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     myCompany,
-    "GB2026GB-CAR1234567891_SDES-error",
-    LocalDateTime.of(2023, 7, 22, 15, 10),
+    "GB2026GB-CAR1234567892_CADX-error",
+    LocalDateTime.of(2023, 7, 24, 9, 0),
     FileStatus.UnprocessableErrorFile
   )
 
