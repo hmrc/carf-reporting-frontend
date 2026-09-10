@@ -24,7 +24,6 @@ import models.responses.getName
 import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
-import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.logWarn
 import views.html.SendYourFileView

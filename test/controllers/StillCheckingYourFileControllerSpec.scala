@@ -23,7 +23,7 @@ import models.fileSubmission.FileStatus.*
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalactic.Prettifier.default
-import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
+import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, UploadIdPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -58,6 +58,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
+        .withPage(UploadIdPage, testUploadId)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -98,6 +99,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, individualRcaspDetails)
+        .withPage(UploadIdPage, testUploadId)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -133,6 +135,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
+        .withPage(UploadIdPage, testUploadId)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -147,9 +150,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.upload.routes.FilePassedChecksController
-          .onPageLoad()
-          .url
+        redirectLocation(result).value mustEqual controllers.routes.FilePassedChecksController.onPageLoad().url
 
         verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
@@ -162,6 +163,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
+        .withPage(UploadIdPage, testUploadId)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -176,9 +178,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.upload.routes.FileFailedChecksController
-          .onPageLoad()
-          .url
+        redirectLocation(result).value mustEqual controllers.routes.FileFailedChecksController.onPageLoad().url
 
         verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
@@ -191,6 +191,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
+        .withPage(UploadIdPage, testUploadId)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -206,7 +207,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.problem.routes.VirusFoundController
-          .onPageLoad()
+          .onPageLoad(testUploadId.value)
           .url
 
         verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
@@ -220,6 +221,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
+        .withPage(UploadIdPage, testUploadId)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -249,6 +251,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
+        .withPage(UploadIdPage, testUploadId)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -276,6 +279,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
+        .withPage(UploadIdPage, testUploadId)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -300,6 +304,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
     "must redirect to Journey Recovery when RcaspDetails is missing from user answers" in {
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
+        .withPage(UploadIdPage, testUploadId)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -323,6 +328,32 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
 
     "must redirect to Journey Recovery for a GET when ExtractedFileDetails is missing from user answers" in {
       val userAnswers = emptyUserAnswers
+        .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
+        .withPage(UploadIdPage, testUploadId)
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+          bind[FrontendAppConfig].toInstance(mockAppConfig),
+          bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
+          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, stillCheckingYourFileRoute)
+        val result  = route(application, request).value
+
+        status(result)                 mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+        verify(mockStubService, times(0)).getFileStatus(any(), any())(any())
+        verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when UploadId is missing from user answers" in {
+      val userAnswers = emptyUserAnswers
+        .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         .withPage(RcaspDetailsPage, organisationRegisteredBusinessRcaspDetails)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))

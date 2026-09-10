@@ -13,3 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package models.errors
+
+import play.api.libs.json.{Json, OFormat}
+
+case class XmlError(lineNumber: Int, errorMessage: String)
+
+object XmlError {
+  implicit val format: OFormat[XmlError] = Json.format[XmlError]
+}

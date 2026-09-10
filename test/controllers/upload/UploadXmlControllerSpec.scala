@@ -26,7 +26,7 @@ import models.upscan.*
 import models.upscan.UploadStatus.*
 import org.mockito.ArgumentMatchers.{any, argThat, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
-import pages.{FileReferencePage, SubscriptionDetailsPage, UploadIdPage}
+import pages.{FileReferencePage, SubscriptionDetailsPage, UploadIdPage, UploadSuccessDetailsPage}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -440,7 +440,41 @@ class UploadXmlControllerSpec extends SpecBase {
     }
 
     ".getUploadStatusAndRedirect" - {
-      "must read the progress of the upload from the backend and redirect accordingly" in {
+      "must read the progress of the upload from the backend and redirect to FileValidationController when successful" in {
+        when(mockUpscanConnector.getUploadStatus(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(Some(uploadedSuccessfully)))
+
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+
+        when(mockAppConfig.upscanCallbackDelayInSeconds).thenReturn(0)
+        when(mockAppConfig.upscanMaxFileNameLength).thenReturn(100)
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[UpscanConnector].toInstance(mockUpscanConnector),
+            bind[FrontendAppConfig].toInstance(mockAppConfig)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, getUploadStatusRoute)
+          val result  = route(application, request).value
+
+          status(result)                 mustBe SEE_OTHER
+          redirectLocation(result).value mustBe controllers.upload.routes.FileValidationController.onPageLoad().url
+
+          verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSessionRepository, times(1)).set(
+            argThat(
+              _.get(UploadSuccessDetailsPage).contains(
+                UploadSuccessDetails(uploadedSuccessfully.name, uploadedSuccessfully.downloadUrl)
+              )
+            )
+          )
+        }
+      }
+
+      "must read the progress of the upload from the backend and redirect accordingly when there is an error" in {
         def verifyResult(uploadStatus: UploadStatus, expectedRedirectUrl: String): Unit = {
           reset(mockUpscanConnector)
           when(mockUpscanConnector.getUploadStatus(any())(any(), any()))
@@ -480,12 +514,6 @@ class UploadXmlControllerSpec extends SpecBase {
           upload.routes.UploadXmlController.showError("octetstream", "rejected", "").url
         )
         verifyResult(Failed, upload.routes.UploadXmlController.showError("UploadFailed", "", "").url)
-        verifyResult(
-          uploadedSuccessfully,
-          controllers.routes.PlaceholderController
-            .onPageLoad("Upscan checks passed. Should redirect to FileValidationController (CARF-596)")
-            .url
-        )
         verifyResult(
           uploadedSuccessfully.copy(name = invalidFileName),
           upload.routes.UploadXmlController.showError("invalidargument", "invalidfilenamelength", "").url

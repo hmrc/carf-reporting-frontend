@@ -18,6 +18,7 @@ package models.problem
 
 import play.twirl.api.Html
 
+// TODO: Remove when mapping of XmlErrors to SchemaErrors is implemented (CARF-591), until then keep for reference for the formatting
 object DataErrorsStubData {
 
   val fewErrors: Seq[SchemaError] = Seq(

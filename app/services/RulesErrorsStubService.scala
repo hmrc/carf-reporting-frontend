@@ -16,7 +16,9 @@
 
 package services
 
+import models.UserAnswers
 import models.problem.{BusinessRuleError, RulesErrorsStubData}
+import pages.UploadSuccessDetailsPage
 
 import javax.inject.Singleton
 
@@ -25,11 +27,14 @@ class RulesErrorsStubService {
 
   private val stubFileName: String = "filename.xml"
 
-  def getFileName(carfId: String): Option[String] = carfId.headOption.map(_.toUpper) match {
-    case Some('Z') => None
-    case Some('X') => None
-    case _         => Some(stubFileName)
-  }
+  def getFileName(carfId: String, userAnswers: Option[UserAnswers]): Option[String] =
+    userAnswers.flatMap(_.get(UploadSuccessDetailsPage).map(_.fileName)).orElse {
+      carfId.headOption.map(_.toUpper) match {
+        case Some('Z') => None
+        case Some('X') => None
+        case _         => Some(stubFileName)
+      }
+    }
 
   def getRulesErrors(carfId: String): Option[Seq[BusinessRuleError]] = carfId.headOption.map(_.toUpper) match {
     case Some('Z') => None

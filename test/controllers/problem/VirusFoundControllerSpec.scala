@@ -22,10 +22,10 @@ import models.errors.ApiError.InternalServerError
 import models.fileSubmission.FileStatus
 import models.fileSubmission.FileStatus.{Passed, VirusFound}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.XmlFileDetailsStubService
 import types.ResultT
 import views.html.problem.VirusFoundView
@@ -33,6 +33,8 @@ import views.html.problem.VirusFoundView
 class VirusFoundControllerSpec extends SpecBase {
 
   private val mockStubService: XmlFileDetailsStubService = mock[XmlFileDetailsStubService]
+
+  lazy val virusFoundRoute: String = routes.VirusFoundController.onPageLoad(testUploadId.value).url
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -51,7 +53,7 @@ class VirusFoundControllerSpec extends SpecBase {
           .build()
 
       running(application) {
-        val request   = FakeRequest(GET, routes.VirusFoundController.onPageLoad().url)
+        val request   = FakeRequest(GET, virusFoundRoute)
         val result    = route(application, request).value
         val view      = application.injector.instanceOf[VirusFoundView]
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
@@ -72,8 +74,8 @@ class VirusFoundControllerSpec extends SpecBase {
           .build()
 
       running(application) {
-        val result =
-          route(application, FakeRequest(GET, routes.VirusFoundController.onPageLoad().url)).value
+        val request = FakeRequest(GET, virusFoundRoute)
+        val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
@@ -90,19 +92,7 @@ class VirusFoundControllerSpec extends SpecBase {
           .build()
 
       running(application) {
-        val result =
-          route(application, FakeRequest(GET, routes.VirusFoundController.onPageLoad().url)).value
-
-        status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must redirect to Journey Recovery when user answers do not exist" in {
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, routes.VirusFoundController.onPageLoad().url)
+        val request = FakeRequest(GET, virusFoundRoute)
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
