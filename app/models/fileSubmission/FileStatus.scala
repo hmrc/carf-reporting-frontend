@@ -18,9 +18,11 @@ package models.fileSubmission
 
 import play.api.i18n.Messages
 import play.api.libs.json.*
+import uk.gov.hmrc.govukfrontend.views.Aliases.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.tag.Tag
 import viewmodels.govuk.all.{FluentTag, TagViewModel}
+import views.html.components.Link
 
 enum FileStatus {
   case Pending
@@ -60,5 +62,53 @@ object FileStatus {
       case Failed | VirusFound                      => TagViewModel(Text(messages("fileStatus.failed"))).red()
       case UnprocessableErrorFile | UnexpectedError =>
         TagViewModel(Text(messages("fileStatus.problem"))).purple()
+    }
+
+  def linkForFileStatus(fileStatus: FileStatus, uploadId: String)(implicit messages: Messages): HtmlContent =
+    fileStatus match {
+      case Pending =>
+        HtmlContent(s"<span class='govuk-visually-hidden'>${messages("resultOfAutomaticChecks.nextStep.none")}</span>")
+
+      case Passed =>
+        HtmlContent(
+          Link()(
+            href = controllers.routes.FileConfirmationController.onPageLoad(uploadId).url,
+            key = "resultOfAutomaticChecks.nextStep.confirmation"
+          )
+        )
+
+      case Failed =>
+        HtmlContent(
+          Link()(
+            href = controllers.problem.routes.RulesErrorsController.onPageLoad(uploadId).url,
+            key = "resultOfAutomaticChecks.nextStep.checkErrors"
+          )
+        )
+
+      case VirusFound =>
+        HtmlContent(
+          Link()(
+            href = controllers.problem.routes.VirusFoundController.onPageLoad(uploadId).url,
+            key = "resultOfAutomaticChecks.nextStep.checkProblem"
+          )
+        )
+
+      case UnprocessableErrorFile =>
+        HtmlContent(
+          Link()(
+            href = controllers.routes.PlaceholderController
+              .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
+              .url,
+            key = "resultOfAutomaticChecks.nextStep.contactUs"
+          )
+        )
+
+      case UnexpectedError =>
+        HtmlContent(
+          Link()(
+            href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
+            key = "resultOfAutomaticChecks.nextStep.uploadAgain"
+          )
+        )
     }
 }

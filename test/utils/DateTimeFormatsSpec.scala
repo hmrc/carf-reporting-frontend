@@ -92,5 +92,42 @@ class DateTimeFormatsSpec extends SpecBase {
         }
       }
     }
+
+    ".dateTimeToStringWithoutAt" - {
+
+      "during BST" - {
+
+        "must format a morning time correctly (am)" in {
+          val dateTime = LocalDateTime.of(2023, 7, 24, 8, 0)
+          val result   = DateTimeFormats.dateTimeToStringWithoutAt(dateTime)
+
+          result mustEqual "24 Jul 2023 9:00am"
+        }
+
+        "must format an afternoon time correctly (pm)" in {
+          val dateTime = LocalDateTime.of(2026, 9, 8, 14, 20)
+          val result   = DateTimeFormats.dateTimeToStringWithoutAt(dateTime)
+
+          result mustEqual "8 Sep 2026 3:20pm"
+        }
+      }
+
+      "during GMT" - {
+
+        "must format a morning time correctly (am)" in {
+          val dateTime = LocalDateTime.of(2026, 1, 17, 9, 30)
+          val result   = DateTimeFormats.dateTimeToStringWithoutAt(dateTime)
+
+          result mustEqual "17 Jan 2026 9:30am"
+        }
+
+        "must format an afternoon time correctly (pm)" in {
+          val dateTime = LocalDateTime.of(2026, 1, 17, 16, 48)
+          val result   = DateTimeFormats.dateTimeToStringWithoutAt(dateTime)
+
+          result mustEqual "17 Jan 2026 4:48pm"
+        }
+      }
+    }
   }
 }
