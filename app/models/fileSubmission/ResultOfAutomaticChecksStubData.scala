@@ -26,6 +26,7 @@ object ResultOfAutomaticChecksStubData {
   val passedFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     abcBank,
     "GB2026GB-CAR1234567892_Valid",
+    "upload-id-passed",
     LocalDateTime.now(ZoneOffset.UTC),
     FileStatus.Passed
   )
@@ -33,6 +34,7 @@ object ResultOfAutomaticChecksStubData {
   val failedRulesFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     abcBank,
     "GB2026GB-CAR1234567892_BR-invalid",
+    "upload-id-failed",
     LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5),
     FileStatus.Failed
   )
@@ -40,13 +42,15 @@ object ResultOfAutomaticChecksStubData {
   val pendingFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     abcBank,
     "GB2026GB-CAR1234567892_CADX-down",
+    "upload-id-pending",
     LocalDateTime.now(ZoneOffset.UTC).minusMinutes(10),
     FileStatus.Pending
   )
 
   val unexpectedErrorFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
-    abcBank,
+    myCompany,
     "GB2026GB-CAR1234567891_SDES-error",
+    "upload-id-unexpected-error",
     LocalDateTime.of(2023, 7, 22, 14, 10),
     FileStatus.UnexpectedError
   )
@@ -54,6 +58,7 @@ object ResultOfAutomaticChecksStubData {
   val virusFoundFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     myCompany,
     "GB2026GB-CAR1234567891_SDES-virus",
+    "upload-id-virus-found",
     LocalDateTime.of(2023, 7, 23, 12, 0),
     FileStatus.VirusFound
   )
@@ -61,6 +66,7 @@ object ResultOfAutomaticChecksStubData {
   val unprocessableErrorFile: SlicedCachedFileDetails = SlicedCachedFileDetails(
     myCompany,
     "GB2026GB-CAR1234567892_CADX-error",
+    "upload-id-unprocessable-error",
     LocalDateTime.of(2023, 7, 24, 8, 0),
     FileStatus.UnprocessableErrorFile
   )

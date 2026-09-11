@@ -67,37 +67,31 @@ class FileStatusSpec extends SpecBase {
 
     ".linkForFileStatus" - {
 
-      "must render visually hidden 'None' text for Pending, with no link" in {
-        val content = linkForFileStatus(Pending).asHtml.body
+      val uploadId = "test-upload-id"
 
-        content must include("govuk-visually-hidden")
-        content must include(messages("resultOfAutomaticChecks.nextStep.none"))
-        content must not include "<a "
-      }
+      "must render a link to the file-confirmation page for Passed" in {
+        val content = linkForFileStatus(Passed, uploadId).asHtml.body
 
-      "must render a link to the file-confirmation placeholder for Passed" in {
-        val content = linkForFileStatus(Passed).asHtml.body
-
-        content must include(controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation page").url)
+        content must include(controllers.routes.FileConfirmationController.onPageLoad(uploadId).url)
         content must include(messages("resultOfAutomaticChecks.nextStep.confirmation"))
       }
 
       "must render a link to the rules-errors page for Failed" in {
-        val content = linkForFileStatus(Failed).asHtml.body
+        val content = linkForFileStatus(Failed, uploadId).asHtml.body
 
-        content must include(controllers.problem.routes.RulesErrorsController.onPageLoad().url)
+        content must include(controllers.problem.routes.RulesErrorsController.onPageLoad(uploadId).url)
         content must include(messages("resultOfAutomaticChecks.nextStep.checkErrors"))
       }
 
       "must render a link to the virus-found page for VirusFound" in {
-        val content = linkForFileStatus(VirusFound).asHtml.body
+        val content = linkForFileStatus(VirusFound, uploadId).asHtml.body
 
-        content must include(controllers.problem.routes.VirusFoundController.onPageLoad().url)
+        content must include(controllers.problem.routes.VirusFoundController.onPageLoad(uploadId).url)
         content must include(messages("resultOfAutomaticChecks.nextStep.checkProblem"))
       }
 
       "must render a link to the file-not-accepted placeholder for UnprocessableErrorFile" in {
-        val content = linkForFileStatus(UnprocessableErrorFile).asHtml.body
+        val content = linkForFileStatus(UnprocessableErrorFile, uploadId).asHtml.body
 
         content must include(
           controllers.routes.PlaceholderController
@@ -108,7 +102,7 @@ class FileStatusSpec extends SpecBase {
       }
 
       "must render a link to upload the file again for UnexpectedError" in {
-        val content = linkForFileStatus(UnexpectedError).asHtml.body
+        val content = linkForFileStatus(UnexpectedError, uploadId).asHtml.body
 
         content must include(controllers.upload.routes.UploadXmlController.onPageLoad().url)
         content must include(messages("resultOfAutomaticChecks.nextStep.uploadAgain"))

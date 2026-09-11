@@ -64,31 +64,35 @@ object FileStatus {
         TagViewModel(Text(messages("fileStatus.problem"))).purple()
     }
 
-  def linkForFileStatus(fileStatus: FileStatus)(implicit messages: Messages): HtmlContent =
+  def linkForFileStatus(fileStatus: FileStatus, uploadId: String)(implicit messages: Messages): HtmlContent =
     fileStatus match {
-      case Pending                =>
+      case Pending =>
         HtmlContent(s"<span class='govuk-visually-hidden'>${messages("resultOfAutomaticChecks.nextStep.none")}</span>")
-      case Passed                 =>
+
+      case Passed =>
         HtmlContent(
           Link()(
-            href = controllers.routes.PlaceholderController.onPageLoad("TODO: file-confirmation page").url,
+            href = controllers.routes.FileConfirmationController.onPageLoad(uploadId).url,
             key = "resultOfAutomaticChecks.nextStep.confirmation"
           )
         )
-      case Failed                 =>
+
+      case Failed =>
         HtmlContent(
           Link()(
-            href = controllers.problem.routes.RulesErrorsController.onPageLoad().url,
+            href = controllers.problem.routes.RulesErrorsController.onPageLoad(uploadId).url,
             key = "resultOfAutomaticChecks.nextStep.checkErrors"
           )
         )
-      case VirusFound             =>
+
+      case VirusFound =>
         HtmlContent(
           Link()(
-            href = controllers.problem.routes.VirusFoundController.onPageLoad().url,
+            href = controllers.problem.routes.VirusFoundController.onPageLoad(uploadId).url,
             key = "resultOfAutomaticChecks.nextStep.checkProblem"
           )
         )
+
       case UnprocessableErrorFile =>
         HtmlContent(
           Link()(
@@ -98,7 +102,8 @@ object FileStatus {
             key = "resultOfAutomaticChecks.nextStep.contactUs"
           )
         )
-      case UnexpectedError        =>
+
+      case UnexpectedError =>
         HtmlContent(
           Link()(
             href = controllers.upload.routes.UploadXmlController.onPageLoad().url,

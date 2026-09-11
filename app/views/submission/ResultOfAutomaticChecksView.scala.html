@@ -48,7 +48,7 @@
                 TableRow(content = Text(submission.messageRefId), classes = "govuk-table__cell long-word-break-all"),
                 TableRow(content = Text(submission.sentFormatted)),
                 TableRow(content = HtmlContent(govukTag(FileStatus.tagForFileStatus(submission.fileStatus)))),
-                TableRow(content = FileStatus.linkForFileStatus(submission.fileStatus))
+                TableRow(content = FileStatus.linkForFileStatus(submission.fileStatus, submission.uploadId))
             )
         },
         caption = Some(messages("resultOfAutomaticChecks.heading")),

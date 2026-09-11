@@ -23,6 +23,7 @@ import java.time.LocalDateTime
 final case class SlicedCachedFileDetails(
     rcaspName: String,
     messageRefId: String,
+    uploadId: String,
     dateSubmitted: LocalDateTime,
     fileStatus: FileStatus
 ) {
