@@ -18,6 +18,7 @@ package models.problem
 
 import models.problem.MessageBlock.{Bullets, Para}
 
+// TODO: Remove when mapping of business rule errors to required content is implemented (ticket TBC), until then keep for reference
 object RulesErrorsStubData {
 
   val fewErrors: Seq[BusinessRuleError] = Seq(

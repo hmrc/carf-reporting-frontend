@@ -20,7 +20,8 @@ import generators.Generators
 import models.*
 import models.DocTypeIndic.*
 import models.MessageTypeIndic.*
-import models.errors.XmlError
+import models.errors.{BusinessRuleValidationErrors, FileError, RecordError, XmlError}
+import models.fileSubmission.{FileStatus, SubmissionDetails}
 import models.responses.*
 import models.upscan.*
 import models.upscan.UploadStatus.*
@@ -38,7 +39,7 @@ trait TestData extends Generators {
   val testCarfId: String     = "XE0000123456789"
 
   private val utcZoneId = "UTC"
-  val clock: Clock      = Clock.fixed(Instant.parse("2020-05-20T12:34:56.789012Z"), ZoneId.of(utcZoneId))
+  val clock: Clock      = Clock.fixed(Instant.parse("2020-05-20T12:34:56.789Z"), ZoneId.of(utcZoneId))
 
   def emptyUserAnswers: UserAnswers =
     UserAnswers(id = userAnswersId, lastUpdated = Instant.now(clock))
@@ -172,6 +173,7 @@ trait TestData extends Generators {
       processingDate = "2024-01-25T09:26:17Z",
       carfSubscriptionDetails = DisplaySubscriptionDetails(
         carfReference = testCarfId,
+        gbUser = true,
         primaryContact = DisplaySubscriptionContact(
           individual = Some(
             DisplaySubscriptionIndividual(
@@ -197,6 +199,7 @@ trait TestData extends Generators {
       processingDate = "2024-01-25T09:26:17Z",
       carfSubscriptionDetails = DisplaySubscriptionDetails(
         carfReference = testCarfId,
+        gbUser = true,
         primaryContact = DisplaySubscriptionContact(
           individual = None,
           organisation = Some(DisplaySubscriptionOrganisation(name = "John Doe")),
@@ -262,11 +265,94 @@ trait TestData extends Generators {
 
   lazy val testDateTime: LocalDateTime = LocalDateTime.of(2026, 8, 17, 16, 48)
 
-  val orgFileDetails = CachedFileDetails(
-    Some(testDateTime),
+  val businessRuleValidationErrors =
+    BusinessRuleValidationErrors(
+      fileError = Seq(
+        FileError("50008", Some("MessageRefId element must be from 26 to 100 characters."))
+      ),
+      recordError = Seq(
+        RecordError(
+          "Temp 21",
+          Some(
+            "The value for OtherNexus Nexus must be either the same or a weaker nexus than the value of RCASP Nexus."
+          ),
+          Seq(
+            "GB2026GB-XRCAS1234567890-CARF_Report2026_001-CryptoUsers-004",
+            "GB2026GB-XRCAS1234567890-CARF_Report2026_001-CryptoUsers-005"
+          )
+        )
+      )
+    )
+
+  def businessRuleValidationManyErrors(numErrors: Int) =
+    BusinessRuleValidationErrors(
+      fileError = (1 to numErrors).map { num =>
+        FileError(num.toString, Some("MessageRefId element must be from 26 to 100 characters."))
+      },
+      recordError = Seq.empty
+    )
+
+  val orgSubmissionDetailsPassed = SubmissionDetails(
+    testUploadId,
+    testCarfId,
     Passed,
-    subscriptionDetailsOrganisation,
+    testFileName,
+    extractedFileDetailsTestData,
     organisationStandardRcaspDetails.copy(IsRCASPUser = true),
-    Some(extractedFileDetailsTestData)
+    displaySubscriptionResponseOrganisation.success.carfSubscriptionDetails,
+    submissionTime = Instant.now(clock),
+    lastStatusUpdateTime = Instant.now(clock).plusSeconds(1),
+    businessRuleErrors = BusinessRuleValidationErrors.apply()
+  )
+
+  val submissionDetailsFailed: SubmissionDetails =
+    orgSubmissionDetailsPassed.copy(
+      fileStatus = FileStatus.Failed,
+      rcaspDetails = organisationStandardRcaspDetails,
+      submissionTime = Instant.now(clock).minusSeconds(1),
+      businessRuleErrors = businessRuleValidationErrors
+    )
+
+  val submissionDetailsVirus: SubmissionDetails =
+    orgSubmissionDetailsPassed.copy(
+      fileStatus = FileStatus.VirusFound,
+      submissionTime = Instant.now(clock).minusSeconds(2)
+    )
+
+  val submissionDetailsUnprocessableErrorFile: SubmissionDetails =
+    orgSubmissionDetailsPassed.copy(
+      fileStatus = FileStatus.UnprocessableErrorFile,
+      submissionTime = Instant.now(clock).minusSeconds(3)
+    )
+
+  val submissionDetailsUnexpectedError: SubmissionDetails =
+    orgSubmissionDetailsPassed.copy(
+      fileStatus = FileStatus.UnexpectedError,
+      submissionTime = Instant.now(clock).minusSeconds(4)
+    )
+
+  val submissionDetailsPending: SubmissionDetails =
+    orgSubmissionDetailsPassed.copy(
+      fileStatus = FileStatus.Pending,
+      rcaspDetails = individualRcaspDetails,
+      submissionTime = Instant.now(clock).minusSeconds(5)
+    )
+
+  val submissionDetailsList: Seq[SubmissionDetails] = Seq(
+    submissionDetailsPending,
+    submissionDetailsFailed,
+    orgSubmissionDetailsPassed,
+    submissionDetailsUnprocessableErrorFile,
+    submissionDetailsUnexpectedError,
+    submissionDetailsVirus
+  )
+
+  val submissionDetailsListSortedBySubmissionTime: Seq[SubmissionDetails] = Seq(
+    orgSubmissionDetailsPassed,
+    submissionDetailsFailed,
+    submissionDetailsVirus,
+    submissionDetailsUnprocessableErrorFile,
+    submissionDetailsUnexpectedError,
+    submissionDetailsPending
   )
 }

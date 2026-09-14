@@ -17,22 +17,23 @@
 package controllers
 
 import config.FrontendAppConfig
+import connectors.SubmissionDetailsConnector
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import models.fileSubmission.FileStatus.Passed
+import models.fileSubmission.SubmissionDetails
 import models.responses.{getEmails, getName}
-import models.{CachedFileDetails, ExtractedFileDetails}
+import models.upscan.UploadId
 import pages.UploadCompletionLockPage
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
 import repositories.SessionRepository
-import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.logWarn
 import utils.{DateTimeFormats, FileConfirmationHelper}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.FileConfirmationView
 
-import java.time.LocalDateTime
+import java.time.ZoneOffset
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +41,7 @@ class FileConfirmationController @Inject (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
-    stubService: XmlFileDetailsStubService,
+    submissionDetailsConnector: SubmissionDetailsConnector,
     sessionRepository: SessionRepository,
     view: FileConfirmationView,
     config: FrontendAppConfig,
@@ -57,44 +58,33 @@ class FileConfirmationController @Inject (
 
   def onPageLoad(uploadId: String): Action[AnyContent] =
     (identify andThen getData()).async { implicit request =>
-      val cachedFileDetails = stubService.getCachedFileDetails(
-        request.carfId,
-        request.userAnswers,
-        uploadId
-      ) // TODO getCachedFileDetails will be reworked when backend repository implementation is complete (CARF-621)
-
-      if (cachedFileDetails.fileStatus == Passed) {
-        cachedFileDetails.dateTime
-          .fold(Future.successful(recovery("Missing success datetime in cached file details"))) { datetime =>
-            cachedFileDetails.extractedFileDetails.fold(
-              Future.successful(recovery("Missing ExtractedFileDetails in cached file details"))
-            ) { extractedFileDetails =>
-              request.userAnswers.fold(
-                Future.successful(prepareView(cachedFileDetails, extractedFileDetails, datetime))
-              ) { userAnswers =>
-                for {
-                  updatedUserAnswers <- Future.fromTry(userAnswers.set(UploadCompletionLockPage, true))
-                  _                  <- sessionRepository.set(updatedUserAnswers)
-                } yield prepareView(cachedFileDetails, extractedFileDetails, datetime)
-              }
-            }
+      submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId)).value.flatMap {
+        case Right(fileDetails) if fileDetails.fileStatus == Passed =>
+          request.userAnswers.fold(
+            Future.successful(prepareView(fileDetails))
+          ) { userAnswers =>
+            for {
+              updatedUserAnswers <- Future.fromTry(userAnswers.set(UploadCompletionLockPage, true))
+              _                  <- sessionRepository.set(updatedUserAnswers)
+            } yield prepareView(fileDetails)
           }
-      } else {
-        Future.successful(recovery(s"The file with upload id ($uploadId) has not passed automated checks"))
+        case Right(fileDetails)                                     =>
+          Future.successful(recovery(s"Unexpected file status: ${fileDetails.fileStatus}"))
+        case Left(error)                                            =>
+          Future.successful(recovery(s"Error retrieving file details: $error"))
       }
     }
 
   private def prepareView(
-      cachedFileDetails: CachedFileDetails,
-      extractedFileDetails: ExtractedFileDetails,
-      datetime: LocalDateTime
+      submissionDetails: SubmissionDetails
   )(implicit request: Request[_], messages: Messages): Result = {
-    val userEmailAddresses = cachedFileDetails.subscriptionDetails.getEmails
-    val rcaspDetails       = cachedFileDetails.rcaspDetails
-    val summaryListRows    = helper.rows(extractedFileDetails, rcaspDetails.getName)
+    val userEmailAddresses = submissionDetails.subscriptionDetails.getEmails
+    val rcaspDetails       = submissionDetails.rcaspDetails
+    val summaryListRows    = helper.rows(submissionDetails.extractedFileDetails, rcaspDetails.getName)
 
     val summary = SummaryListViewModel(rows = summaryListRows)
 
+    val datetime            = submissionDetails.lastStatusUpdateTime.atZone(ZoneOffset.UTC).toLocalDateTime
     val formattedDate       = DateTimeFormats.dateTimeToString(datetime)
     val isRcaspUser         = rcaspDetails.IsRCASPUser
     val rcaspEmailAddresses = rcaspDetails.getEmails

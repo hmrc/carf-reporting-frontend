@@ -17,47 +17,77 @@
 package controllers.problem
 
 import config.{Constants, FrontendAppConfig}
-import controllers.actions._
-import javax.inject.Inject
-import play.api.Logging
+import connectors.SubmissionDetailsConnector
+import controllers.actions.*
+import models.errors.BusinessRuleValidationErrors
+import models.fileSubmission.FileStatus.Failed
+import models.problem.BusinessRuleError
+import models.problem.MessageBlock.Para
+import models.upscan.UploadId
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.RulesErrorsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.problem.RulesErrorsView
 import utils.LoggerUtil.logWarn
+import views.html.problem.RulesErrorsView
+
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class RulesErrorsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
-    getData: DataRetrievalAction,
-    uploadCompletionLock: UploadCompletionLockAction,
+    submissionDetailsConnector: SubmissionDetailsConnector,
     appConfig: FrontendAppConfig,
-    rulesErrorsStubService: RulesErrorsStubService,
     val controllerComponents: MessagesControllerComponents,
     view: RulesErrorsView
-) extends FrontendBaseController
-    with I18nSupport
-    with Logging {
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad(uploadId: String): Action[AnyContent] =
-    (identify andThen getData() andThen uploadCompletionLock) { implicit request =>
-      val carfId = request.carfId
-      // TODO: Replace with actual call to get file details from backend (CARF-621)
-      (
-        rulesErrorsStubService.getRulesErrors(carfId),
-        rulesErrorsStubService.getFileName(carfId, request.userAnswers)
-      ) match {
-        case (Some(errors), Some(fileName)) if errors.nonEmpty =>
-          val hasMoreThanMax = errors.length > Constants.maxErrorsShown
-          Ok(view(fileName, errors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
-
-        case (errors, _) =>
-          logWarn(
-            s"[RulesErrorsController][onPageLoad] Unable to retrieve rules errors or file name " +
-              s"for rules-errors page. Errors length: ${errors.map(_.length)}"
+  def onPageLoad(uploadId: String): Action[AnyContent] = identify.async { implicit request =>
+    submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId)).value.map {
+      case Right(fileDetails) if fileDetails.fileStatus == Failed =>
+        if (fileDetails.businessRuleErrors.fileError.nonEmpty || fileDetails.businessRuleErrors.recordError.nonEmpty) {
+          val processedErrors = processBusinessRuleErrors(fileDetails.businessRuleErrors)
+          val hasMoreThanMax  = processedErrors.length > Constants.maxErrorsShown
+          Ok(
+            view(
+              fileDetails.fileName,
+              processedErrors.take(Constants.maxErrorsShown),
+              hasMoreThanMax,
+              appConfig.managementUrl
+            )
           )
+        } else {
+          logWarn(s"[RulesErrorsController][onPageLoad] No business rule errors found in submission details")
           Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-      }
+        }
+      case Right(fileDetails)                                     =>
+        logWarn(s"[RulesErrorsController][onPageLoad] Unexpected file status: ${fileDetails.fileStatus}")
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+      case Left(error)                                            =>
+        logWarn(s"[RulesErrorsController][onPageLoad] Error retrieving file status: $error")
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
+  }
+
+  // TODO: Map business rule errors to required content (ticket TBC)
+  private def processBusinessRuleErrors(businessRuleErrors: BusinessRuleValidationErrors): Seq[BusinessRuleError] = {
+    val processedFileErrors   = businessRuleErrors.fileError.map { error =>
+      BusinessRuleError(
+        error.code,
+        docRefIds = Seq.empty,
+        message = error.details.fold(Seq(Para("")))(message => Seq(Para(message)))
+      )
+    }
+    val processedRecordErrors = businessRuleErrors.recordError.map { error =>
+      BusinessRuleError(
+        error.code,
+        docRefIds = error.docRefIDInError,
+        message = error.details.fold(Seq(Para("")))(message => Seq(Para(message)))
+      )
+    }
+
+    (processedFileErrors ++ processedRecordErrors).sortBy(_.errorCode)
+  }
 }

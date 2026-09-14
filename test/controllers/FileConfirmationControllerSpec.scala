@@ -18,6 +18,8 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
+import connectors.SubmissionDetailsConnector
+import models.errors.ApiError.InternalServerError
 import models.fileSubmission.FileStatus.Pending
 import models.responses.getEmails
 import org.mockito.ArgumentMatchers.{any, argThat, eq as eqTo}
@@ -26,17 +28,18 @@ import pages.UploadCompletionLockPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.XmlFileDetailsStubService
+import types.ResultT
 import utils.{DateTimeFormats, FileConfirmationHelper}
 import views.html.FileConfirmationView
 
+import java.time.ZoneOffset
 import scala.concurrent.Future
 
 class FileConfirmationControllerSpec extends SpecBase {
 
-  private val mockAppConfig: FrontendAppConfig                   = mock[FrontendAppConfig]
-  private val mockFileConfirmationHelper: FileConfirmationHelper = mock[FileConfirmationHelper]
-  private val mockStubService: XmlFileDetailsStubService         = mock[XmlFileDetailsStubService]
+  private val mockAppConfig: FrontendAppConfig                           = mock[FrontendAppConfig]
+  private val mockFileConfirmationHelper: FileConfirmationHelper         = mock[FileConfirmationHelper]
+  private val mockSubmissionDetailsConnector: SubmissionDetailsConnector = mock[SubmissionDetailsConnector]
 
   lazy val fileConfirmationRoute: String = controllers.routes.FileConfirmationController
     .onPageLoad(testUploadId.value)
@@ -46,7 +49,7 @@ class FileConfirmationControllerSpec extends SpecBase {
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockFileConfirmationHelper)
+    reset(mockSubmissionDetailsConnector, mockFileConfirmationHelper)
   }
 
   "FileConfirmation Controller" - {
@@ -55,16 +58,18 @@ class FileConfirmationControllerSpec extends SpecBase {
       "must return OK and the correct view when user answers are complete 2 emails" in {
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
-        when(mockStubService.getCachedFileDetails(any(), eqTo(Some(emptyUserAnswers)), eqTo(testUploadId.value)))
-          .thenReturn(orgFileDetails)
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(orgSubmissionDetailsPassed))
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-        val formattedDateTime = DateTimeFormats.dateTimeToString(orgFileDetails.dateTime.get)
+        val datetime = orgSubmissionDetailsPassed.lastStatusUpdateTime.atZone(ZoneOffset.UTC).toLocalDateTime
+
+        val formattedDateTime = DateTimeFormats.dateTimeToString(datetime)
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
           .overrides(bind[FileConfirmationHelper].toInstance(mockFileConfirmationHelper))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
           .build()
 
         running(application) {
@@ -86,27 +91,34 @@ class FileConfirmationControllerSpec extends SpecBase {
             expectedEmailHtml
           )(request, messages(application)).toString
 
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          verify(mockFileConfirmationHelper, times(1))
+            .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
           verify(mockSessionRepository, times(1)).set(argThat(_.get(UploadCompletionLockPage).contains(true)))
         }
       }
 
       "must return OK and the correct view when user answers are complete 1 email" in {
-
         val orgFileDetailsOneEmail =
-          orgFileDetails.copy(subscriptionDetails = subscriptionDetailsOrganisation.copy(secondaryUserDetails = None))
+          orgSubmissionDetailsPassed.copy(subscriptionDetails =
+            displaySubscriptionResponseIndividual.success.carfSubscriptionDetails
+          )
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
-        when(mockStubService.getCachedFileDetails(any(), eqTo(Some(emptyUserAnswers)), eqTo(testUploadId.value)))
-          .thenReturn(orgFileDetailsOneEmail)
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(orgFileDetailsOneEmail))
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-        val formattedDateTime = DateTimeFormats.dateTimeToString(orgFileDetailsOneEmail.dateTime.get)
+        val datetime = orgSubmissionDetailsPassed.lastStatusUpdateTime.atZone(ZoneOffset.UTC).toLocalDateTime
+
+        val formattedDateTime = DateTimeFormats.dateTimeToString(datetime)
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
           .overrides(bind[FileConfirmationHelper].toInstance(mockFileConfirmationHelper))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
           .build()
 
         running(application) {
@@ -127,30 +139,34 @@ class FileConfirmationControllerSpec extends SpecBase {
             expectedEmailHtml
           )(request, messages(application)).toString
 
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          verify(mockFileConfirmationHelper, times(1))
+            .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
           verify(mockSessionRepository, times(1)).set(argThat(_.get(UploadCompletionLockPage).contains(true)))
         }
       }
 
       "must return OK and the correct view when user answers are complete 4 emails" in {
-
-        val orgFileDetailsOneEmail = orgFileDetails
+        val orgFileDetailsFourEmails = orgSubmissionDetailsPassed
           .copy(
-            rcaspDetails = organisationStandardRcaspDetails,
-            subscriptionDetails = subscriptionDetailsOrganisation
+            rcaspDetails = organisationStandardRcaspDetails
           )
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
-        when(mockStubService.getCachedFileDetails(any(), eqTo(Some(emptyUserAnswers)), eqTo(testUploadId.value)))
-          .thenReturn(orgFileDetailsOneEmail)
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(orgFileDetailsFourEmails))
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-        val formattedDateTime = DateTimeFormats.dateTimeToString(orgFileDetailsOneEmail.dateTime.get)
+        val datetime = orgSubmissionDetailsPassed.lastStatusUpdateTime.atZone(ZoneOffset.UTC).toLocalDateTime
+
+        val formattedDateTime = DateTimeFormats.dateTimeToString(datetime)
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
           .overrides(bind[FileConfirmationHelper].toInstance(mockFileConfirmationHelper))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
           .build()
 
         running(application) {
@@ -173,25 +189,33 @@ class FileConfirmationControllerSpec extends SpecBase {
             expectedEmailHtml
           )(request, messages(application)).toString
 
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          verify(mockFileConfirmationHelper, times(1))
+            .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
           verify(mockSessionRepository, times(1)).set(argThat(_.get(UploadCompletionLockPage).contains(true)))
         }
       }
 
       "must return OK and the correct view when user answers do not exist (accessing from results-of-automatic-checks)" in {
         val orgFileDetailsOneEmail =
-          orgFileDetails.copy(subscriptionDetails = subscriptionDetailsOrganisation.copy(secondaryUserDetails = None))
+          orgSubmissionDetailsPassed.copy(subscriptionDetails =
+            displaySubscriptionResponseIndividual.success.carfSubscriptionDetails
+          )
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
-        when(mockStubService.getCachedFileDetails(any(), eqTo(None), eqTo(testUploadId.value)))
-          .thenReturn(orgFileDetailsOneEmail)
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(orgFileDetailsOneEmail))
 
-        val formattedDateTime = DateTimeFormats.dateTimeToString(orgFileDetailsOneEmail.dateTime.get)
+        val datetime = orgSubmissionDetailsPassed.lastStatusUpdateTime.atZone(ZoneOffset.UTC).toLocalDateTime
+
+        val formattedDateTime = DateTimeFormats.dateTimeToString(datetime)
 
         val application = applicationBuilder(userAnswers = None)
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
           .overrides(bind[FileConfirmationHelper].toInstance(mockFileConfirmationHelper))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
           .build()
 
         running(application) {
@@ -212,19 +236,22 @@ class FileConfirmationControllerSpec extends SpecBase {
             expectedEmailHtml
           )(request, messages(application)).toString
 
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          verify(mockFileConfirmationHelper, times(1))
+            .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
           verify(mockSessionRepository, times(0)).set(any())
         }
       }
 
-      "must redirect to Journey Recovery when datetime is missing from cached File Details" in {
-        when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
-        when(mockStubService.getCachedFileDetails(any(), eqTo(Some(emptyUserAnswers)), eqTo(testUploadId.value)))
-          .thenReturn(orgFileDetails.copy(dateTime = None))
+      "must redirect to Journey Recovery when file status is not Passed" in {
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(orgSubmissionDetailsPassed.copy(fileStatus = Pending)))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
           .overrides(bind[FileConfirmationHelper].toInstance(mockFileConfirmationHelper))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
           .build()
 
         running(application) {
@@ -233,18 +260,22 @@ class FileConfirmationControllerSpec extends SpecBase {
 
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          verify(mockFileConfirmationHelper, times(0)).rows(any(), any())(any())
+          verify(mockSessionRepository, times(0)).set(any())
         }
       }
 
-      "must redirect to Journey Recovery when file status is not Passed from cached File Details" in {
-        when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
-        when(mockStubService.getCachedFileDetails(any(), eqTo(Some(emptyUserAnswers)), eqTo(testUploadId.value)))
-          .thenReturn(orgFileDetails.copy(fileStatus = Pending))
+      "must redirect to Journey Recovery when SubmissionDetailsConnector returns an error" in {
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromError(InternalServerError))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
           .overrides(bind[FileConfirmationHelper].toInstance(mockFileConfirmationHelper))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
           .build()
 
         running(application) {
@@ -253,27 +284,11 @@ class FileConfirmationControllerSpec extends SpecBase {
 
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
-        }
-      }
 
-      "must redirect to Journey Recovery when getCachedFileDetails returns no extracted file details" in {
-
-        when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
-        when(mockStubService.getCachedFileDetails(any(), eqTo(Some(emptyUserAnswers)), eqTo(testUploadId.value)))
-          .thenReturn(orgFileDetails.copy(extractedFileDetails = None))
-
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
-          .overrides(bind[FileConfirmationHelper].toInstance(mockFileConfirmationHelper))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
-          .build()
-
-        running(application) {
-          val request = FakeRequest(GET, fileConfirmationRoute)
-          val result  = route(application, request).value
-
-          status(result)                 mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          verify(mockFileConfirmationHelper, times(0)).rows(any(), any())(any())
+          verify(mockSessionRepository, times(0)).set(any())
         }
       }
     }

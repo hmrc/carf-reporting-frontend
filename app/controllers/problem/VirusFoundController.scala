@@ -17,13 +17,14 @@
 package controllers.problem
 
 import config.FrontendAppConfig
-import controllers.actions._
+import connectors.SubmissionDetailsConnector
+import controllers.actions.*
 import models.fileSubmission.FileStatus.VirusFound
+import models.upscan.UploadId
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil._
+import utils.LoggerUtil.*
 import views.html.problem.VirusFoundView
 
 import javax.inject.Inject
@@ -32,30 +33,26 @@ import scala.concurrent.ExecutionContext
 class VirusFoundController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
-    getData: DataRetrievalAction,
     appConfig: FrontendAppConfig,
-    uploadCompletionLock: UploadCompletionLockAction,
-    stubService: XmlFileDetailsStubService,
+    submissionDetailsConnector: SubmissionDetailsConnector,
     val controllerComponents: MessagesControllerComponents,
     view: VirusFoundView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(uploadId: String): Action[AnyContent] =
-    (identify andThen getData() andThen uploadCompletionLock).async { implicit request =>
-      // TODO: Replace StubService method with actual call to check file status (CARF-621)
-      stubService.getFileStatus(request.carfId).value.map {
-        case Right(VirusFound) =>
-          Ok(view(appConfig.managementUrl))
+  def onPageLoad(uploadId: String): Action[AnyContent] = identify.async { implicit request =>
+    submissionDetailsConnector.getFileStatus(UploadId(uploadId)).value.map {
+      case Right(VirusFound) =>
+        Ok(view(appConfig.managementUrl))
 
-        case Right(otherStatus) =>
-          logWarn(s"[VirusFoundController][onPageLoad] File status was: $otherStatus")
-          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+      case Right(otherStatus) =>
+        logWarn(s"[VirusFoundController][onPageLoad] File status was: $otherStatus")
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
 
-        case Left(error) =>
-          logWarn(s"[VirusFoundController][onPageLoad] Error retrieving file status: $error")
-          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-      }
+      case Left(error) =>
+        logWarn(s"[VirusFoundController][onPageLoad] Error retrieving file status: $error")
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
+  }
 }

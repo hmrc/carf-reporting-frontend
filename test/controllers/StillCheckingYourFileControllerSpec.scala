@@ -18,6 +18,7 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
+import connectors.SubmissionDetailsConnector
 import models.errors.ApiError.InternalServerError
 import models.fileSubmission.FileStatus.*
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
@@ -27,14 +28,13 @@ import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, UploadIdPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.XmlFileDetailsStubService
 import types.ResultT
 import utils.StillCheckingYourFileHelper
 import views.html.StillCheckingYourFileView
 
 class StillCheckingYourFileControllerSpec extends SpecBase {
 
-  val mockStubService: XmlFileDetailsStubService                   = mock[XmlFileDetailsStubService]
+  val mockSubmissionDetailsConnector: SubmissionDetailsConnector   = mock[SubmissionDetailsConnector]
   val mockStillCheckingYourFileHelper: StillCheckingYourFileHelper = mock[StillCheckingYourFileHelper]
   val mockAppConfig: FrontendAppConfig                             = mock[FrontendAppConfig]
 
@@ -42,7 +42,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockStubService, mockStillCheckingYourFileHelper)
+    reset(mockSubmissionDetailsConnector, mockStillCheckingYourFileHelper)
   }
 
   "StillCheckingYourFile Controller" - {
@@ -51,7 +51,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       when(mockAppConfig.managementUrl) thenReturn "managementUrl"
       when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
-      when(mockStubService.getFileStatus(any(), any())(any())).thenReturn(ResultT.fromValue(Pending))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any())).thenReturn(ResultT.fromValue(Pending))
 
       when(mockStillCheckingYourFileHelper.stillCheckingYourFileSummaryList(any())(any())).thenReturn(testSummaryList)
 
@@ -64,7 +64,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -82,7 +82,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
           testRcaspName
         )(request, messages(application)).toString
 
-        verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
+        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(1))
           .stillCheckingYourFileSummaryList(eqTo(testMessageRefId))(any())
       }
@@ -92,7 +92,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       when(mockAppConfig.managementUrl) thenReturn "managementUrl"
       when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
-      when(mockStubService.getFileStatus(any(), any())(any())).thenReturn(ResultT.fromValue(Pending))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any())).thenReturn(ResultT.fromValue(Pending))
 
       when(mockStillCheckingYourFileHelper.stillCheckingYourFileSummaryList(any())(any())).thenReturn(testSummaryList)
 
@@ -105,7 +105,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -123,14 +123,14 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
           "Nemona Champion"
         )(request, messages(application)).toString
 
-        verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
+        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(1))
           .stillCheckingYourFileSummaryList(eqTo(testMessageRefId))(any())
       }
     }
 
     "must redirect to FilePassedChecks when file status is Passed" in {
-      when(mockStubService.getFileStatus(any(), any())(any())).thenReturn(ResultT.fromValue(Passed))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any())).thenReturn(ResultT.fromValue(Passed))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -141,7 +141,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -152,13 +152,13 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.FilePassedChecksController.onPageLoad().url
 
-        verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
+        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to FileFailedChecks when file status is Failed" in {
-      when(mockStubService.getFileStatus(any(), any())(any())).thenReturn(ResultT.fromValue(Failed))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any())).thenReturn(ResultT.fromValue(Failed))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -169,7 +169,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -180,13 +180,14 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.FileFailedChecksController.onPageLoad().url
 
-        verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
+        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to VirusFound when file status is VirusFound" in {
-      when(mockStubService.getFileStatus(any(), any())(any())).thenReturn(ResultT.fromValue(VirusFound))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(VirusFound))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -197,7 +198,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -210,13 +211,14 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
           .onPageLoad(testUploadId.value)
           .url
 
-        verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
+        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to FileNotAccepted when file status is UnprocessableErrorFile" in {
-      when(mockStubService.getFileStatus(any(), any())(any())).thenReturn(ResultT.fromValue(UnprocessableErrorFile))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(UnprocessableErrorFile))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -227,7 +229,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -240,13 +242,14 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
           .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
           .url
 
-        verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
+        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to Journey Recovery when file status is UnexpectedError" in {
-      when(mockStubService.getFileStatus(any(), any())(any())).thenReturn(ResultT.fromValue(UnexpectedError))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(UnexpectedError))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -257,7 +260,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -268,13 +271,14 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
+        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to Journey Recovery when there is an error getting the file status" in {
-      when(mockStubService.getFileStatus(any(), any())(any())).thenReturn(ResultT.fromError(InternalServerError))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+        .thenReturn(ResultT.fromError(InternalServerError))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -285,7 +289,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -296,7 +300,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockStubService, times(1)).getFileStatus(any(), eqTo(userAnswers))(any())
+        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
@@ -310,7 +314,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -321,7 +325,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockStubService, times(0)).getFileStatus(any(), any())(any())
+        verify(mockSubmissionDetailsConnector, times(0)).getFileStatus(any())(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
@@ -335,7 +339,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -346,7 +350,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockStubService, times(0)).getFileStatus(any(), any())(any())
+        verify(mockSubmissionDetailsConnector, times(0)).getFileStatus(any())(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
@@ -360,7 +364,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         .overrides(
           bind[FrontendAppConfig].toInstance(mockAppConfig),
           bind[StillCheckingYourFileHelper].toInstance(mockStillCheckingYourFileHelper),
-          bind[XmlFileDetailsStubService].toInstance(mockStubService)
+          bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector)
         )
         .build()
 
@@ -371,7 +375,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockStubService, times(0)).getFileStatus(any(), any())(any())
+        verify(mockSubmissionDetailsConnector, times(0)).getFileStatus(any())(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }

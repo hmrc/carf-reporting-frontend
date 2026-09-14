@@ -41,9 +41,15 @@ object DisplaySubscriptionSuccess {
 
 case class DisplaySubscriptionDetails(
     carfReference: String,
+    gbUser: Boolean,
     primaryContact: DisplaySubscriptionContact,
     secondaryContact: Option[DisplaySubscriptionContact]
-)
+) {
+  def getEmails: List[String] = List(
+    Some(primaryContact.email),
+    secondaryContact.map(_.email)
+  ).flatten
+}
 
 object DisplaySubscriptionDetails {
   implicit val format: OFormat[DisplaySubscriptionDetails] = Json.format[DisplaySubscriptionDetails]

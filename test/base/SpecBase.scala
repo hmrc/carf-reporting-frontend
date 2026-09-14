@@ -35,7 +35,6 @@ import play.api.mvc.PlayBodyParsers
 import play.api.test.FakeRequest
 import queries.{Gettable, Settable}
 import repositories.SessionRepository
-import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
@@ -66,8 +65,7 @@ trait SpecBase
   }
 
   protected def applicationBuilder(
-      userAnswers: Option[UserAnswers] = None,
-      affinityGroup: AffinityGroup = AffinityGroup.Individual
+      userAnswers: Option[UserAnswers] = None
   ): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
@@ -84,8 +82,7 @@ trait SpecBase
   extension (userAnswers: UserAnswers) {
 
     def withPage[T](page: Settable[T] & Gettable[T], value: T)(implicit
-        writes: Writes[T],
-        rds: Reads[T]
+        writes: Writes[T]
     ): UserAnswers = {
       val updatedData = userAnswers.data.setObject(page.path, Json.toJson(value)) match {
         case JsSuccess(jsValue, _) =>
@@ -96,7 +93,7 @@ trait SpecBase
       userAnswers.copy(data = updatedData.success.value)
     }
 
-    def withoutPage[T](page: Settable[T])(implicit writes: Writes[T]): UserAnswers =
+    def withoutPage[T](page: Settable[T]): UserAnswers =
       userAnswers.remove(page).success.value
 
   }

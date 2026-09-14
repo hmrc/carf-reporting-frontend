@@ -18,38 +18,38 @@ package controllers.problem
 
 import base.SpecBase
 import config.FrontendAppConfig
+import connectors.SubmissionDetailsConnector
 import models.errors.ApiError.InternalServerError
 import models.fileSubmission.FileStatus
 import models.fileSubmission.FileStatus.{Passed, VirusFound}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.XmlFileDetailsStubService
 import types.ResultT
 import views.html.problem.VirusFoundView
 
 class VirusFoundControllerSpec extends SpecBase {
 
-  private val mockStubService: XmlFileDetailsStubService = mock[XmlFileDetailsStubService]
+  private val mockSubmissionDetailsConnector: SubmissionDetailsConnector = mock[SubmissionDetailsConnector]
 
   lazy val virusFoundRoute: String = routes.VirusFoundController.onPageLoad(testUploadId.value).url
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockStubService)
+    reset(mockSubmissionDetailsConnector)
   }
 
   "VirusFoundController" - {
 
     "must return OK when file status is VirusFound" in {
-      when(mockStubService.getFileStatus(any[String]()))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
         .thenReturn(ResultT.fromValue[FileStatus](VirusFound))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
           .build()
 
       running(application) {
@@ -61,16 +61,18 @@ class VirusFoundControllerSpec extends SpecBase {
         status(result)          mustEqual OK
         contentAsString(result) mustEqual
           view(appConfig.managementUrl)(request, messages(application)).toString
+
+        verify(mockSubmissionDetailsConnector).getFileStatus(eqTo(testUploadId))(any(), any())
       }
     }
 
     "must redirect to Journey Recovery when file status is not VirusFound" in {
-      when(mockStubService.getFileStatus(any[String]()))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
         .thenReturn(ResultT.fromValue[FileStatus](Passed))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
           .build()
 
       running(application) {
@@ -79,16 +81,18 @@ class VirusFoundControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+        verify(mockSubmissionDetailsConnector).getFileStatus(eqTo(testUploadId))(any(), any())
       }
     }
 
     "must redirect to Journey Recovery when retrieving file status fails" in {
-      when(mockStubService.getFileStatus(any[String]()))
+      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
         .thenReturn(ResultT.fromError[FileStatus](InternalServerError))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(bind[XmlFileDetailsStubService].toInstance(mockStubService))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
           .build()
 
       running(application) {
@@ -97,6 +101,8 @@ class VirusFoundControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+        verify(mockSubmissionDetailsConnector).getFileStatus(eqTo(testUploadId))(any(), any())
       }
     }
   }

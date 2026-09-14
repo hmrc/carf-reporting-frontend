@@ -15,7 +15,8 @@
  *@
 
 @import models.fileSubmission.FileStatus
-@import models.fileSubmission.SlicedCachedFileDetails
+@import models.fileSubmission.SubmissionDetails
+@import models.responses.getName
 @import uk.gov.hmrc.govukfrontend.views.html.components.*
 
 @this(
@@ -25,7 +26,7 @@
         govukTag: GovukTag
 )
 
-@(submissions: Seq[SlicedCachedFileDetails], managementUrl: String)(implicit request: Request[_], messages: Messages)
+@(submissions: Seq[SubmissionDetails], managementUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("resultOfAutomaticChecks.title"))) {
 
@@ -44,11 +45,11 @@
         )),
         rows = submissions.map { submission =>
             Seq(
-                TableRow(content = Text(submission.rcaspName), classes = "govuk-table__header long-word"),
-                TableRow(content = Text(submission.messageRefId), classes = "govuk-table__cell long-word-break-all"),
-                TableRow(content = Text(submission.sentFormatted)),
+                TableRow(content = Text(submission.rcaspDetails.getName), classes = "govuk-table__header long-word"),
+                TableRow(content = Text(submission.extractedFileDetails.messageRefId), classes = "govuk-table__cell long-word-break-all"),
+                TableRow(content = Text(submission.formattedSubmissionTime)),
                 TableRow(content = HtmlContent(govukTag(FileStatus.tagForFileStatus(submission.fileStatus)))),
-                TableRow(content = FileStatus.linkForFileStatus(submission.fileStatus, submission.uploadId))
+                TableRow(content = FileStatus.linkForFileStatus(submission.fileStatus, submission._id.value))
             )
         },
         caption = Some(messages("resultOfAutomaticChecks.heading")),

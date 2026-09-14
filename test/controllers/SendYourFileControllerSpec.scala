@@ -18,20 +18,32 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
+import connectors.SubmissionDetailsConnector
+import models.errors.ApiError.InternalServerError
+import models.fileSubmission.FileStatus.*
+import models.fileSubmission.URL
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.{reset, times, verify, when}
+import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, UploadIdPage}
 import play.api.inject.bind
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import types.ResultT
 import views.html.SendYourFileView
 
 class SendYourFileControllerSpec extends SpecBase {
 
-  val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
+  val mockSubmissionDetailsConnector: SubmissionDetailsConnector = mock[SubmissionDetailsConnector]
+  val mockAppConfig: FrontendAppConfig                           = mock[FrontendAppConfig]
 
   lazy val sendYourFileRoute: String       = routes.SendYourFileController.onPageLoad().url
-  lazy val sendYourFileStatusRoute: String = routes.SendYourFileController.getFileStatusAndRedirect().url
+  lazy val sendYourFileStatusRoute: String = routes.SendYourFileController.getFileStatusAndRedirect.url
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockSubmissionDetailsConnector)
+  }
 
   "SendYourFile Controller" - {
 
@@ -183,18 +195,177 @@ class SendYourFileControllerSpec extends SpecBase {
     }
 
     ".getFileStatusAndRedirect" - {
-      // TODO: Update when call to get file status is implemented (CARF-621)
-      "must redirect based on the file status" in {
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      "must return NoContent when file status is Pending" in {
+        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(Pending))
+
+        val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
+          .build()
 
         running(application) {
           val request = FakeRequest(GET, sendYourFileStatusRoute)
           val result  = route(application, request).value
 
-          status(result)                 mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.PlaceholderController
-            .onPageLoad("Redirect to next page based on file status (CARF-621)")
-            .url
+          status(result) mustEqual NO_CONTENT
+
+          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        }
+      }
+
+      "must return OK with url to file confirmation page when file status is Passed" in {
+        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(Passed))
+
+        val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, sendYourFileStatusRoute)
+          val result  = route(application, request).value
+
+          status(result)        mustEqual OK
+          contentAsJson(result) mustEqual Json.toJson(
+            URL(controllers.routes.FileConfirmationController.onPageLoad(testUploadId.value).url)
+          )
+
+          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        }
+      }
+
+      "must return OK with url to rules errors page when file status is Failed" in {
+        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(Failed))
+
+        val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, sendYourFileStatusRoute)
+          val result  = route(application, request).value
+
+          status(result)        mustEqual OK
+          contentAsJson(result) mustEqual Json.toJson(
+            URL(controllers.problem.routes.RulesErrorsController.onPageLoad(testUploadId.value).url)
+          )
+
+          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        }
+      }
+
+      "must return OK with url to virus found page when file status is VirusFound" in {
+        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(VirusFound))
+
+        val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, sendYourFileStatusRoute)
+          val result  = route(application, request).value
+
+          status(result)        mustEqual OK
+          contentAsJson(result) mustEqual Json.toJson(
+            URL(controllers.problem.routes.VirusFoundController.onPageLoad(testUploadId.value).url)
+          )
+
+          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        }
+      }
+
+      "must return OK with url to file-not-accepted when file status is UnprocessableErrorFile" in {
+        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(UnprocessableErrorFile))
+
+        val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, sendYourFileStatusRoute)
+          val result  = route(application, request).value
+
+          status(result)        mustEqual OK
+          contentAsJson(result) mustEqual Json.toJson(
+            URL(
+              controllers.routes.PlaceholderController
+                .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
+                .url
+            )
+          )
+
+          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        }
+      }
+
+      "must return OK with url to journey recovery when file status is UnexpectedError" in {
+        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(UnexpectedError))
+
+        val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, sendYourFileStatusRoute)
+          val result  = route(application, request).value
+
+          status(result)        mustEqual OK
+          contentAsJson(result) mustEqual Json.toJson(
+            URL(controllers.routes.JourneyRecoveryController.onPageLoad().url)
+          )
+
+          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        }
+      }
+
+      "must return InternalServerError when SubmissionDetailsConnector returns an error" in {
+        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+          .thenReturn(ResultT.fromError(InternalServerError))
+
+        val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, sendYourFileStatusRoute)
+          val result  = route(application, request).value
+
+          status(result) mustEqual INTERNAL_SERVER_ERROR
+
+          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        }
+      }
+
+      "must return InternalServerError when UploadId is missing from user answers" in {
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, sendYourFileStatusRoute)
+          val result  = route(application, request).value
+
+          status(result) mustEqual INTERNAL_SERVER_ERROR
+
+          verify(mockSubmissionDetailsConnector, times(0)).getFileStatus(any())(any(), any())
         }
       }
 

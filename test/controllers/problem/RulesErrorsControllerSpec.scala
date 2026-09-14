@@ -18,48 +18,64 @@ package controllers.problem
 
 import base.SpecBase
 import config.FrontendAppConfig
-import models.problem.{BusinessRuleError, MessageBlock}
+import connectors.SubmissionDetailsConnector
+import models.errors.ApiError.InternalServerError
+import models.errors.BusinessRuleValidationErrors
+import models.problem.BusinessRuleError
+import models.problem.MessageBlock.Para
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import services.RulesErrorsStubService
+import play.api.test.Helpers.*
+import types.ResultT
 import views.html.problem.RulesErrorsView
 
 class RulesErrorsControllerSpec extends SpecBase {
 
-  private val mockService: RulesErrorsStubService = mock[RulesErrorsStubService]
+  private val mockSubmissionDetailsConnector: SubmissionDetailsConnector = mock[SubmissionDetailsConnector]
 
-  private def errors(count: Int): Seq[BusinessRuleError] =
-    (1 to count).map { index =>
+  // TODO: Update tests when business rule errors are mapped to required content (ticket TBC)
+  private def processTestBusinessRuleErrors(
+      businessRuleErrors: BusinessRuleValidationErrors
+  ): Seq[BusinessRuleError] = {
+    val processedFileErrors   = businessRuleErrors.fileError.map { error =>
       BusinessRuleError(
-        errorCode = s"error-$index",
+        error.code,
         docRefIds = Seq.empty,
-        message = Seq(MessageBlock.Para(s"Error message $index"))
+        message = error.details.fold(Seq(Para("")))(message => Seq(Para(message)))
+      )
+    }
+    val processedRecordErrors = businessRuleErrors.recordError.map { error =>
+      BusinessRuleError(
+        error.code,
+        docRefIds = error.docRefIDInError,
+        message = error.details.fold(Seq(Para("")))(message => Seq(Para(message)))
       )
     }
 
-  private val belowMaxErrors   = errors(99)
-  private val exactlyMaxErrors = errors(100)
-  private val aboveMaxErrors   = errors(101)
+    (processedFileErrors ++ processedRecordErrors).sortBy(_.errorCode)
+  }
+
+  private val belowMaxErrors   = processTestBusinessRuleErrors(businessRuleValidationErrors)
+  private val exactlyMaxErrors = processTestBusinessRuleErrors(businessRuleValidationManyErrors(100))
+  private val aboveMaxErrors   = processTestBusinessRuleErrors(businessRuleValidationManyErrors(101))
 
   lazy val rulesErrorsRoute: String = routes.RulesErrorsController.onPageLoad(testUploadId.value).url
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockService)
+    reset(mockSubmissionDetailsConnector)
   }
 
   "RulesErrors Controller" - {
 
     "must return OK and the correct view when errors and filename are both present, below the max" in {
-
-      when(mockService.getFileName(any(), any())).thenReturn(Some("filename.xml"))
-      when(mockService.getRulesErrors(any())).thenReturn(Some(belowMaxErrors))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(submissionDetailsFailed))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[RulesErrorsStubService].toInstance(mockService))
+        .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
         .build()
 
       running(application) {
@@ -71,7 +87,7 @@ class RulesErrorsControllerSpec extends SpecBase {
 
         status(result)          mustEqual OK
         contentAsString(result) mustEqual
-          view("filename.xml", belowMaxErrors, hasMoreThanMax = false, appConfig.managementUrl)(
+          view(testFileName, belowMaxErrors, hasMoreThanMax = false, appConfig.managementUrl)(
             request,
             messages(application)
           ).toString
@@ -79,12 +95,15 @@ class RulesErrorsControllerSpec extends SpecBase {
     }
 
     "must return OK and not show the over-100 message when errors equal the max" in {
-
-      when(mockService.getFileName(any(), any())).thenReturn(Some("filename.xml"))
-      when(mockService.getRulesErrors(any())).thenReturn(Some(exactlyMaxErrors))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(
+          ResultT.fromValue(
+            submissionDetailsFailed.copy(businessRuleErrors = businessRuleValidationManyErrors(100))
+          )
+        )
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[RulesErrorsStubService].toInstance(mockService))
+        .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
         .build()
 
       running(application) {
@@ -96,20 +115,23 @@ class RulesErrorsControllerSpec extends SpecBase {
 
         status(result)          mustEqual OK
         contentAsString(result) mustEqual
-          view("filename.xml", exactlyMaxErrors, hasMoreThanMax = false, appConfig.managementUrl)(
+          view(testFileName, exactlyMaxErrors, hasMoreThanMax = false, appConfig.managementUrl)(
             request,
             messages(application)
           ).toString
       }
     }
 
-    "must return OK and truncate to 100 rows with hasMoreThanMax true when errors exceed the max" in {
-
-      when(mockService.getFileName(any(), any())).thenReturn(Some("filename.xml"))
-      when(mockService.getRulesErrors(any())).thenReturn(Some(aboveMaxErrors))
+    "must return OK and truncate to 100 rows with hasMoreThanMax = true when errors exceed the max" in {
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(
+          ResultT.fromValue(
+            submissionDetailsFailed.copy(businessRuleErrors = businessRuleValidationManyErrors(101))
+          )
+        )
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[RulesErrorsStubService].toInstance(mockService))
+        .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
         .build()
 
       running(application) {
@@ -122,7 +144,7 @@ class RulesErrorsControllerSpec extends SpecBase {
         status(result)          mustEqual OK
         contentAsString(result) mustEqual
           view(
-            "filename.xml",
+            testFileName,
             aboveMaxErrors.take(100),
             hasMoreThanMax = true,
             appConfig.managementUrl
@@ -133,13 +155,12 @@ class RulesErrorsControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Journey Recovery when both errors and filename are missing" in {
-
-      when(mockService.getFileName(any(), any())).thenReturn(None)
-      when(mockService.getRulesErrors(any())).thenReturn(None)
+    "must redirect to Journey Recovery when file status is not Failed" in {
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(submissionDetailsPending))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[RulesErrorsStubService].toInstance(mockService))
+        .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
         .build()
 
       running(application) {
@@ -151,13 +172,16 @@ class RulesErrorsControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Journey Recovery when filename is missing but errors are present" in {
-
-      when(mockService.getFileName(any(), any())).thenReturn(None)
-      when(mockService.getRulesErrors(any())).thenReturn(Some(belowMaxErrors))
+    "must redirect to Journey Recovery when businessRuleValidationErrors contains no errors" in {
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(
+          ResultT.fromValue(
+            submissionDetailsFailed.copy(businessRuleErrors = BusinessRuleValidationErrors.apply())
+          )
+        )
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[RulesErrorsStubService].toInstance(mockService))
+        .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
         .build()
 
       running(application) {
@@ -169,13 +193,12 @@ class RulesErrorsControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Journey Recovery when errors are empty but filename is present" in {
-
-      when(mockService.getFileName(any(), any())).thenReturn(Some("filename.xml"))
-      when(mockService.getRulesErrors(any())).thenReturn(Some(Seq.empty[BusinessRuleError]))
+    "must redirect to Journey Recovery when SubmissionDetailsConnector returns an error" in {
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromError(InternalServerError))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[RulesErrorsStubService].toInstance(mockService))
+        .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
         .build()
 
       running(application) {

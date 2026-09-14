@@ -82,6 +82,7 @@ class RcaspAndSubscriptionDetailsControllerSpec extends SpecBase {
             processingDate = "2024-01-25T09:26:17Z",
             carfSubscriptionDetails = DisplaySubscriptionDetails(
               carfReference = testCarfId,
+              gbUser = true,
               primaryContact = DisplaySubscriptionContact(
                 individual = None,
                 organisation = None,
