@@ -14,11 +14,29 @@
  * limitations under the License.
  */
 
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package repositories
 
-import config.FrontendAppConfig
+import config.{CryptoProvider, FrontendAppConfig}
+import models.CryptoType.{randomAesKey, CryptoT}
 import models.UserAnswers
 import org.mockito.Mockito.when
+import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters
 import org.scalactic.source.Position
 import org.scalatest.OptionValues
@@ -27,7 +45,9 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.slf4j.MDC
+import play.api.Configuration
 import play.api.libs.json.Json
+import uk.gov.hmrc.crypto.Crypted
 import uk.gov.hmrc.mdc.MdcExecutionContext
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
@@ -51,6 +71,9 @@ class SessionRepositorySpec
 
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
+  when(mockAppConfig.mongoEncryptionEnabled) thenReturn true
+
+  private implicit val crypto: CryptoT = new CryptoProvider(Configuration("crypto.key" -> randomAesKey)).get()
 
   implicit val productionLikeTestMdcExecutionContext: ExecutionContext = MdcExecutionContext()
 
@@ -71,6 +94,52 @@ class SessionRepositorySpec
 
       setResult     mustEqual true
       updatedRecord mustEqual expectedResult
+    }
+
+    "must persist the data in encrypted format when encryption is enabled" in {
+
+      val setResult = repository.set(userAnswers).futureValue
+
+      setResult mustEqual true
+
+      val rawRecord = repository.collection
+        .find[BsonDocument](Filters.equal("_id", userAnswers.id))
+        .headOption()
+        .futureValue
+        .value
+
+      val rawData = rawRecord.get("data").asString().getValue
+
+      val decryptedData = crypto.decrypt(Crypted(rawData)).value
+
+      Json.parse(decryptedData) mustBe userAnswers.data
+    }
+
+    "must persist the data in plain format when encryption is disabled" in {
+
+      val mockAppConfigNoEncryption = mock[FrontendAppConfig]
+      when(mockAppConfigNoEncryption.cacheTtl) thenReturn 1L
+      when(mockAppConfigNoEncryption.mongoEncryptionEnabled) thenReturn false
+
+      val repositoryNoEncryption = new SessionRepository(
+        mongoComponent = mongoComponent,
+        appConfig = mockAppConfigNoEncryption,
+        clock = stubClock
+      )
+
+      val setResult = repositoryNoEncryption.set(userAnswers).futureValue
+
+      setResult mustEqual true
+
+      val rawRecord = repositoryNoEncryption.collection
+        .find[BsonDocument](Filters.equal("_id", userAnswers.id))
+        .headOption()
+        .futureValue
+        .value
+
+      val rawData = rawRecord.get("data").asDocument()
+
+      Json.parse(rawData.toJson) mustBe userAnswers.data
     }
 
     mustPreserveMdc(repository.set(userAnswers))

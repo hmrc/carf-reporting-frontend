@@ -56,6 +56,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
+  val mongoEncryptionEnabled: Boolean = configuration.get[Boolean]("mongodb.encryptionEnabled")
+
   val upscanInitiateHost: String        = servicesConfig.baseUrl("upscan")
   val upscanInitiatePath: String        = configuration.get[String]("microservice.services.upscan.initiate-path")
   val upscanRedirectBase: String        = configuration.get[String]("microservice.services.upscan.redirect-base")
