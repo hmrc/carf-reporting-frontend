@@ -64,5 +64,50 @@ class FileStatusSpec extends SpecBase {
         tagForFileStatus(UnexpectedError)        mustBe TagViewModel(Text("Problem")).purple()
       }
     }
+
+    ".linkForFileStatus" - {
+
+      val uploadId = "test-upload-id"
+
+      "must render a link to the file-confirmation page for Passed" in {
+        val content = linkForFileStatus(Passed, uploadId).asHtml.body
+
+        content must include(controllers.routes.FileConfirmationController.onPageLoad(uploadId).url)
+        content must include(messages("resultOfAutomaticChecks.nextStep.confirmation"))
+      }
+
+      "must render a link to the rules-errors page for Failed" in {
+        val content = linkForFileStatus(Failed, uploadId).asHtml.body
+
+        content must include(controllers.problem.routes.RulesErrorsController.onPageLoad(uploadId).url)
+        content must include(messages("resultOfAutomaticChecks.nextStep.checkErrors"))
+      }
+
+      "must render a link to the virus-found page for VirusFound" in {
+        val content = linkForFileStatus(VirusFound, uploadId).asHtml.body
+
+        content must include(controllers.problem.routes.VirusFoundController.onPageLoad(uploadId).url)
+        content must include(messages("resultOfAutomaticChecks.nextStep.checkProblem"))
+      }
+
+      "must render a link to the file-not-accepted placeholder for UnprocessableErrorFile" in {
+        val content = linkForFileStatus(UnprocessableErrorFile, uploadId).asHtml.body
+
+        content must include(
+          controllers.routes.PlaceholderController
+            .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
+            .url
+        )
+        content must include(messages("resultOfAutomaticChecks.nextStep.contactUs"))
+      }
+
+      "must render a link to upload the file again for UnexpectedError" in {
+        val content = linkForFileStatus(UnexpectedError, uploadId).asHtml.body
+
+        content must include(controllers.upload.routes.UploadXmlController.onPageLoad().url)
+        content must include(messages("resultOfAutomaticChecks.nextStep.uploadAgain"))
+      }
+
+    }
   }
 }
