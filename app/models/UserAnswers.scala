@@ -16,6 +16,7 @@
 
 package models
 
+import models.CryptoType.CryptoT
 import models.crypto.SensitiveJsObject
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
@@ -95,7 +96,7 @@ object UserAnswers {
 
   implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)
 
-  def mongoFormat(encryptionEnabled: Boolean)(implicit crypto: Encrypter with Decrypter): OFormat[UserAnswers] = {
+  def mongoFormat(encryptionEnabled: Boolean)(implicit crypto: CryptoT): OFormat[UserAnswers] = {
 
     implicit val sensitiveFormat: Format[SensitiveJsObject] =
       JsonEncryption.sensitiveEncrypterDecrypter(SensitiveJsObject.apply)
