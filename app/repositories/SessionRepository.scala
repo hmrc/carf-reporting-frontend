@@ -17,6 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
+import models.CryptoType.CryptoT
 import models.UserAnswers
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.*
@@ -36,11 +37,11 @@ class SessionRepository @Inject() (
     mongoComponent: MongoComponent,
     appConfig: FrontendAppConfig,
     clock: Clock
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, crypto: CryptoT)
     extends PlayMongoRepository[UserAnswers](
       collectionName = "user-answers",
       mongoComponent = mongoComponent,
-      domainFormat = UserAnswers.format,
+      domainFormat = UserAnswers.mongoFormat(appConfig.mongoEncryptionEnabled),
       indexes = Seq(
         IndexModel(
           Indexes.ascending("lastUpdated"),

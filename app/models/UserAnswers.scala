@@ -16,8 +16,12 @@
 
 package models
 
+import models.CryptoType.CryptoT
+import models.crypto.SensitiveJsObject
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
 import queries.{Gettable, Settable}
+import uk.gov.hmrc.crypto.json.JsonEncryption
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
@@ -75,28 +79,47 @@ final case class UserAnswers(
 
 object UserAnswers {
 
-  val reads: Reads[UserAnswers] = {
-
-    import play.api.libs.functional.syntax.*
-
+  val reads: Reads[UserAnswers] =
     (
       (__ \ "_id").read[String] and
         (__ \ "data").read[JsObject] and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
     )(UserAnswers.apply _)
-  }
 
-  val writes: OWrites[UserAnswers] = {
-
-    import play.api.libs.functional.syntax.*
-
+  val writes: OWrites[UserAnswers] =
     (
       (__ \ "_id").write[String] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
     )(ua => (ua.id, ua.data, ua.lastUpdated))
-  }
 
   implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)
 
+  def mongoFormat(encryptionEnabled: Boolean)(implicit crypto: CryptoT): OFormat[UserAnswers] = {
+
+    implicit val sensitiveFormat: Format[SensitiveJsObject] =
+      JsonEncryption.sensitiveEncrypterDecrypter(SensitiveJsObject.apply)
+
+    val mongoReads: Reads[UserAnswers] =
+      if (encryptionEnabled)
+        (
+          (__ \ "_id").read[String] and
+            (__ \ "data").read[SensitiveJsObject].map(_.decryptedValue) and
+            (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
+        )(UserAnswers.apply _)
+      else
+        reads
+
+    val mongoWrites: OWrites[UserAnswers] =
+      if (encryptionEnabled)
+        (
+          (__ \ "_id").write[String] and
+            (__ \ "data").write[SensitiveJsObject] and
+            (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
+        )(ua => (ua.id, SensitiveJsObject(ua.data), ua.lastUpdated))
+      else
+        writes
+
+    OFormat(mongoReads, mongoWrites)
+  }
 }
