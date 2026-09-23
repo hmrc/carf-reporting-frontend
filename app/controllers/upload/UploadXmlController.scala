@@ -30,6 +30,7 @@ import models.{ErrorCode, InvalidArgumentErrorMessage, UserAnswers}
 import org.apache.pekko
 import org.apache.pekko.actor.ActorSystem
 import pages.{FileReferencePage, UploadIdPage, UploadSuccessDetailsPage}
+import pages.{FileReferencePage, UploadDetailsUserAnswers, UploadIdPage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -115,8 +116,10 @@ class UploadXmlController @Inject() (
 
   def getUploadStatusAndRedirect(uploadId: UploadId): Action[AnyContent] =
     (identify andThen getData() andThen requireData).async { implicit request =>
-      def errorRedirect(errorCode: String, errorMessage: String, errorRequestId: String): Result =
-        Redirect(controllers.upload.routes.UploadXmlController.showError(errorCode, errorMessage, errorRequestId).url)
+      def errorRedirect(errorCode: String, errorMessage: String, errorRequestId: String): Future[Result] =
+        Future.successful(
+          Redirect(controllers.upload.routes.UploadXmlController.showError(errorCode, errorMessage, errorRequestId).url)
+        )
 
       // Delay the call to make sure the backend db has been populated by the upscan callback first
       pekko.pattern.after(config.upscanCallbackDelayInSeconds.seconds, actorSystem.scheduler) {
@@ -137,8 +140,8 @@ class UploadXmlController @Inject() (
                   val uploadSuccessDetails =
                     UploadSuccessDetails(uploadedSuccessfully.name, uploadedSuccessfully.downloadUrl)
                   for {
-                    updatedAnswers <-
-                      Future.fromTry(request.userAnswers.set(UploadSuccessDetailsPage, uploadSuccessDetails))
+                    ua <- Future.fromTry(request.userAnswers.set(UploadDetailsUserAnswers, uploadedSuccessfully))
+                    updatedAnswers <- Future.fromTry(ua.set(UploadSuccessDetailsPage, uploadSuccessDetails))
                     _              <- sessionRepository.set(updatedAnswers)
                   } yield Redirect(controllers.upload.routes.FileValidationController.onPageLoad().url)
                 }

@@ -25,6 +25,9 @@ import models.fileSubmission.FileStatus.*
 import models.responses.{OrganisationRcaspDetailsStandard, RcaspContactDetails, SubscriptionContactDetails, SubscriptionDetails}
 import models.{CachedFileDetails, ExtractedFileDetails, UserAnswers}
 import pages.{ExtractedFileDetailsPage, FileStatusPage, RcaspDetailsPage, SubscriptionDetailsPage}
+import models.responses.*
+import models.{CachedFileSubmissionDetails, ExtractedFileDetails, UserAnswers}
+import pages.FileStatusPage
 import repositories.SessionRepository
 import types.ResultT
 
@@ -35,6 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository, clock: Clock) {
 
   private inline val stubbedRCASPName = "testRcaspName"
+  private inline val testCarfId       = "XE0000123456789"
 
   val organisationStandardRcaspDetails =
     OrganisationRcaspDetailsStandard(
@@ -45,9 +49,21 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
       SecondaryContactDetails = Some(RcaspContactDetails(ContactName = "Clavell", EmailAddress = "clavell@uva.edu.org"))
     )
 
-  val subscriptionDetailsOrganisation = SubscriptionDetails(
-    primaryUserDetails = SubscriptionContactDetails("John Doe", "GroupRep@FATCACRS.com"),
-    secondaryUserDetails = Some(SubscriptionContactDetails("Jane Doe", "GroupRep2@FATCACRS.com"))
+  lazy val subscriptionDetailsOrganisation: DisplaySubscriptionDetails = DisplaySubscriptionDetails(
+    carfReference = testCarfId,
+    gbUser = true,
+    primaryContact = DisplaySubscriptionContact(
+      individual = None,
+      organisation = Some(DisplaySubscriptionOrganisation("John Doe")),
+      email = "GroupRep@FATCACRS.com"
+    ),
+    secondaryContact = Some(
+      DisplaySubscriptionContact(
+        individual = None,
+        organisation = Some(DisplaySubscriptionOrganisation("John Doe")),
+        email = "GroupRep2@FATCACRS.com"
+      )
+    )
   )
 
   private def testDate = LocalDateTime.now(clock)
@@ -84,7 +100,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
 
     carfId.takeRight(1) match {
       case "1" => // TestData
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,
@@ -105,7 +121,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case "2" => // NilReport
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,
@@ -126,7 +142,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case "3" => // NotificationOfReportingOutsideUk
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,
@@ -147,7 +163,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case "4" => // NewInformation
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,
@@ -168,7 +184,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case "5" => // AdditionalInformationForExistingReport
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,
@@ -189,10 +205,10 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case "6" => // DeletionOfExistingReport
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation.copy(secondaryUserDetails = None),
+          subscriptionDetailsOrganisation.copy(secondaryContact = None),
           organisationStandardRcaspDetails.copy(IsRCASPUser = true),
           Some(
             ExtractedFileDetails(
@@ -210,7 +226,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case "7" => // CorrectedInformationForExistingReport
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,
@@ -231,7 +247,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case "8" => // DeletedInformationForExistingReport
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,
@@ -252,7 +268,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case "9" => // CorrectedAndDeletedInformationForExistingReport
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,
@@ -273,7 +289,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case "0" => // ReportableInformationFallback
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,
@@ -294,7 +310,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
           )
         )
       case _   =>
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetailsOrganisation,

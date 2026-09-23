@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import config.FrontendAppConfig
 import models.fileSubmission.FileStatus.Pending
-import models.responses.getEmails
+import models.responses.{getEmails, getEmailsFromSubscriptionDetails}
 import org.mockito.ArgumentMatchers.{any, argThat, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import pages.UploadCompletionLockPage
@@ -74,8 +74,8 @@ class FileConfirmationControllerSpec extends SpecBase {
           val view = application.injector.instanceOf[FileConfirmationView]
 
           val expectedEmailHtml =
-            s"We have sent a confirmation email to ${subscriptionDetailsOrganisation.getEmails.head} " +
-              s"and ${subscriptionDetailsOrganisation.getEmails(1)}."
+            s"We have sent a confirmation email to ${displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails.head} " +
+              s"and ${displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails(1)}."
 
           status(result)          mustEqual OK
           contentAsString(result)      must include(expectedEmailHtml)
@@ -93,7 +93,7 @@ class FileConfirmationControllerSpec extends SpecBase {
       "must return OK and the correct view when user answers are complete 1 email" in {
 
         val orgFileDetailsOneEmail =
-          orgFileDetails.copy(subscriptionDetails = subscriptionDetailsOrganisation.copy(secondaryUserDetails = None))
+          orgFileDetails.copy(subscriptionDetails = displaySubscriptionDetailsOrg.copy(secondaryContact = None))
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
@@ -116,7 +116,7 @@ class FileConfirmationControllerSpec extends SpecBase {
           val view = application.injector.instanceOf[FileConfirmationView]
 
           val expectedEmailHtml =
-            s"We have sent a confirmation email to ${subscriptionDetailsOrganisation.getEmails.head}."
+            s"We have sent a confirmation email to ${displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails.head}."
 
           status(result)          mustEqual OK
           contentAsString(result)      must include(expectedEmailHtml)
@@ -136,7 +136,7 @@ class FileConfirmationControllerSpec extends SpecBase {
         val orgFileDetailsOneEmail = orgFileDetails
           .copy(
             rcaspDetails = organisationStandardRcaspDetails,
-            subscriptionDetails = subscriptionDetailsOrganisation
+            subscriptionDetails = displaySubscriptionDetailsOrg
           )
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
@@ -160,8 +160,8 @@ class FileConfirmationControllerSpec extends SpecBase {
           val view = application.injector.instanceOf[FileConfirmationView]
 
           val expectedEmailHtml =
-            s"We have sent a confirmation email to ${subscriptionDetailsOrganisation.getEmails.head}, " +
-              s"${subscriptionDetailsOrganisation.getEmails(1)}, " +
+            s"We have sent a confirmation email to ${displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails.head}, " +
+              s"${displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails(1)}, " +
               s"${organisationStandardRcaspDetails.getEmails.head} and ${organisationStandardRcaspDetails.getEmails(1)}."
 
           status(result)          mustEqual OK

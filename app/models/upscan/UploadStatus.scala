@@ -31,7 +31,7 @@ enum UploadStatus {
 
 object UploadStatus {
 
-  private val uploadedSuccessfullyFormat: OFormat[UploadedSuccessfully] = Json.format[UploadedSuccessfully]
+  implicit val uploadedSuccessfullyFormat: OFormat[UploadedSuccessfully] = Json.format[UploadedSuccessfully]
 
   private val uploadRejectedFormat: OFormat[UploadRejected] = Json.format[UploadRejected]
 

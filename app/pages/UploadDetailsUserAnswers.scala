@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package models
+package pages
 
-import models.fileSubmission.FileStatus
-import models.responses.{RcaspDetails, SubscriptionDetails}
+import models.upscan.UploadStatus.UploadedSuccessfully
+import play.api.libs.json.JsPath
 
-import java.time.LocalDateTime
+case object UploadDetailsUserAnswers extends QuestionPage[UploadedSuccessfully] {
 
-case class CachedFileDetails(
-    dateTime: Option[LocalDateTime],
-    fileStatus: FileStatus,
-    subscriptionDetails: SubscriptionDetails,
-    rcaspDetails: RcaspDetails,
-    extractedFileDetails: Option[ExtractedFileDetails]
-)
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "uploadDetails"
+
+}

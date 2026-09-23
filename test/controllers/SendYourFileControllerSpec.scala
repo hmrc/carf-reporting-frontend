@@ -18,17 +18,21 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
+import connectors.SDESConnector
+import models.errors.ApiError.InternalServerError
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import pages.{ExtractedFileDetailsPage, RcaspDetailsPage}
+import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, SubscriptionDetailsPage, UploadDetailsUserAnswers, UploadIdPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import types.ResultT
 import views.html.SendYourFileView
 
 class SendYourFileControllerSpec extends SpecBase {
 
   val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
+  val mockSDESConnector: SDESConnector = mock[SDESConnector]
 
   lazy val sendYourFileRoute: String       = routes.SendYourFileController.onPageLoad().url
   lazy val sendYourFileStatusRoute: String = routes.SendYourFileController.getFileStatusAndRedirect().url
@@ -142,11 +146,23 @@ class SendYourFileControllerSpec extends SpecBase {
     }
 
     ".onSubmit" - {
-      // TODO: Update when call to FTS is implemented (CARF-611) and StillCheckingYourFile is created (CARF-616)
+      // TODO: Update when StillCheckingYourFile is created (CARF-616)
       "must submit to FTS and redirect to StillCheckingYourFileController" in {
-        val userAnswers = emptyUserAnswers.withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
+        when(mockSDESConnector.sendSubmission(any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val userAnswers = emptyUserAnswers
+          .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
+          .withPage(SubscriptionDetailsPage, displaySubscriptionDetailsOrg)
+          .withPage(RcaspDetailsPage, organisationStandardRcaspDetails)
+          .withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
+          .withPage(UploadIdPage, testUploadId)
+
+        val application =
+          applicationBuilder(userAnswers = Some(userAnswers))
+            .overrides(
+              bind[SDESConnector].toInstance(mockSDESConnector)
+            )
+            .build()
 
         running(application) {
           val request = FakeRequest(POST, sendYourFileRoute)
@@ -157,7 +173,30 @@ class SendYourFileControllerSpec extends SpecBase {
         }
       }
 
+      "must redirect to Journey recovery when the SDES call fails" in {
+        when(mockSDESConnector.sendSubmission(any())(any(), any()))
+          .thenReturn(ResultT.fromError(InternalServerError))
+
+        val userAnswers = emptyUserAnswers
+
+        val application =
+          applicationBuilder(userAnswers = Some(userAnswers))
+            .overrides(
+              bind[SDESConnector].toInstance(mockSDESConnector)
+            )
+            .build()
+
+        running(application) {
+          val request = FakeRequest(POST, sendYourFileRoute)
+          val result  = route(application, request).value
+
+          status(result)                 mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
       "must redirect to Journey Recovery when ExtractedFileDetails is missing from user answers" in {
+        when(mockSDESConnector.sendSubmission(any())(any(), any())).thenReturn(ResultT.fromValue(()))
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
@@ -170,6 +209,7 @@ class SendYourFileControllerSpec extends SpecBase {
       }
 
       "must redirect to Journey Recovery when user answers do not exist" in {
+        when(mockSDESConnector.sendSubmission(any())(any(), any())).thenReturn(ResultT.fromValue(()))
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {

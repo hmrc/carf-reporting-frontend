@@ -27,6 +27,7 @@ import models.upscan.UploadStatus.*
 import org.mockito.ArgumentMatchers.{any, argThat, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import pages.{FileReferencePage, SubscriptionDetailsPage, UploadIdPage, UploadSuccessDetailsPage}
+import pages.{FileReferencePage, SubscriptionDetailsPage, UploadDetailsUserAnswers, UploadIdPage}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -63,7 +64,7 @@ class UploadXmlControllerSpec extends SpecBase {
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-        val userAnswers = emptyUserAnswers.withPage(SubscriptionDetailsPage, subscriptionDetailsOrganisation)
+        val userAnswers = emptyUserAnswers.withPage(SubscriptionDetailsPage, displaySubscriptionDetailsOrg)
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[UpscanConnector].toInstance(mockUpscanConnector))
@@ -440,48 +441,20 @@ class UploadXmlControllerSpec extends SpecBase {
     }
 
     ".getUploadStatusAndRedirect" - {
-      "must read the progress of the upload from the backend and redirect to FileValidationController when successful" in {
-        when(mockUpscanConnector.getUploadStatus(any())(any(), any()))
-          .thenReturn(ResultT.fromValue(Some(uploadedSuccessfully)))
+      "must read the progress of the upload from the backend and redirect accordingly" in {
 
-        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
-
-        when(mockAppConfig.upscanCallbackDelayInSeconds).thenReturn(0)
-        when(mockAppConfig.upscanMaxFileNameLength).thenReturn(100)
-
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[UpscanConnector].toInstance(mockUpscanConnector),
-            bind[FrontendAppConfig].toInstance(mockAppConfig)
-          )
-          .build()
-
-        running(application) {
-          val request = FakeRequest(GET, getUploadStatusRoute)
-          val result  = route(application, request).value
-
-          status(result)                 mustBe SEE_OTHER
-          redirectLocation(result).value mustBe controllers.upload.routes.FileValidationController.onPageLoad().url
-
-          verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId))(any(), any())
-          verify(mockSessionRepository, times(1)).set(
-            argThat(
-              _.get(UploadSuccessDetailsPage).contains(
-                UploadSuccessDetails(uploadedSuccessfully.name, uploadedSuccessfully.downloadUrl)
-              )
-            )
-          )
-        }
-      }
-
-      "must read the progress of the upload from the backend and redirect accordingly when there is an error" in {
-        def verifyResult(uploadStatus: UploadStatus, expectedRedirectUrl: String): Unit = {
-          reset(mockUpscanConnector)
+        def verifyResult(
+            uploadStatus: UploadStatus,
+            expectedRedirectUrl: String,
+            additionalVerify: => Future[Boolean]
+        ): Unit = {
+          reset(mockUpscanConnector, mockSessionRepository)
           when(mockUpscanConnector.getUploadStatus(any())(any(), any()))
             .thenReturn(ResultT.fromValue(Some(uploadStatus)))
 
           when(mockAppConfig.upscanCallbackDelayInSeconds).thenReturn(0)
           when(mockAppConfig.upscanMaxFileNameLength).thenReturn(100)
+          when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
           val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
             .overrides(
@@ -498,37 +471,64 @@ class UploadXmlControllerSpec extends SpecBase {
             redirectLocation(result).value mustBe expectedRedirectUrl
 
             verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId))(any(), any())
+            additionalVerify
           }
         }
 
         val invalidFileName = stringsLongerThan(101).sample.get.concat(".xml")
 
-        verifyResult(InProgress, upload.routes.UploadXmlController.getUploadStatusAndRedirect(testUploadId).url)
-        verifyResult(Quarantined, upload.routes.UploadXmlController.showError("virusfile", "", "").url)
+        verifyResult(
+          InProgress,
+          upload.routes.UploadXmlController.getUploadStatusAndRedirect(testUploadId).url,
+          verify(mockSessionRepository, times(0)).set(any())
+        )
+        verifyResult(
+          Quarantined,
+          upload.routes.UploadXmlController.showError("virusfile", "", "").url,
+          verify(mockSessionRepository, times(0)).set(any())
+        )
         verifyResult(
           uploadRejected,
-          upload.routes.UploadXmlController.showError("invalidargument", "typemismatch", "").url
+          upload.routes.UploadXmlController.showError("invalidargument", "typemismatch", "").url,
+          verify(mockSessionRepository, times(0)).set(any())
         )
         verifyResult(
           UploadRejected(ErrorDetails("REJECTED", "octet-stream")),
-          upload.routes.UploadXmlController.showError("octetstream", "rejected", "").url
+          upload.routes.UploadXmlController.showError("octetstream", "rejected", "").url,
+          verify(mockSessionRepository, times(0)).set(any())
         )
         verifyResult(Failed, upload.routes.UploadXmlController.showError("UploadFailed", "", "").url)
         verifyResult(
+          Failed,
+          upload.routes.UploadXmlController.showError("UploadFailed", "", "").url,
+          verify(mockSessionRepository, times(0)).set(any())
+        )
+        verifyResult(
+          uploadedSuccessfully,
+          controllers.upload.routes.FileValidationController.onPageLoad().url,
+          verify(mockSessionRepository, times(1)).set(
+            argThat(_.get(UploadDetailsUserAnswers).nonEmpty)
+          )
+        )
+        verifyResult(
           uploadedSuccessfully.copy(name = invalidFileName),
-          upload.routes.UploadXmlController.showError("invalidargument", "invalidfilenamelength", "").url
+          upload.routes.UploadXmlController.showError("invalidargument", "invalidfilenamelength", "").url,
+          verify(mockSessionRepository, times(0)).set(any())
         )
         verifyResult(
           uploadedSuccessfully.copy(name = "disallowed???<>!!!.xml"),
-          upload.routes.UploadXmlController.showError("invalidargument", "disallowedcharacters", "").url
+          upload.routes.UploadXmlController.showError("invalidargument", "disallowedcharacters", "").url,
+          verify(mockSessionRepository, times(0)).set(any())
         )
         verifyResult(
           uploadedSuccessfully.copy(name = "not-xml.png"),
-          upload.routes.UploadXmlController.showError("invalidargument", "typemismatch", "").url
+          upload.routes.UploadXmlController.showError("invalidargument", "typemismatch", "").url,
+          verify(mockSessionRepository, times(0)).set(any())
         )
         verifyResult(
           uploadedSuccessfully.copy(size = 0L),
-          upload.routes.UploadXmlController.showError("invalidargument", "fileisempty", "").url
+          upload.routes.UploadXmlController.showError("invalidargument", "fileisempty", "").url,
+          verify(mockSessionRepository, times(0)).set(any())
         )
       }
 
@@ -547,6 +547,7 @@ class UploadXmlControllerSpec extends SpecBase {
           redirectLocation(result).value mustBe upload.routes.UploadXmlController.showError("UploadFailed", "", "").url
 
           verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSessionRepository, times(0)).set(any())
         }
       }
 
@@ -571,6 +572,7 @@ class UploadXmlControllerSpec extends SpecBase {
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
           verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSessionRepository, times(0)).set(any())
         }
       }
 
@@ -583,6 +585,7 @@ class UploadXmlControllerSpec extends SpecBase {
 
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+          verify(mockSessionRepository, times(0)).set(any())
         }
       }
     }

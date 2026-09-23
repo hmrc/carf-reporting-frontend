@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package pages
+package models
 
-import models.responses.DisplaySubscriptionDetails
-import play.api.libs.json.JsPath
+import models.fileSubmission.FileStatus
+import models.responses.{DisplaySubscriptionDetails, RcaspDetails}
 
-case object SubscriptionDetailsPage extends QuestionPage[DisplaySubscriptionDetails] {
+import java.time.LocalDateTime
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "subscriptionDetails"
-}
+case class CachedFileSubmissionDetails(
+    dateTime: Option[LocalDateTime],
+    fileStatus: FileStatus,
+    subscriptionDetails: DisplaySubscriptionDetails,
+    rcaspDetails: RcaspDetails,
+    extractedFileDetails: Option[ExtractedFileDetails]
+)

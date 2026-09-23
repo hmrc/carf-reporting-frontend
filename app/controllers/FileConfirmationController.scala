@@ -21,6 +21,7 @@ import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import models.fileSubmission.FileStatus.Passed
 import models.responses.{getEmails, getName}
 import models.{CachedFileDetails, ExtractedFileDetails}
+import models.responses.{getEmails, getEmailsFromSubscriptionDetails, getName}
 import pages.UploadCompletionLockPage
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
@@ -89,7 +90,7 @@ class FileConfirmationController @Inject (
       extractedFileDetails: ExtractedFileDetails,
       datetime: LocalDateTime
   )(implicit request: Request[_], messages: Messages): Result = {
-    val userEmailAddresses = cachedFileDetails.subscriptionDetails.getEmails
+    val userEmailAddresses = cachedFileDetails.subscriptionDetails.getEmailsFromSubscriptionDetails
     val rcaspDetails       = cachedFileDetails.rcaspDetails
     val summaryListRows    = helper.rows(extractedFileDetails, rcaspDetails.getName)
 

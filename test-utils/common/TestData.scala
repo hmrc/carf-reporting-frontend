@@ -17,13 +17,15 @@
 package common
 
 import generators.Generators
-import models.*
+import models.upscan.UploadStatus.*
+import models.MessageTypeIndic.*
 import models.DocTypeIndic.*
 import models.MessageTypeIndic.*
 import models.errors.XmlError
+import models.requests.sdes.{FileName, SubmissionRequest}
 import models.responses.*
 import models.upscan.*
-import models.upscan.UploadStatus.*
+import models.*
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryList, SummaryListRow}
 import viewmodels.govuk.all.{ActionItemViewModel, FluentActionItem, SummaryListRowViewModel, ValueViewModel}
@@ -49,7 +51,7 @@ trait TestData extends Generators {
   val testFileName    = "test.xml"
   val testDownloadUrl = "https://bucketName.s3.eu-west-2.amazonaws.com?1235676"
   val testFileSize    = 987L
-  val testChecksum    = "396f1"
+  val testChecksum    = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
   val postTarget = "http://localhost:9570/upscan/upload-proxy"
 
@@ -167,55 +169,45 @@ trait TestData extends Generators {
 
   val displaySubscriptionOrganisation = DisplaySubscriptionOrganisation(testContactName)
 
+  lazy val displaySubscriptionDetailsIndividual: DisplaySubscriptionDetails = DisplaySubscriptionDetails(
+    carfReference = testCarfId,
+    gbUser = true,
+    primaryContact = DisplaySubscriptionContact(
+      individual = Some(DisplaySubscriptionIndividual("Jane", "Smith")),
+      organisation = None,
+      email = "GroupRep@FATCACRS.com"
+    ),
+    secondaryContact = None
+  )
+
   val displaySubscriptionResponseIndividual = DisplaySubscriptionResponse(
     success = DisplaySubscriptionSuccess(
       processingDate = "2024-01-25T09:26:17Z",
-      carfSubscriptionDetails = DisplaySubscriptionDetails(
-        carfReference = testCarfId,
-        primaryContact = DisplaySubscriptionContact(
-          individual = Some(
-            DisplaySubscriptionIndividual(
-              firstName = "Joe",
-              lastName = "Smith"
-            )
-          ),
-          organisation = None,
-          email = "GroupRep@FATCACRS.com"
-        ),
-        secondaryContact = None
-      )
+      carfSubscriptionDetails = displaySubscriptionDetailsIndividual
     )
   )
 
-  val subscriptionDetailsIndividual = SubscriptionDetails(
-    primaryUserDetails = SubscriptionContactDetails("Joe Smith", "GroupRep@FATCACRS.com"),
-    secondaryUserDetails = None
+  val displaySubscriptionDetailsOrg           = DisplaySubscriptionDetails(
+    carfReference = testCarfId,
+    gbUser = true,
+    primaryContact = DisplaySubscriptionContact(
+      individual = None,
+      organisation = Some(DisplaySubscriptionOrganisation(name = "John Doe")),
+      email = "GroupRep@FATCACRS.com"
+    ),
+    secondaryContact = Some(
+      DisplaySubscriptionContact(
+        individual = None,
+        organisation = Some(DisplaySubscriptionOrganisation(name = "Jane Doe")),
+        email = "GroupRep2@FATCACRS.com"
+      )
+    )
   )
-
   val displaySubscriptionResponseOrganisation = DisplaySubscriptionResponse(
     success = DisplaySubscriptionSuccess(
       processingDate = "2024-01-25T09:26:17Z",
-      carfSubscriptionDetails = DisplaySubscriptionDetails(
-        carfReference = testCarfId,
-        primaryContact = DisplaySubscriptionContact(
-          individual = None,
-          organisation = Some(DisplaySubscriptionOrganisation(name = "John Doe")),
-          email = "GroupRep@FATCACRS.com"
-        ),
-        secondaryContact = Some(
-          DisplaySubscriptionContact(
-            individual = None,
-            organisation = Some(DisplaySubscriptionOrganisation(name = "Jane Doe")),
-            email = "GroupRep2@FATCACRS.com"
-          )
-        )
-      )
+      carfSubscriptionDetails = displaySubscriptionDetailsOrg
     )
-  )
-
-  val subscriptionDetailsOrganisation = SubscriptionDetails(
-    primaryUserDetails = SubscriptionContactDetails("John Doe", "GroupRep@FATCACRS.com"),
-    secondaryUserDetails = Some(SubscriptionContactDetails("Jane Doe", "GroupRep2@FATCACRS.com"))
   )
 
   lazy val testSummaryListRow: SummaryListRow =
@@ -262,11 +254,42 @@ trait TestData extends Generators {
 
   lazy val testDateTime: LocalDateTime = LocalDateTime.of(2026, 8, 17, 16, 48)
 
-  val orgFileDetails = CachedFileDetails(
+  val orgFileDetails = CachedFileSubmissionDetails(
     Some(testDateTime),
     Passed,
-    subscriptionDetailsOrganisation,
+    displaySubscriptionDetailsOrg,
     organisationStandardRcaspDetails.copy(IsRCASPUser = true),
     Some(extractedFileDetailsTestData)
+  )
+
+  val extractedFileDetailsCarf = ExtractedFileDetails(
+    messageRefId = "MSG-2024-0001",
+    sendingEntityIn = "SENDER-001",
+    rcaspName = Some("Acme Crypto Exchange Ltd"),
+    messageTypeIndic = CARF701,
+    hasOtherNexus = false,
+    hasCryptoUsers = true,
+    docTypeIndic = Some(OECD1),
+    isTestData = false,
+    allCryptoUsersAreCorrections = false,
+    allCryptoUsersAreDeletions = false
+  )
+
+  lazy val testSubmissionRequest: SubmissionRequest = SubmissionRequest(
+    fileName = FileName("test-file.xml"),
+    uploadId = testUploadId,
+    fileSize = 1024L,
+    documentUrl = "http://localhost:8080/file",
+    checksum = testChecksum,
+    rcaspDetails = individualRcaspDetails,
+    subscriptionDetails = displaySubscriptionDetailsIndividual,
+    extractedFileDetails = extractedFileDetailsCarf
+  )
+
+  lazy val uploadDetailsUserAnswers: UploadedSuccessfully = UploadedSuccessfully(
+    testFileName,
+    testDownloadUrl,
+    testFileSize,
+    testChecksum
   )
 }

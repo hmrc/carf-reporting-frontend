@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
+<<<<<<<< HEAD:app/models/crypto/SensitiveJsObject.scala
 package models.crypto
 
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.crypto.Sensitive
 
 case class SensitiveJsObject(override val decryptedValue: JsObject) extends Sensitive[JsObject]
+========
+package pages
+
+import models.upscan.UploadStatus.UploadedSuccessfully
+import play.api.libs.json.JsPath
+
+case object UploadDetailsUserAnswers extends QuestionPage[UploadedSuccessfully] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "uploadDetails"
+
+}
+>>>>>>>> 17906d2 ([CARF-611] Implement Initial request to FTS/SDES):app/pages/UploadDetailsUserAnswers.scala
