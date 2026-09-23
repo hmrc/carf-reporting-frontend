@@ -5,16 +5,6 @@ if (window.history && window.history.replaceState && typeof window.history.repla
 
 document.addEventListener('DOMContentLoaded', function (event) {
 
-    // handle back click
-    var backLink = document.querySelector('.govuk-back-link');
-    if (backLink !== null) {
-        backLink.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            window.history.back();
-        });
-    }
-
     // handle print click
     var printLink = document.querySelector('.print-link');
     if (printLink !== null) {
