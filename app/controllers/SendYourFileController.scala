@@ -73,30 +73,28 @@ class SendYourFileController @Inject() (
       request.userAnswers.get(UploadDetailsUserAnswers),
       request.userAnswers.get(UploadIdPage)
     ).mapN { (extractedFileDetails, subscriptionDetails, rcaspDetails, uploadDetails, uploadId) =>
-      sdesConnector.sendSubmission(
-        SubmissionRequest(
-          FileName(uploadDetails.name),
-          uploadId,
-          uploadDetails.size,
-          uploadDetails.downloadUrl,
-          checksum = uploadDetails.checksum,
-          rcaspDetails,
-          subscriptionDetails,
-          extractedFileDetails
+      sdesConnector
+        .sendSubmission(
+          SubmissionRequest(
+            FileName(uploadDetails.name),
+            uploadId,
+            uploadDetails.size,
+            uploadDetails.downloadUrl,
+            checksum = uploadDetails.checksum,
+            rcaspDetails,
+            subscriptionDetails,
+            extractedFileDetails
+          )
         )
-      )
-    }.fold(Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))) {
+        .map(_ => extractedFileDetails)
+    }.fold {
+      logWarn("[SendYourFileController][onSubmit] Unable to get needed data from user answers")
+      Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))
+    } {
       _.value.map {
-        case Right(_)    =>
-          request.userAnswers
-            .get(ExtractedFileDetailsPage)
-            .fold {
-              logWarn("[SendYourFileController][onSubmit] Unable to get ExtractedFileDetails from user answers")
-              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-            } { extractedFileDetails =>
-              Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad())
-            }
-        case Left(error) => Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        case Right(extractedFileDetails) =>
+          Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad())
+        case Left(error)                 => Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
       }
     }
   }
