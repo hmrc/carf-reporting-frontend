@@ -21,14 +21,15 @@ import models.*
 import models.DocTypeIndic.*
 import models.MessageTypeIndic.*
 import models.errors.{BusinessRuleValidationErrors, FileError, RecordError, XmlError}
+import models.fileSubmission.FileStatus.Passed
 import models.fileSubmission.{FileStatus, SubmissionDetails}
+import models.requests.sdes.{FileName, SubmissionRequest}
 import models.responses.*
 import models.upscan.*
 import models.upscan.UploadStatus.*
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryList, SummaryListRow}
 import viewmodels.govuk.all.{ActionItemViewModel, FluentActionItem, SummaryListRowViewModel, ValueViewModel}
-import models.fileSubmission.FileStatus.Passed
 
 import java.time.{Clock, Instant, LocalDateTime, ZoneId}
 
@@ -50,7 +51,7 @@ trait TestData extends Generators {
   val testFileName    = "test.xml"
   val testDownloadUrl = "https://bucketName.s3.eu-west-2.amazonaws.com?1235676"
   val testFileSize    = 987L
-  val testChecksum    = "396f1"
+  val testChecksum    = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
   val postTarget = "http://localhost:9570/upscan/upload-proxy"
 
@@ -75,8 +76,6 @@ trait TestData extends Generators {
         message = "Error message"
       )
     )
-
-  val uploadSuccessDetails = UploadSuccessDetails(testFileName, testDownloadUrl)
 
   val xmlFewErrors: Seq[XmlError] = Seq(
     XmlError(4, "SendingEntityIN value must be the RCASP ID of the reporting cryptoasset service provider"),
@@ -168,57 +167,46 @@ trait TestData extends Generators {
 
   val displaySubscriptionOrganisation = DisplaySubscriptionOrganisation(testContactName)
 
+  lazy val displaySubscriptionDetailsIndividual: DisplaySubscriptionDetails = DisplaySubscriptionDetails(
+    carfReference = testCarfId,
+    gbUser = true,
+    primaryContact = DisplaySubscriptionContact(
+      individual = Some(DisplaySubscriptionIndividual("Jane", "Smith")),
+      organisation = None,
+      email = "GroupRep@FATCACRS.com"
+    ),
+    secondaryContact = None
+  )
+
   val displaySubscriptionResponseIndividual = DisplaySubscriptionResponse(
     success = DisplaySubscriptionSuccess(
       processingDate = "2024-01-25T09:26:17Z",
-      carfSubscriptionDetails = DisplaySubscriptionDetails(
-        carfReference = testCarfId,
-        gbUser = true,
-        primaryContact = DisplaySubscriptionContact(
-          individual = Some(
-            DisplaySubscriptionIndividual(
-              firstName = "Joe",
-              lastName = "Smith"
-            )
-          ),
-          organisation = None,
-          email = "GroupRep@FATCACRS.com"
-        ),
-        secondaryContact = None
-      )
+      carfSubscriptionDetails = displaySubscriptionDetailsIndividual
     )
   )
 
-  val subscriptionDetailsIndividual = SubscriptionDetails(
-    primaryUserDetails = SubscriptionContactDetails("Joe Smith", "GroupRep@FATCACRS.com"),
-    secondaryUserDetails = None
+  val displaySubscriptionDetailsOrg = DisplaySubscriptionDetails(
+    carfReference = testCarfId,
+    gbUser = true,
+    primaryContact = DisplaySubscriptionContact(
+      individual = None,
+      organisation = Some(DisplaySubscriptionOrganisation(name = "John Doe")),
+      email = "GroupRep@FATCACRS.com"
+    ),
+    secondaryContact = Some(
+      DisplaySubscriptionContact(
+        individual = None,
+        organisation = Some(DisplaySubscriptionOrganisation(name = "Jane Doe")),
+        email = "GroupRep2@FATCACRS.com"
+      )
+    )
   )
 
   val displaySubscriptionResponseOrganisation = DisplaySubscriptionResponse(
     success = DisplaySubscriptionSuccess(
       processingDate = "2024-01-25T09:26:17Z",
-      carfSubscriptionDetails = DisplaySubscriptionDetails(
-        carfReference = testCarfId,
-        gbUser = true,
-        primaryContact = DisplaySubscriptionContact(
-          individual = None,
-          organisation = Some(DisplaySubscriptionOrganisation(name = "John Doe")),
-          email = "GroupRep@FATCACRS.com"
-        ),
-        secondaryContact = Some(
-          DisplaySubscriptionContact(
-            individual = None,
-            organisation = Some(DisplaySubscriptionOrganisation(name = "Jane Doe")),
-            email = "GroupRep2@FATCACRS.com"
-          )
-        )
-      )
+      carfSubscriptionDetails = displaySubscriptionDetailsOrg
     )
-  )
-
-  val subscriptionDetailsOrganisation = SubscriptionDetails(
-    primaryUserDetails = SubscriptionContactDetails("John Doe", "GroupRep@FATCACRS.com"),
-    secondaryUserDetails = Some(SubscriptionContactDetails("Jane Doe", "GroupRep2@FATCACRS.com"))
   )
 
   lazy val testSummaryListRow: SummaryListRow =
@@ -299,7 +287,7 @@ trait TestData extends Generators {
     testFileName,
     extractedFileDetailsTestData,
     organisationStandardRcaspDetails.copy(IsRCASPUser = true),
-    displaySubscriptionResponseOrganisation.success.carfSubscriptionDetails,
+    displaySubscriptionDetailsOrg,
     submissionTime = Instant.now(clock),
     lastStatusUpdateTime = Instant.now(clock).plusSeconds(1),
     businessRuleErrors = BusinessRuleValidationErrors.apply()
@@ -354,5 +342,36 @@ trait TestData extends Generators {
     submissionDetailsUnprocessableErrorFile,
     submissionDetailsUnexpectedError,
     submissionDetailsPending
+  )
+
+  val extractedFileDetailsCarf = ExtractedFileDetails(
+    messageRefId = "MSG-2024-0001",
+    sendingEntityIn = "SENDER-001",
+    rcaspName = Some("Acme Crypto Exchange Ltd"),
+    messageTypeIndic = CARF701,
+    hasOtherNexus = false,
+    hasCryptoUsers = true,
+    docTypeIndic = Some(OECD1),
+    isTestData = false,
+    allCryptoUsersAreCorrections = false,
+    allCryptoUsersAreDeletions = false
+  )
+
+  lazy val testSubmissionRequest: SubmissionRequest = SubmissionRequest(
+    fileName = FileName("test-file.xml"),
+    uploadId = testUploadId,
+    fileSize = 1024L,
+    documentUrl = "http://localhost:8080/file",
+    checksum = testChecksum,
+    rcaspDetails = individualRcaspDetails,
+    subscriptionDetails = displaySubscriptionDetailsIndividual,
+    extractedFileDetails = extractedFileDetailsCarf
+  )
+
+  lazy val uploadDetailsUserAnswers: UploadedSuccessfully = UploadedSuccessfully(
+    testFileName,
+    testDownloadUrl,
+    testFileSize,
+    testChecksum
   )
 }

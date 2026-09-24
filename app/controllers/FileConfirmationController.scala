@@ -21,7 +21,7 @@ import connectors.SubmissionDetailsConnector
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import models.fileSubmission.FileStatus.Passed
 import models.fileSubmission.SubmissionDetails
-import models.responses.{getEmails, getName}
+import models.responses.{getEmails, getEmailsFromSubscriptionDetails, getName}
 import models.upscan.UploadId
 import pages.UploadCompletionLockPage
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
@@ -78,7 +78,7 @@ class FileConfirmationController @Inject (
   private def prepareView(
       submissionDetails: SubmissionDetails
   )(implicit request: Request[_], messages: Messages): Result = {
-    val userEmailAddresses = submissionDetails.subscriptionDetails.getEmails
+    val userEmailAddresses = submissionDetails.subscriptionDetails.getEmailsFromSubscriptionDetails
     val rcaspDetails       = submissionDetails.rcaspDetails
     val summaryListRows    = helper.rows(submissionDetails.extractedFileDetails, rcaspDetails.getName)
 

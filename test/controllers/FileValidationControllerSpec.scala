@@ -22,7 +22,7 @@ import models.errors.ApiError.InternalServerError
 import models.errors.{InvalidXmlError, XmlErrors}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
-import pages.{ExtractedFileDetailsPage, UploadSuccessDetailsPage, XmlErrorsPage}
+import pages.{ExtractedFileDetailsPage, UploadDetailsUserAnswers, XmlErrorsPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -44,7 +44,7 @@ class FileValidationControllerSpec extends SpecBase {
   "FileValidation Controller" - {
 
     "must redirect to RcaspAndSubscriptionDetailsController when FileValidationConnector returns extracted file details" in {
-      val userAnswers = emptyUserAnswers.withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+      val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
       when(mockFileValidationConnector.validateAndExtract(any())(any(), any()))
         .thenReturn(ResultT.fromValue(extractedFileDetailsTestData))
@@ -72,7 +72,7 @@ class FileValidationControllerSpec extends SpecBase {
     }
 
     "must redirect to InvalidXmlController when FileValidationConnector returns InvalidXmlError" in {
-      val userAnswers = emptyUserAnswers.withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+      val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
       when(mockFileValidationConnector.validateAndExtract(any())(any(), any()))
         .thenReturn(ResultT.fromError(InvalidXmlError))
@@ -96,7 +96,7 @@ class FileValidationControllerSpec extends SpecBase {
     }
 
     "must redirect to DataErrorsController when FileValidationConnector returns XML schema errors" in {
-      val userAnswers = emptyUserAnswers.withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+      val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
       when(mockFileValidationConnector.validateAndExtract(any())(any(), any()))
         .thenReturn(ResultT.fromError(XmlErrors(xmlFewErrors)))
@@ -121,7 +121,7 @@ class FileValidationControllerSpec extends SpecBase {
     }
 
     "must redirect to Journey Recovery when FileValidationConnector returns InternalServerError" in {
-      val userAnswers = emptyUserAnswers.withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+      val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
       when(mockFileValidationConnector.validateAndExtract(any())(any(), any()))
         .thenReturn(ResultT.fromError(InternalServerError))

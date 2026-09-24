@@ -62,20 +62,4 @@ object SubmissionDetails {
         (__ \ "businessRuleErrors").read[BusinessRuleValidationErrors]
     )(SubmissionDetails.apply _)
 
-  implicit val writes: OWrites[SubmissionDetails] =
-    (
-      (__ \ "_id").write[UploadId] and
-        (__ \ "carfId").write[String] and
-        (__ \ "fileStatus").write[FileStatus] and
-        (__ \ "fileName").write[String] and
-        (__ \ "extractedFileDetails").write[ExtractedFileDetails] and
-        (__ \ "rcaspDetails").write[RcaspDetails] and
-        (__ \ "subscriptionDetails").write[DisplaySubscriptionDetails] and
-        (__ \ "submissionTime").write(MongoJavatimeFormats.instantFormat) and
-        (__ \ "lastStatusUpdateTime").write(MongoJavatimeFormats.instantFormat) and
-        (__ \ "businessRuleErrors").write[BusinessRuleValidationErrors]
-      )(o => Tuple.fromProductTyped(o))
-
-  implicit val format: OFormat[SubmissionDetails] = OFormat(reads, writes)
-
 }

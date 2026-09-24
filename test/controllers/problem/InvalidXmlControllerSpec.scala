@@ -20,7 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import pages.UploadSuccessDetailsPage
+import pages.UploadDetailsUserAnswers
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -38,7 +38,7 @@ class InvalidXmlControllerSpec extends SpecBase {
       when(mockAppConfig.managementUrl) thenReturn "managementUrl"
       when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
-      val userAnswers = emptyUserAnswers.withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+      val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))

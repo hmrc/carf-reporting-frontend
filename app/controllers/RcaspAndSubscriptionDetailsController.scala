@@ -67,19 +67,13 @@ class RcaspAndSubscriptionDetailsController @Inject() (
                       )
                       Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
                     case Right(subscriptionResponse) =>
-                      subscriptionResponse.toSubscriptionDetails.fold {
-                        logWarn(
-                          "[RcaspAndSubscriptionDetailsController][onPageLoad] Unable to create SubscriptionDetails from DisplaySubscriptionResponse"
-                        )
-                        Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
-                      } { subscriptionDetails =>
-                        for {
-                          updatedAnswers1 <- Future.fromTry(request.userAnswers.set(RcaspDetailsPage, matchingRcasp))
-                          updatedAnswers2 <-
-                            Future.fromTry(updatedAnswers1.set(SubscriptionDetailsPage, subscriptionDetails))
-                          _               <- sessionRepository.set(updatedAnswers2)
-                        } yield Redirect(controllers.routes.CheckYourFileDetailsController.onPageLoad())
-                      }
+                      val subscriptionDetails = subscriptionResponse.success.carfSubscriptionDetails
+                      for {
+                        updatedAnswers1 <- Future.fromTry(request.userAnswers.set(RcaspDetailsPage, matchingRcasp))
+                        updatedAnswers2 <-
+                          Future.fromTry(updatedAnswers1.set(SubscriptionDetailsPage, subscriptionDetails))
+                        _               <- sessionRepository.set(updatedAnswers2)
+                      } yield Redirect(controllers.routes.CheckYourFileDetailsController.onPageLoad())
                   }
                 }
           }

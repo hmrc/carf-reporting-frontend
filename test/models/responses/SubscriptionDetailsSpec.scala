@@ -21,13 +21,16 @@ import base.SpecBase
 class SubscriptionDetailsSpec extends SpecBase {
 
   "SubscriptionDetails" - {
-    ".getEmails" - {
+    ".getEmailsFromSubscriptionDetails" - {
       "when there are primary and secondary user details" in {
-        subscriptionDetailsOrganisation.getEmails mustBe List("GroupRep@FATCACRS.com", "GroupRep2@FATCACRS.com")
+        displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails mustBe List(
+          "GroupRep@FATCACRS.com",
+          "GroupRep2@FATCACRS.com"
+        )
       }
 
       "when there are only primary user details" in {
-        subscriptionDetailsIndividual.getEmails mustBe List("GroupRep@FATCACRS.com")
+        displaySubscriptionDetailsIndividual.getEmailsFromSubscriptionDetails mustBe List("GroupRep@FATCACRS.com")
       }
     }
   }

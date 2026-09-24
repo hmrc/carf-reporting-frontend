@@ -45,7 +45,7 @@ class SubscriptionConnectorISpec
       |      "gbUser": true,
       |      "primaryContact": {
       |        "individual": {
-      |          "firstName": "Joe",
+      |          "firstName": "Jane",
       |          "lastName": "Smith"
       |        },
       |        "email": "GroupRep@FATCACRS.com",

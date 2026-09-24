@@ -19,7 +19,7 @@ package controllers.problem
 import config.{Constants, FrontendAppConfig}
 import controllers.actions.*
 import models.problem.SchemaError
-import pages.{UploadSuccessDetailsPage, XmlErrorsPage}
+import pages.{UploadDetailsUserAnswers, XmlErrorsPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
@@ -45,7 +45,7 @@ class DataErrorsController @Inject() (
     (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
       val userAnswers = request.userAnswers
 
-      (userAnswers.get(XmlErrorsPage), userAnswers.get(UploadSuccessDetailsPage).map(_.fileName)) match {
+      (userAnswers.get(XmlErrorsPage), userAnswers.get(UploadDetailsUserAnswers).map(_.name)) match {
         case (Some(xmlErrors), Some(fileName)) if xmlErrors.nonEmpty =>
           val hasMoreThanMax = xmlErrors.length > Constants.maxErrorsShown
           // TODO: Map XML errors to required content and HTML (CARF-591)

@@ -18,16 +18,7 @@ package models.responses
 
 import play.api.libs.json.{Json, OFormat}
 
-case class DisplaySubscriptionResponse(success: DisplaySubscriptionSuccess) {
-
-  def toSubscriptionDetails: Option[SubscriptionDetails] = for {
-    primaryUserDetails   <- success.carfSubscriptionDetails.primaryContact.toSubscriptionContactDetails
-    secondaryUserDetails <-
-      success.carfSubscriptionDetails.secondaryContact.fold[Option[Option[SubscriptionContactDetails]]](Some(None))(
-        secondContact => secondContact.toSubscriptionContactDetails.map(Some(_))
-      )
-  } yield SubscriptionDetails(primaryUserDetails, secondaryUserDetails)
-}
+case class DisplaySubscriptionResponse(success: DisplaySubscriptionSuccess)
 
 object DisplaySubscriptionResponse {
   implicit val format: OFormat[DisplaySubscriptionResponse] = Json.format[DisplaySubscriptionResponse]
@@ -51,6 +42,13 @@ case class DisplaySubscriptionDetails(
   ).flatten
 }
 
+extension (displaySubscriptionDetails: DisplaySubscriptionDetails) {
+  def getEmailsFromSubscriptionDetails: List[String] = List(
+    Some(displaySubscriptionDetails.primaryContact.email),
+    displaySubscriptionDetails.secondaryContact.map(_.email)
+  ).flatten
+}
+
 object DisplaySubscriptionDetails {
   implicit val format: OFormat[DisplaySubscriptionDetails] = Json.format[DisplaySubscriptionDetails]
 }
@@ -59,17 +57,7 @@ case class DisplaySubscriptionContact(
     individual: Option[DisplaySubscriptionIndividual],
     organisation: Option[DisplaySubscriptionOrganisation],
     email: String
-) {
-
-  def toSubscriptionContactDetails: Option[SubscriptionContactDetails] =
-    (individual, organisation) match {
-      case (Some(individualDetails), None)   =>
-        Some(SubscriptionContactDetails(individualDetails.fullName, email))
-      case (None, Some(organisationDetails)) =>
-        Some(SubscriptionContactDetails(organisationDetails.name, email))
-      case _                                 => None
-    }
-}
+)
 
 object DisplaySubscriptionContact {
   implicit val format: OFormat[DisplaySubscriptionContact] = Json.format[DisplaySubscriptionContact]
