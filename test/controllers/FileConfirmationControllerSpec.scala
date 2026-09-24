@@ -179,7 +179,7 @@ class FileConfirmationControllerSpec extends SpecBase {
 
       "must return OK and the correct view when user answers do not exist (accessing from results-of-automatic-checks)" in {
         val orgFileDetailsOneEmail =
-          orgFileDetails.copy(subscriptionDetails = subscriptionDetailsOrganisation.copy(secondaryUserDetails = None))
+          orgFileDetails.copy(subscriptionDetails = displaySubscriptionDetailsOrg.copy(secondaryContact = None))
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
@@ -201,7 +201,7 @@ class FileConfirmationControllerSpec extends SpecBase {
           val view = application.injector.instanceOf[FileConfirmationView]
 
           val expectedEmailHtml =
-            s"We have sent a confirmation email to ${subscriptionDetailsOrganisation.getEmails.head}."
+            s"We have sent a confirmation email to ${displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails.head}."
 
           status(result)          mustEqual OK
           contentAsString(result)      must include(expectedEmailHtml)

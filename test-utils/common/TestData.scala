@@ -17,19 +17,18 @@
 package common
 
 import generators.Generators
-import models.upscan.UploadStatus.*
-import models.MessageTypeIndic.*
+import models.*
 import models.DocTypeIndic.*
 import models.MessageTypeIndic.*
 import models.errors.XmlError
+import models.fileSubmission.FileStatus.Passed
 import models.requests.sdes.{FileName, SubmissionRequest}
 import models.responses.*
 import models.upscan.*
-import models.*
+import models.upscan.UploadStatus.*
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryList, SummaryListRow}
 import viewmodels.govuk.all.{ActionItemViewModel, FluentActionItem, SummaryListRowViewModel, ValueViewModel}
-import models.fileSubmission.FileStatus.Passed
 
 import java.time.{Clock, Instant, LocalDateTime, ZoneId}
 
@@ -76,8 +75,6 @@ trait TestData extends Generators {
         message = "Error message"
       )
     )
-
-  val uploadSuccessDetails = UploadSuccessDetails(testFileName, testDownloadUrl)
 
   val xmlFewErrors: Seq[XmlError] = Seq(
     XmlError(4, "SendingEntityIN value must be the RCASP ID of the reporting cryptoasset service provider"),

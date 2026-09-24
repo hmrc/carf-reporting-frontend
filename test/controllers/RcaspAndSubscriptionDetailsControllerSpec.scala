@@ -19,7 +19,6 @@ package controllers
 import base.SpecBase
 import connectors.{RcaspRegistrationConnector, SubscriptionConnector}
 import models.errors.ApiError.InternalServerError
-import models.responses.{DisplaySubscriptionContact, DisplaySubscriptionDetails, DisplaySubscriptionResponse, DisplaySubscriptionSuccess}
 import org.mockito.ArgumentMatchers.{any, argThat}
 import org.mockito.Mockito.{reset, times, verify, when}
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, SubscriptionDetailsPage}

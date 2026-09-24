@@ -19,9 +19,8 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import models.fileSubmission.FileStatus.Passed
-import models.responses.{getEmails, getName}
-import models.{CachedFileDetails, ExtractedFileDetails}
 import models.responses.{getEmails, getEmailsFromSubscriptionDetails, getName}
+import models.{CachedFileSubmissionDetails, ExtractedFileDetails}
 import pages.UploadCompletionLockPage
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
@@ -58,25 +57,25 @@ class FileConfirmationController @Inject (
 
   def onPageLoad(uploadId: String): Action[AnyContent] =
     (identify andThen getData()).async { implicit request =>
-      val cachedFileDetails = stubService.getCachedFileDetails(
+      val cachedFileSubmissionDetails = stubService.getCachedFileDetails(
         request.carfId,
         request.userAnswers,
         uploadId
       ) // TODO getCachedFileDetails will be reworked when backend repository implementation is complete (CARF-621)
 
-      if (cachedFileDetails.fileStatus == Passed) {
-        cachedFileDetails.dateTime
+      if (cachedFileSubmissionDetails.fileStatus == Passed) {
+        cachedFileSubmissionDetails.dateTime
           .fold(Future.successful(recovery("Missing success datetime in cached file details"))) { datetime =>
-            cachedFileDetails.extractedFileDetails.fold(
+            cachedFileSubmissionDetails.extractedFileDetails.fold(
               Future.successful(recovery("Missing ExtractedFileDetails in cached file details"))
             ) { extractedFileDetails =>
               request.userAnswers.fold(
-                Future.successful(prepareView(cachedFileDetails, extractedFileDetails, datetime))
+                Future.successful(prepareView(cachedFileSubmissionDetails, extractedFileDetails, datetime))
               ) { userAnswers =>
                 for {
                   updatedUserAnswers <- Future.fromTry(userAnswers.set(UploadCompletionLockPage, true))
                   _                  <- sessionRepository.set(updatedUserAnswers)
-                } yield prepareView(cachedFileDetails, extractedFileDetails, datetime)
+                } yield prepareView(cachedFileSubmissionDetails, extractedFileDetails, datetime)
               }
             }
           }
@@ -86,12 +85,12 @@ class FileConfirmationController @Inject (
     }
 
   private def prepareView(
-      cachedFileDetails: CachedFileDetails,
+      cachedFileSubmissionDetails: CachedFileSubmissionDetails,
       extractedFileDetails: ExtractedFileDetails,
       datetime: LocalDateTime
   )(implicit request: Request[_], messages: Messages): Result = {
-    val userEmailAddresses = cachedFileDetails.subscriptionDetails.getEmailsFromSubscriptionDetails
-    val rcaspDetails       = cachedFileDetails.rcaspDetails
+    val userEmailAddresses = cachedFileSubmissionDetails.subscriptionDetails.getEmailsFromSubscriptionDetails
+    val rcaspDetails       = cachedFileSubmissionDetails.rcaspDetails
     val summaryListRows    = helper.rows(extractedFileDetails, rcaspDetails.getName)
 
     val summary = SummaryListViewModel(rows = summaryListRows)

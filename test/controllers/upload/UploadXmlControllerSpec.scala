@@ -26,7 +26,6 @@ import models.upscan.*
 import models.upscan.UploadStatus.*
 import org.mockito.ArgumentMatchers.{any, argThat, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
-import pages.{FileReferencePage, SubscriptionDetailsPage, UploadIdPage, UploadSuccessDetailsPage}
 import pages.{FileReferencePage, SubscriptionDetailsPage, UploadDetailsUserAnswers, UploadIdPage}
 import play.api.data.Form
 import play.api.inject.bind
@@ -497,7 +496,11 @@ class UploadXmlControllerSpec extends SpecBase {
           upload.routes.UploadXmlController.showError("octetstream", "rejected", "").url,
           verify(mockSessionRepository, times(0)).set(any())
         )
-        verifyResult(Failed, upload.routes.UploadXmlController.showError("UploadFailed", "", "").url)
+        verifyResult(
+          Failed,
+          upload.routes.UploadXmlController.showError("UploadFailed", "", "").url,
+          verify(mockSessionRepository, times(0)).set(any())
+        )
         verifyResult(
           Failed,
           upload.routes.UploadXmlController.showError("UploadFailed", "", "").url,

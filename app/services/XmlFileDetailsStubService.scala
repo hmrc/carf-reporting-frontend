@@ -22,12 +22,9 @@ import models.MessageTypeIndic.*
 import models.errors.ApiError.InternalServerError
 import models.fileSubmission.FileStatus
 import models.fileSubmission.FileStatus.*
-import models.responses.{OrganisationRcaspDetailsStandard, RcaspContactDetails, SubscriptionContactDetails, SubscriptionDetails}
-import models.{CachedFileDetails, ExtractedFileDetails, UserAnswers}
-import pages.{ExtractedFileDetailsPage, FileStatusPage, RcaspDetailsPage, SubscriptionDetailsPage}
 import models.responses.*
 import models.{CachedFileSubmissionDetails, ExtractedFileDetails, UserAnswers}
-import pages.FileStatusPage
+import pages.{ExtractedFileDetailsPage, FileStatusPage, RcaspDetailsPage, SubscriptionDetailsPage}
 import repositories.SessionRepository
 import types.ResultT
 
@@ -49,7 +46,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
       SecondaryContactDetails = Some(RcaspContactDetails(ContactName = "Clavell", EmailAddress = "clavell@uva.edu.org"))
     )
 
-  lazy val subscriptionDetailsOrganisation: DisplaySubscriptionDetails = DisplaySubscriptionDetails(
+  lazy val displaySubscriptionDetailsOrg: DisplaySubscriptionDetails = DisplaySubscriptionDetails(
     carfReference = testCarfId,
     gbUser = true,
     primaryContact = DisplaySubscriptionContact(
@@ -72,7 +69,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
       carfId: String,
       maybeUserAnswers: Option[UserAnswers],
       uploadId: String
-  ): CachedFileDetails = {
+  ): CachedFileSubmissionDetails = {
     val _ = uploadId // TODO Will be used to fetch correct file for RCASP Submission
 
     val maybeExtractedFileDetails = maybeUserAnswers.flatMap(_.get(ExtractedFileDetailsPage))
@@ -81,7 +78,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
 
     (maybeExtractedFileDetails, maybeRcaspDetails, maybeSubscriptionDetails)
       .mapN { (extractedFileDetails, rcaspDetails, subscriptionDetails) =>
-        CachedFileDetails(
+        CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
           subscriptionDetails,
@@ -92,7 +89,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
       .getOrElse(hardcodedCachedFileDetails(carfId))
   }
 
-  private def hardcodedCachedFileDetails(carfId: String): CachedFileDetails = {
+  private def hardcodedCachedFileDetails(carfId: String): CachedFileSubmissionDetails = {
     val testMessageRefId      =
       "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001"
     val testRcaspNameFromFile = "Timmy's Turtles"
@@ -103,7 +100,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails,
           Some(
             ExtractedFileDetails(
@@ -124,7 +121,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails,
           Some(
             ExtractedFileDetails(
@@ -145,7 +142,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails,
           Some(
             ExtractedFileDetails(
@@ -166,7 +163,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails,
           Some(
             ExtractedFileDetails(
@@ -187,7 +184,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails,
           Some(
             ExtractedFileDetails(
@@ -208,7 +205,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation.copy(secondaryContact = None),
+          displaySubscriptionDetailsOrg.copy(secondaryContact = None),
           organisationStandardRcaspDetails.copy(IsRCASPUser = true),
           Some(
             ExtractedFileDetails(
@@ -229,7 +226,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails.copy(IsRCASPUser = true),
           Some(
             ExtractedFileDetails(
@@ -250,7 +247,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails,
           Some(
             ExtractedFileDetails(
@@ -271,7 +268,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails,
           Some(
             ExtractedFileDetails(
@@ -292,7 +289,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails,
           Some(
             ExtractedFileDetails(
@@ -313,7 +310,7 @@ class XmlFileDetailsStubService @Inject() (sessionRepository: SessionRepository,
         CachedFileSubmissionDetails(
           Some(testDate),
           Passed,
-          subscriptionDetailsOrganisation,
+          displaySubscriptionDetailsOrg,
           organisationStandardRcaspDetails,
           None
         )
