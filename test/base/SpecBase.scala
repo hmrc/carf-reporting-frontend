@@ -75,6 +75,7 @@ trait SpecBase
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(injectedParsers)),
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalActionProvider(userAnswers)),
         bind[UploadCompletionLockAction].toInstance(new FakeUploadCompletionLockAction),
+        bind[DuplicateSubmissionLockAction].toInstance(new FakeDuplicateSubmissionLockAction),
         bind[SessionRepository].toInstance(mockSessionRepository)
       )
 

@@ -20,16 +20,16 @@ import base.SpecBase
 import controllers.routes
 import models.UserAnswers
 import models.requests.OptionalDataRequest
-import pages.UploadCompletionLockPage
+import pages.DuplicateSubmissionLockPage
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 
 import scala.concurrent.Future
 
-class UploadCompletionLockActionSpec extends SpecBase {
+class DuplicateSubmissionLockActionSpec extends SpecBase {
 
-  class Harness extends UploadCompletionLockAction {
+  class Harness extends DuplicateSubmissionLockAction {
     def callFilter[A](request: OptionalDataRequest[A]): Future[Option[Result]] = filter(request)
   }
 
@@ -38,7 +38,7 @@ class UploadCompletionLockActionSpec extends SpecBase {
   private def buildRequest(userAnswers: Option[UserAnswers]): OptionalDataRequest[_] =
     OptionalDataRequest(fakeRequest, testInternalId, userAnswers, testCarfId)
 
-  "UploadCompletionLockAction" - {
+  "DuplicateSubmissionLockAction" - {
 
     "must return None to let the request continue" - {
 
@@ -51,7 +51,7 @@ class UploadCompletionLockActionSpec extends SpecBase {
         result mustBe empty
       }
 
-      "when user answers exist but UploadCompletionLockPage is missing" in {
+      "when user answers exist but DuplicateSubmissionLockPage is missing" in {
         val harnessAction = new Harness()
         val request       = buildRequest(userAnswers = Some(emptyUserAnswers))
 
@@ -60,9 +60,9 @@ class UploadCompletionLockActionSpec extends SpecBase {
         result mustBe empty
       }
 
-      "when user answers exist and UploadCompletionLockPage is false" in {
+      "when user answers exist and DuplicateSubmissionLockPage is false" in {
         val harnessAction = new Harness()
-        val userAnswers   = emptyUserAnswers.withPage(UploadCompletionLockPage, false)
+        val userAnswers   = emptyUserAnswers.withPage(DuplicateSubmissionLockPage, false)
         val request       = buildRequest(userAnswers = Some(userAnswers))
 
         val result = harnessAction.callFilter(request).futureValue
@@ -73,9 +73,9 @@ class UploadCompletionLockActionSpec extends SpecBase {
 
     "must block the request and redirect" - {
 
-      "when user answers exist and UploadCompletionLockPage is true" in {
+      "when user answers exist and DuplicateSubmissionLockPage is true" in {
         val harnessAction = new Harness()
-        val userAnswers   = emptyUserAnswers.withPage(UploadCompletionLockPage, true)
+        val userAnswers   = emptyUserAnswers.withPage(DuplicateSubmissionLockPage, true)
         val request       = buildRequest(userAnswers = Some(userAnswers))
 
         val result = harnessAction.callFilter(request).futureValue
@@ -91,4 +91,5 @@ class UploadCompletionLockActionSpec extends SpecBase {
       }
     }
   }
+
 }

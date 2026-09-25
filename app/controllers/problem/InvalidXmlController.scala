@@ -32,7 +32,7 @@ class InvalidXmlController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
-    uploadCompletionLock: UploadCompletionLockAction,
+    duplicateSubmissionLockAction: DuplicateSubmissionLockAction,
     val controllerComponents: MessagesControllerComponents,
     view: InvalidXmlView,
     appConfig: FrontendAppConfig
@@ -40,7 +40,7 @@ class InvalidXmlController @Inject() (
     with I18nSupport {
 
   def onPageLoad: Action[AnyContent] =
-    (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
+    (identify andThen getData() andThen duplicateSubmissionLockAction andThen requireData) { implicit request =>
       request.userAnswers
         .get(UploadDetailsUserAnswers)
         .fold {

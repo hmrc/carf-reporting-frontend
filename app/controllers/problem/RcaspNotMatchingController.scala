@@ -32,7 +32,7 @@ class RcaspNotMatchingController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
-    uploadCompletionLock: UploadCompletionLockAction,
+    duplicateSubmissionLockAction: DuplicateSubmissionLockAction,
     val controllerComponents: MessagesControllerComponents,
     view: RcaspNotMatchingView,
     appConfig: FrontendAppConfig
@@ -40,7 +40,7 @@ class RcaspNotMatchingController @Inject() (
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] =
-    (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
+    (identify andThen getData() andThen duplicateSubmissionLockAction andThen requireData) { implicit request =>
       request.userAnswers.get(ExtractedFileDetailsPage) match {
         case Some(extractedFileDetails) =>
           Ok(view(extractedFileDetails.sendingEntityIn, appConfig.yourRcaspsUrl))

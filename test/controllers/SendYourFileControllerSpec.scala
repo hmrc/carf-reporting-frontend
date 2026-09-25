@@ -22,12 +22,14 @@ import connectors.SDESConnector
 import models.errors.ApiError.InternalServerError
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
-import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, SubscriptionDetailsPage, UploadDetailsUserAnswers, UploadIdPage}
+import pages.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import types.ResultT
 import views.html.SendYourFileView
+
+import scala.concurrent.Future
 
 class SendYourFileControllerSpec extends SpecBase {
 
@@ -153,6 +155,7 @@ class SendYourFileControllerSpec extends SpecBase {
     ".onSubmit" - {
       "must submit to FTS and redirect to StillCheckingYourFileController" in {
         when(mockSDESConnector.sendSubmission(any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
         val userAnswers = emptyUserAnswers
           .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -175,6 +178,7 @@ class SendYourFileControllerSpec extends SpecBase {
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.StillCheckingYourFileController.onPageLoad().url
           verify(mockSDESConnector, times(1)).sendSubmission(any())(any(), any())
+          verify(mockSessionRepository, times(1)).set(any())
         }
       }
 

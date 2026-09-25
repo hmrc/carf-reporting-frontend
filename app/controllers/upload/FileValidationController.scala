@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class FileValidationController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
-    uploadCompletionLock: UploadCompletionLockAction,
+    duplicateSubmissionLockAction: DuplicateSubmissionLockAction,
     requireData: DataRequiredAction,
     sessionRepository: SessionRepository,
     fileValidationConnector: FileValidationConnector,
@@ -40,7 +40,7 @@ class FileValidationController @Inject() (
     extends FrontendBaseController {
 
   def onPageLoad(): Action[AnyContent] =
-    (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
+    (identify andThen getData() andThen duplicateSubmissionLockAction andThen requireData).async { implicit request =>
       request.userAnswers
         .get(UploadDetailsUserAnswers)
         .fold {
