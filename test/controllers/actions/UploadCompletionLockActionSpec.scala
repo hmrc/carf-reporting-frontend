@@ -62,7 +62,7 @@ class UploadCompletionLockActionSpec extends SpecBase {
 
       "when user answers exist and UploadCompletionLockPage is false" in {
         val harnessAction = new Harness()
-        val userAnswers   = emptyUserAnswers.set(UploadCompletionLockPage, false).success.value
+        val userAnswers   = emptyUserAnswers.withPage(UploadCompletionLockPage, false)
         val request       = buildRequest(userAnswers = Some(userAnswers))
 
         val result = harnessAction.callFilter(request).futureValue

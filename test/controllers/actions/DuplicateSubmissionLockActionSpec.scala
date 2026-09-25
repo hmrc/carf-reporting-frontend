@@ -62,7 +62,7 @@ class DuplicateSubmissionLockActionSpec extends SpecBase {
 
       "when user answers exist and DuplicateSubmissionLockPage is false" in {
         val harnessAction = new Harness()
-        val userAnswers   = emptyUserAnswers.set(DuplicateSubmissionLockPage, false).success.value
+        val userAnswers   = emptyUserAnswers.withPage(DuplicateSubmissionLockPage, false)
         val request       = buildRequest(userAnswers = Some(userAnswers))
 
         val result = harnessAction.callFilter(request).futureValue

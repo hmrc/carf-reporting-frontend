@@ -39,7 +39,7 @@ class SendYourFileController @Inject() (
     identify: IdentifierAction,
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
-    uploadCompletionLock: UploadCompletionLockAction,
+    duplicateSubmissionLockAction: DuplicateSubmissionLockAction,
     view: SendYourFileView,
     appConfig: FrontendAppConfig,
     sessionRepository: SessionRepository,
@@ -50,7 +50,7 @@ class SendYourFileController @Inject() (
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] =
-    (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
+    (identify andThen getData() andThen duplicateSubmissionLockAction andThen requireData) { implicit request =>
       val userAnswers = request.userAnswers
 
       (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
