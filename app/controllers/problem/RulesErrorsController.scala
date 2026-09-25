@@ -31,7 +31,6 @@ class RulesErrorsController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     getData: DataRetrievalAction,
-    uploadCompletionLock: UploadCompletionLockAction,
     appConfig: FrontendAppConfig,
     rulesErrorsStubService: RulesErrorsStubService,
     val controllerComponents: MessagesControllerComponents,
@@ -41,7 +40,7 @@ class RulesErrorsController @Inject() (
     with Logging {
 
   def onPageLoad(uploadId: String): Action[AnyContent] =
-    (identify andThen getData() andThen uploadCompletionLock) { implicit request =>
+    (identify andThen getData()) { implicit request =>
       val carfId = request.carfId
       // TODO: Replace with actual call to get file details from backend (CARF-621)
       (

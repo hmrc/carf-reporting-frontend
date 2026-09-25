@@ -26,8 +26,11 @@ import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, SubscriptionDetailsPag
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import repositories.SessionRepository
 import types.ResultT
 import views.html.SendYourFileView
+
+import scala.concurrent.Future
 
 class SendYourFileControllerSpec extends SpecBase {
 
@@ -153,6 +156,7 @@ class SendYourFileControllerSpec extends SpecBase {
     ".onSubmit" - {
       "must submit to FTS and redirect to StillCheckingYourFileController" in {
         when(mockSDESConnector.sendSubmission(any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
         val userAnswers = emptyUserAnswers
           .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)

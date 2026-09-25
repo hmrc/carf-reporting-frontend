@@ -26,6 +26,7 @@ import models.responses.getName
 import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.logWarn
 import views.html.SendYourFileView
@@ -41,6 +42,7 @@ class SendYourFileController @Inject() (
     uploadCompletionLock: UploadCompletionLockAction,
     view: SendYourFileView,
     appConfig: FrontendAppConfig,
+    sessionRepository: SessionRepository,
     val controllerComponents: MessagesControllerComponents,
     sdesConnector: SDESConnector
 )(implicit ec: ExecutionContext)
@@ -90,10 +92,13 @@ class SendYourFileController @Inject() (
       logWarn("[SendYourFileController][onSubmit] Unable to get needed data from user answers")
       Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))
     } {
-      _.value.map {
+      _.value.flatMap {
         case Right(_)    =>
-          Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad())
-        case Left(error) => Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+          for {
+            updatedUserAnswers <- Future.fromTry(request.userAnswers.set(DuplicateSubmissionLockPage, true))
+            _                  <- sessionRepository.set(updatedUserAnswers)
+          } yield Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad())
+        case Left(error) => Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
       }
     }
   }
