@@ -43,7 +43,7 @@ class UploadCompletionLockAction @Inject() (implicit val ec: ExecutionContext)
       Future.successful(
         Some(
           Results.Redirect(
-            routes.PlaceholderController.onPageLoad("Should nav to /problem/page-unavailable (CARF-308)")
+            routes.PlaceholderController.onPageLoad("Should nav to /problem/page-unavailable (CARF-537)")
           )
         )
       )

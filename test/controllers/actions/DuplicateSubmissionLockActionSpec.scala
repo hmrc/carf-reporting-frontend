@@ -86,7 +86,7 @@ class DuplicateSubmissionLockActionSpec extends SpecBase {
 
         status(redirectResult)                 mustEqual SEE_OTHER
         redirectLocation(redirectResult).value mustEqual routes.PlaceholderController
-          .onPageLoad("Should nav to /problem/page-unavailable (CARF-308)")
+          .onPageLoad("Should nav to /problem/page-unavailable (CARF-537)")
           .url
       }
     }
