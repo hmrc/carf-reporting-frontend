@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package models.upscan
+package models.responses
 
-import play.api.libs.json.{Json, OFormat}
+import base.SpecBase
 
-case class UploadSuccessDetails(
-    fileName: String,
-    downloadUrl: String
-)
+class DisplaySubscriptionDetailsSpec extends SpecBase {
 
-object UploadSuccessDetails {
-  implicit val format: OFormat[UploadSuccessDetails] = Json.format[UploadSuccessDetails]
+  "DisplaySubscriptionDetails" - {
+    ".getEmailsFromSubscriptionDetails" - {
+      "when there are primary and secondary user details" in {
+        displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails mustBe List(
+          "GroupRep@FATCACRS.com",
+          "GroupRep2@FATCACRS.com"
+        )
+      }
+
+      "when there are only primary user details" in {
+        displaySubscriptionDetailsIndividual.getEmailsFromSubscriptionDetails mustBe List("GroupRep@FATCACRS.com")
+      }
+    }
+  }
+
 }

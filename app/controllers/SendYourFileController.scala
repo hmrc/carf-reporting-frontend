@@ -18,8 +18,10 @@ package controllers
 
 import cats.syntax.all.*
 import config.FrontendAppConfig
+import connectors.SDESConnector
 import controllers.actions.*
 import models.ReportType
+import models.requests.sdes.{FileName, SubmissionRequest}
 import models.responses.getName
 import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -29,6 +31,7 @@ import utils.LoggerUtil.logWarn
 import views.html.SendYourFileView
 
 import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class SendYourFileController @Inject() (
     override val messagesApi: MessagesApi,
@@ -38,8 +41,10 @@ class SendYourFileController @Inject() (
     uploadCompletionLock: UploadCompletionLockAction,
     view: SendYourFileView,
     appConfig: FrontendAppConfig,
-    val controllerComponents: MessagesControllerComponents
-) extends FrontendBaseController
+    val controllerComponents: MessagesControllerComponents,
+    sdesConnector: SDESConnector
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] =
@@ -60,16 +65,37 @@ class SendYourFileController @Inject() (
         }
     }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData() andThen requireData) { implicit request =>
-    // TODO: Build request for FTS (details TBC) and call submission connector (CARF-611)
-    request.userAnswers
-      .get(ExtractedFileDetailsPage)
-      .fold {
-        logWarn("[SendYourFileController][onSubmit] Unable to get ExtractedFileDetails from user answers")
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
-      } { extractedFileDetails =>
-        Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad().url)
+  def onSubmit(): Action[AnyContent] = (identify andThen getData() andThen requireData).async { implicit request =>
+    (
+      request.userAnswers.get(ExtractedFileDetailsPage),
+      request.userAnswers.get(SubscriptionDetailsPage),
+      request.userAnswers.get(RcaspDetailsPage),
+      request.userAnswers.get(UploadDetailsUserAnswers),
+      request.userAnswers.get(UploadIdPage)
+    ).mapN { (extractedFileDetails, subscriptionDetails, rcaspDetails, uploadDetails, uploadId) =>
+      sdesConnector
+        .sendSubmission(
+          SubmissionRequest(
+            FileName(uploadDetails.name),
+            uploadId,
+            uploadDetails.size,
+            uploadDetails.downloadUrl,
+            checksum = uploadDetails.checksum,
+            rcaspDetails,
+            subscriptionDetails,
+            extractedFileDetails
+          )
+        )
+    }.fold {
+      logWarn("[SendYourFileController][onSubmit] Unable to get needed data from user answers")
+      Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))
+    } {
+      _.value.map {
+        case Right(_)    =>
+          Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad())
+        case Left(error) => Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
       }
+    }
   }
 
   def getFileStatusAndRedirect(): Action[AnyContent] = (identify andThen getData() andThen requireData) {

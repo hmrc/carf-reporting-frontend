@@ -19,7 +19,6 @@ package controllers
 import base.SpecBase
 import connectors.{RcaspRegistrationConnector, SubscriptionConnector}
 import models.errors.ApiError.InternalServerError
-import models.responses.{DisplaySubscriptionContact, DisplaySubscriptionDetails, DisplaySubscriptionResponse, DisplaySubscriptionSuccess}
 import org.mockito.ArgumentMatchers.{any, argThat}
 import org.mockito.Mockito.{reset, times, verify, when}
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, SubscriptionDetailsPage}
@@ -71,49 +70,8 @@ class RcaspAndSubscriptionDetailsControllerSpec extends SpecBase {
           verify(mockSubscriptionConnector, times(1)).displaySubscription(any())(any(), any())
           verify(mockSessionRepository, times(1)).set(argThat { ua =>
             ua.get(RcaspDetailsPage).contains(organisationRegisteredBusinessRcaspDetails) &&
-            ua.get(SubscriptionDetailsPage).contains(subscriptionDetailsOrganisation)
+            ua.get(SubscriptionDetailsPage).contains(displaySubscriptionDetailsOrg)
           })
-        }
-      }
-
-      "must redirect to Journey Recovery when unable to create SubscriptionDetails from the DisplaySubscriptionResponse" in {
-        val badDisplaySubscriptionResponse = DisplaySubscriptionResponse(
-          success = DisplaySubscriptionSuccess(
-            processingDate = "2024-01-25T09:26:17Z",
-            carfSubscriptionDetails = DisplaySubscriptionDetails(
-              carfReference = testCarfId,
-              primaryContact = DisplaySubscriptionContact(
-                individual = None,
-                organisation = None,
-                email = "GroupRep@FATCACRS.com"
-              ),
-              secondaryContact = None
-            )
-          )
-        )
-
-        when(mockRcaspConnector.viewRcasps(any())(any(), any()))
-          .thenReturn(ResultT.fromValue(List(organisationRegisteredBusinessRcaspDetails)))
-        when(mockSubscriptionConnector.displaySubscription(any())(any(), any()))
-          .thenReturn(ResultT.fromValue(badDisplaySubscriptionResponse))
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[RcaspRegistrationConnector].toInstance(mockRcaspConnector),
-            bind[SubscriptionConnector].toInstance(mockSubscriptionConnector)
-          )
-          .build()
-
-        running(application) {
-          val request = FakeRequest(GET, rcaspAndSubscriptionDetailsRoute)
-          val result  = route(application, request).value
-
-          status(result)                 mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
-
-          verify(mockRcaspConnector, times(1)).viewRcasps(any())(any(), any())
-          verify(mockSubscriptionConnector, times(1)).displaySubscription(any())(any(), any())
-          verify(mockSessionRepository, times(0)).set(any())
         }
       }
 
