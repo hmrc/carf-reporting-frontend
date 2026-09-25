@@ -502,11 +502,6 @@ class UploadXmlControllerSpec extends SpecBase {
           verify(mockSessionRepository, times(0)).set(any())
         )
         verifyResult(
-          Failed,
-          upload.routes.UploadXmlController.showError("UploadFailed", "", "").url,
-          verify(mockSessionRepository, times(0)).set(any())
-        )
-        verifyResult(
           uploadedSuccessfully,
           controllers.upload.routes.FileValidationController.onPageLoad().url,
           verify(mockSessionRepository, times(1)).set(

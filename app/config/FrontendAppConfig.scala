@@ -27,7 +27,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val host: String    = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
 
-  val carfReportingHost: String = servicesConfig.baseUrl("carf-reporting")
+  private val carfReportingHost: String = servicesConfig.baseUrl("carf-reporting")
 
   val carfReportingBaseUrl: String = s"$carfReportingHost/carf-reporting"
 

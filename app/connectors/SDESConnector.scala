@@ -37,7 +37,7 @@ class SDESConnector @Inject() (val config: FrontendAppConfig, val http: HttpClie
       submissionRequest: SubmissionRequest
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[Unit] = {
 
-    val baseUrl = url"${config.carfReportingHost}/submit"
+    val baseUrl = url"${config.carfReportingBaseUrl}/submit"
 
     logDebug(
       s"[SDESConnector][sendSubmission] Sending submission uploadId/correlationId: " +

@@ -90,15 +90,14 @@ class SendYourFileController @Inject() (
             extractedFileDetails
           )
         )
-        .map(_ => extractedFileDetails)
     }.fold {
       logWarn("[SendYourFileController][onSubmit] Unable to get needed data from user answers")
       Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))
     } {
       _.value.map {
-        case Right(extractedFileDetails) =>
+        case Right(_)    =>
           Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad())
-        case Left(error)                 => Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        case Left(error) => Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
       }
     }
   }
