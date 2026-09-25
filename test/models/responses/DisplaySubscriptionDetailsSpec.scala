@@ -18,9 +18,9 @@ package models.responses
 
 import base.SpecBase
 
-class SubscriptionDetailsSpec extends SpecBase {
+class DisplaySubscriptionDetailsSpec extends SpecBase {
 
-  "SubscriptionDetails" - {
+  "DisplaySubscriptionDetails" - {
     ".getEmailsFromSubscriptionDetails" - {
       "when there are primary and secondary user details" in {
         displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails mustBe List(

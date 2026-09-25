@@ -66,7 +66,7 @@ class SDESConnectorSpec extends ApplicationWithWiremock
     "sendSubmission" - {
       "return Right(()) when the downstream service returns NO_CONTENT (204)" in {
         stubFor(
-          post(urlPathMatching("/submit"))
+          post(urlPathMatching("/carf-reporting/submit"))
             .willReturn(
               aResponse()
                 .withBody(Json.parse(testSubmissionRequestJson).toString)
@@ -81,7 +81,7 @@ class SDESConnectorSpec extends ApplicationWithWiremock
 
       "return Left(InternalServerError) when the downstream service returns an unexpected status (e.g., 400)" in {
         stubFor(
-          post(urlPathMatching("/submit"))
+          post(urlPathMatching("/carf-reporting/submit"))
             .willReturn(
               aResponse()
                 .withBody(Json.parse(testSubmissionRequestJson).toString)
@@ -96,7 +96,7 @@ class SDESConnectorSpec extends ApplicationWithWiremock
 
       "return Left(InternalServerError) when the downstream service returns an unexpected status (e.g., 500)" in {
         stubFor(
-          post(urlEqualTo("/submit"))
+          post(urlEqualTo("/carf-reporting/submit"))
             .willReturn(
               aResponse()
                 .withBody(Json.parse(testSubmissionRequestJson).toString)

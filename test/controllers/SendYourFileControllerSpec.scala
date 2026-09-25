@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import connectors.SDESConnector
 import models.errors.ApiError.InternalServerError
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, times, verify, when}
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, SubscriptionDetailsPage, UploadDetailsUserAnswers, UploadIdPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -36,6 +36,11 @@ class SendYourFileControllerSpec extends SpecBase {
 
   lazy val sendYourFileRoute: String       = routes.SendYourFileController.onPageLoad().url
   lazy val sendYourFileStatusRoute: String = routes.SendYourFileController.getFileStatusAndRedirect().url
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockSDESConnector)
+  }
 
   "SendYourFile Controller" - {
 
@@ -146,7 +151,6 @@ class SendYourFileControllerSpec extends SpecBase {
     }
 
     ".onSubmit" - {
-      // TODO: Update when StillCheckingYourFile is created (CARF-616)
       "must submit to FTS and redirect to StillCheckingYourFileController" in {
         when(mockSDESConnector.sendSubmission(any())(any(), any())).thenReturn(ResultT.fromValue(()))
 
@@ -170,6 +174,7 @@ class SendYourFileControllerSpec extends SpecBase {
 
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.StillCheckingYourFileController.onPageLoad().url
+          verify(mockSDESConnector, times(1)).sendSubmission(any())(any(), any())
         }
       }
 
@@ -178,6 +183,11 @@ class SendYourFileControllerSpec extends SpecBase {
           .thenReturn(ResultT.fromError(InternalServerError))
 
         val userAnswers = emptyUserAnswers
+          .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
+          .withPage(SubscriptionDetailsPage, displaySubscriptionDetailsOrg)
+          .withPage(RcaspDetailsPage, organisationStandardRcaspDetails)
+          .withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
+          .withPage(UploadIdPage, testUploadId)
 
         val application =
           applicationBuilder(userAnswers = Some(userAnswers))
@@ -192,12 +202,16 @@ class SendYourFileControllerSpec extends SpecBase {
 
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+          verify(mockSDESConnector, times(1)).sendSubmission(any())(any(), any())
         }
       }
 
       "must redirect to Journey Recovery when ExtractedFileDetails is missing from user answers" in {
-        when(mockSDESConnector.sendSubmission(any())(any(), any())).thenReturn(ResultT.fromValue(()))
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[SDESConnector].toInstance(mockSDESConnector)
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(POST, sendYourFileRoute)
@@ -205,12 +219,17 @@ class SendYourFileControllerSpec extends SpecBase {
 
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+          verify(mockSDESConnector, times(0)).sendSubmission(any())(any(), any())
         }
       }
 
       "must redirect to Journey Recovery when user answers do not exist" in {
-        when(mockSDESConnector.sendSubmission(any())(any(), any())).thenReturn(ResultT.fromValue(()))
-        val application = applicationBuilder(userAnswers = None).build()
+
+        val application = applicationBuilder(userAnswers = None)
+          .overrides(
+            bind[SDESConnector].toInstance(mockSDESConnector)
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(POST, sendYourFileRoute)
@@ -218,6 +237,7 @@ class SendYourFileControllerSpec extends SpecBase {
 
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+          verify(mockSDESConnector, times(0)).sendSubmission(any())(any(), any())
         }
       }
     }
