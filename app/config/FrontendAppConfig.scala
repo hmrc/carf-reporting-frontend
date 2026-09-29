@@ -47,7 +47,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val yourRcaspsUrl: String    = configuration.get[String]("urls.yourRcaspsUrl")
 
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
-  val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/carf-reporting-frontend"
+  val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/carf-reporting-frontend?useServiceNavigation"
 
   val languageTranslationEnabled: Boolean = configuration.get[Boolean]("features.welsh-translation")
 
