@@ -43,6 +43,8 @@ $("#sendYourFileForm").submit(function (e) {
 function pollBackendToCheckFileStatus() {
     var refreshUrl = $("#fileStatusRefreshUrl").val();
     if (refreshUrl) {
+        const initialWaitInMilliseconds = 10000;
+        const pollingIntervalInMilliseconds = 3000;
         setTimeout(function () {
             var count = 0;
             window.refreshIntervalId = setInterval(function () {
@@ -61,7 +63,7 @@ function pollBackendToCheckFileStatus() {
                 } else {
                     window.location = $("#slowJourneyUrl").val()
                 }
-            }, 3000); // polling every 3 seconds
-        }, 10000); // wait 10 seconds, then poll backend
+            }, pollingIntervalInMilliseconds);
+        }, initialWaitInMilliseconds);
     }
 }

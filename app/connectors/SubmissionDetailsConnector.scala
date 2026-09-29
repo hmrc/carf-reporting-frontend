@@ -37,7 +37,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
   def getFileStatus(uploadId: UploadId)(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[FileStatus] = {
     val requestUrl = url"${config.carfReportingBaseUrl}/file-status/${uploadId.value}"
 
-    logInfo(s"[SubmissionDetailsConnector][getFileStatus] Calling endpoint: ${requestUrl.toURI}")
+    logInfo(s"[SubmissionDetailsConnector][getFileStatus] Getting file status for uploadId ${uploadId.value}")
 
     ResultT.fromFuture {
       httpClient
@@ -49,7 +49,9 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
               Try(response.json.as[FileStatus]) match {
                 case Success(fileStatus) => Right(fileStatus)
                 case Failure(_)          =>
-                  logWarn(s"[SubmissionDetailsConnector][getFileStatus] Error parsing response body from $requestUrl")
+                  logWarn(
+                    s"[SubmissionDetailsConnector][getFileStatus] Error parsing response body for uploadId ${uploadId.value}"
+                  )
                   Left(JsonValidationError)
               }
             case NOT_FOUND =>
@@ -59,7 +61,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
               Left(NotFoundError)
             case status    =>
               logError(
-                s"[SubmissionDetailsConnector][getFileStatus] Unexpected response: status $status from $requestUrl"
+                s"[SubmissionDetailsConnector][getFileStatus] Unexpected response: status $status from ${requestUrl.toURI}"
               )
               Left(InternalServerError)
           }
@@ -72,7 +74,9 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[SubmissionDetails] = {
     val requestUrl = url"${config.carfReportingBaseUrl}/submission-details/${uploadId.value}"
 
-    logInfo(s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Calling endpoint: ${requestUrl.toURI}")
+    logInfo(
+      s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Getting submission details for uploadId ${uploadId.value}"
+    )
 
     ResultT.fromFuture {
       httpClient
@@ -85,7 +89,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
                 case Success(fileDetails) => Right(fileDetails)
                 case Failure(_)           =>
                   logWarn(
-                    s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Error parsing response body from $requestUrl"
+                    s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Error parsing response body for uploadId ${uploadId.value}"
                   )
                   Left(JsonValidationError)
               }
@@ -96,7 +100,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
               Left(NotFoundError)
             case status    =>
               logError(
-                s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Unexpected response: status $status from $requestUrl"
+                s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Unexpected response: status $status from ${requestUrl.toURI}"
               )
               Left(InternalServerError)
           }
@@ -109,7 +113,9 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[Seq[SubmissionDetails]] = {
     val requestUrl = url"${config.carfReportingBaseUrl}/user-submission-details/$carfId"
 
-    logInfo(s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Calling endpoint: ${requestUrl.toURI}")
+    logInfo(
+      s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Getting submission details for carfId $carfId"
+    )
 
     ResultT.fromFuture {
       httpClient
@@ -122,13 +128,13 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
                 case Success(fileDetailsList) => Right(fileDetailsList)
                 case Failure(_)               =>
                   logWarn(
-                    s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Error parsing response body from $requestUrl"
+                    s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Error parsing response body for carfId $carfId"
                   )
                   Left(JsonValidationError)
               }
             case status =>
               logError(
-                s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Unexpected response: status $status from $requestUrl"
+                s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Unexpected response: status $status from ${requestUrl.toURI}"
               )
               Left(InternalServerError)
           }
