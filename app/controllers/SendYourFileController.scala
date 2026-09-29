@@ -19,12 +19,15 @@ package controllers
 import cats.syntax.all.*
 import config.FrontendAppConfig
 import connectors.SDESConnector
+import connectors.SubmissionDetailsConnector
 import controllers.actions.*
 import models.ReportType
+import models.fileSubmission.{FileStatus, URL}
 import models.requests.sdes.{FileName, SubmissionRequest}
 import models.responses.getName
 import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.Json
 import play.api.mvc.*
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -41,6 +44,7 @@ class SendYourFileController @Inject() (
     requireData: DataRequiredAction,
     duplicateSubmissionLockAction: DuplicateSubmissionLockAction,
     view: SendYourFileView,
+    submissionDetailsConnector: SubmissionDetailsConnector,
     appConfig: FrontendAppConfig,
     sessionRepository: SessionRepository,
     val controllerComponents: MessagesControllerComponents,
@@ -103,11 +107,44 @@ class SendYourFileController @Inject() (
     }
   }
 
-  def getFileStatusAndRedirect(): Action[AnyContent] = (identify andThen getData() andThen requireData) {
-    implicit request =>
-      // TODO: Call backend to check file status (CARF-621)
-      Redirect(
-        controllers.routes.PlaceholderController.onPageLoad("Redirect to next page based on file status (CARF-621)").url
-      )
-  }
+  def getFileStatusAndRedirect: Action[AnyContent] =
+    (identify andThen getData() andThen requireData).async { implicit request =>
+      request.userAnswers
+        .get(UploadIdPage)
+        .fold {
+          logWarn(
+            "[SendYourFileController][getFileStatusAndRedirect] UploadId not found in user answers"
+          )
+          Future.successful(InternalServerError)
+        } { uploadId =>
+          submissionDetailsConnector.getFileStatus(uploadId).value.map {
+            case Right(fileStatus) =>
+              fileStatus match {
+                case FileStatus.Pending                =>
+                  NoContent
+                case FileStatus.Passed                 =>
+                  Ok(Json.toJson(URL(controllers.routes.FileConfirmationController.onPageLoad(uploadId.value).url)))
+                case FileStatus.Failed                 =>
+                  Ok(Json.toJson(URL(controllers.problem.routes.RulesErrorsController.onPageLoad(uploadId.value).url)))
+                case FileStatus.VirusFound             =>
+                  Ok(Json.toJson(URL(controllers.problem.routes.VirusFoundController.onPageLoad(uploadId.value).url)))
+                case FileStatus.UnprocessableErrorFile =>
+                  Ok(
+                    Json.toJson(
+                      URL(
+                        controllers.routes.PlaceholderController
+                          .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
+                          .url
+                      )
+                    )
+                  )
+                case FileStatus.UnexpectedError        =>
+                  Ok(Json.toJson(URL(controllers.routes.JourneyRecoveryController.onPageLoad().url)))
+              }
+            case Left(error)       =>
+              logWarn(s"[SendYourFileController][getFileStatusAndRedirect] Error getting file status: $error")
+              InternalServerError
+          }
+        }
+    }
 }

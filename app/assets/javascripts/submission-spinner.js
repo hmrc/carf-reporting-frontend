@@ -44,26 +44,24 @@ function pollBackendToCheckFileStatus() {
     var refreshUrl = $("#fileStatusRefreshUrl").val();
     if (refreshUrl) {
         setTimeout(function () {
-            window.location = refreshUrl;
-            // TODO: Replace above line with call to get file status (CARF-611)
-            // var count = 0;
-            // window.refreshIntervalId = setInterval(function () {
-            //     if (count < $("#maxPollingAttempts").val()) {
-            //         $.getJSON(refreshUrl)
-            //             .done(function (data, textStatus, jqXhr) {
-            //                 if (jqXhr.status === 200) {
-            //                     window.location = data.url;
-            //                 } else {
-            //                     count += 1
-            //                     return false
-            //                 }
-            //             }).fail(function (jqxhr, textStatus, error) {
-            //             window.location = $("#technicalDifficultiesRedirectUrl").val()
-            //         });
-            //     } else {
-            //         window.location = $("#slowJourneyUrl").val()
-            //     }
-            // }, 3000); // polling every 3 seconds
+            var count = 0;
+            window.refreshIntervalId = setInterval(function () {
+                if (count < $("#maxPollingAttempts").val()) {
+                    $.getJSON(refreshUrl)
+                        .done(function (data, textStatus, jqXhr) {
+                            if (jqXhr.status === 200) {
+                                window.location = data.url;
+                            } else {
+                                count += 1
+                                return false
+                            }
+                        }).fail(function (jqxhr, textStatus, error) {
+                        window.location = $("#technicalDifficultiesRedirectUrl").val()
+                    });
+                } else {
+                    window.location = $("#slowJourneyUrl").val()
+                }
+            }, 3000); // polling every 3 seconds
         }, 10000); // wait 10 seconds, then poll backend
     }
 }

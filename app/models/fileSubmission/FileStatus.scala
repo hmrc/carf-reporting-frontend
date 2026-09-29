@@ -35,25 +35,15 @@ enum FileStatus {
 
 object FileStatus {
 
-  given Format[FileStatus] = Format(
-    Reads {
-      case JsString("Pending")                => JsSuccess(Pending)
-      case JsString("Passed")                 => JsSuccess(Passed)
-      case JsString("Failed")                 => JsSuccess(Failed)
-      case JsString("VirusFound")             => JsSuccess(VirusFound)
-      case JsString("UnprocessableErrorFile") => JsSuccess(UnprocessableErrorFile)
-      case JsString("UnexpectedError")        => JsSuccess(UnexpectedError)
-      case other                              => JsError(s"Invalid FileStatus JSON: $other")
-    },
-    Writes {
-      case Pending                => JsString("Pending")
-      case Passed                 => JsString("Passed")
-      case Failed                 => JsString("Failed")
-      case VirusFound             => JsString("VirusFound")
-      case UnprocessableErrorFile => JsString("UnprocessableErrorFile")
-      case UnexpectedError        => JsString("UnexpectedError")
-    }
-  )
+  implicit val reads: Reads[FileStatus] = Reads[FileStatus] {
+    case JsString("Pending")                => JsSuccess(Pending)
+    case JsString("Accepted")               => JsSuccess(Passed)
+    case JsString("Rejected")               => JsSuccess(Failed)
+    case JsString("VirusFound")             => JsSuccess(VirusFound)
+    case JsString("UnprocessableErrorFile") => JsSuccess(UnprocessableErrorFile)
+    case JsString("UnexpectedError")        => JsSuccess(UnexpectedError)
+    case other                              => JsError(s"Invalid FileStatus JSON: $other")
+  }
 
   def tagForFileStatus(fileStatus: FileStatus)(implicit messages: Messages): Tag =
     fileStatus match {

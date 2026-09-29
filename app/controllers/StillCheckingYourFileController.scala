@@ -18,13 +18,13 @@ package controllers
 
 import cats.syntax.all.*
 import config.FrontendAppConfig
+import connectors.SubmissionDetailsConnector
 import controllers.actions.*
 import models.fileSubmission.FileStatus
 import models.responses.getName
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, UploadIdPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.logWarn
 import utils.StillCheckingYourFileHelper
@@ -42,7 +42,7 @@ class StillCheckingYourFileController @Inject() (
     view: StillCheckingYourFileView,
     stillCheckingYourFileHelper: StillCheckingYourFileHelper,
     appConfig: FrontendAppConfig,
-    stubService: XmlFileDetailsStubService,
+    submissionDetailsConnector: SubmissionDetailsConnector,
     val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -54,8 +54,7 @@ class StillCheckingYourFileController @Inject() (
 
       (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage), userAnswers.get(UploadIdPage))
         .mapN { (rcaspDetails, extractedFileDetails, uploadId) =>
-          // TODO: Replace StubService method with actual call to check file status (CARF-621)
-          stubService.getFileStatus(request.carfId, userAnswers).value.map {
+          submissionDetailsConnector.getFileStatus(uploadId).value.map {
             case Right(fileStatus) =>
               fileStatus match {
                 case FileStatus.Pending                =>
