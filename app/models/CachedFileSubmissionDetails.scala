@@ -17,14 +17,14 @@
 package models
 
 import models.fileSubmission.FileStatus
-import models.responses.{RcaspDetails, SubscriptionDetails}
+import models.responses.{DisplaySubscriptionDetails, RcaspDetails}
 
 import java.time.LocalDateTime
 
-case class CachedFileDetails(
+case class CachedFileSubmissionDetails(
     dateTime: Option[LocalDateTime],
     fileStatus: FileStatus,
-    subscriptionDetails: SubscriptionDetails,
+    subscriptionDetails: DisplaySubscriptionDetails,
     rcaspDetails: RcaspDetails,
     extractedFileDetails: Option[ExtractedFileDetails]
 )

@@ -19,7 +19,7 @@ package controllers.upload
 import connectors.FileValidationConnector
 import controllers.actions.*
 import models.errors.{InvalidXmlError, XmlErrors}
-import pages.{ExtractedFileDetailsPage, UploadSuccessDetailsPage, XmlErrorsPage}
+import pages.{ExtractedFileDetailsPage, UploadDetailsUserAnswers, XmlErrorsPage}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -42,7 +42,7 @@ class FileValidationController @Inject() (
   def onPageLoad(): Action[AnyContent] =
     (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
       request.userAnswers
-        .get(UploadSuccessDetailsPage)
+        .get(UploadDetailsUserAnswers)
         .fold {
           logWarn("[FileValidationController][onPageLoad] Missing UploadSuccessDetails from user answers")
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))

@@ -29,7 +29,7 @@ import models.upscan.UploadStatus.*
 import models.{ErrorCode, InvalidArgumentErrorMessage, UserAnswers}
 import org.apache.pekko
 import org.apache.pekko.actor.ActorSystem
-import pages.{FileReferencePage, UploadIdPage, UploadSuccessDetailsPage}
+import pages.{FileReferencePage, UploadDetailsUserAnswers, UploadIdPage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -115,8 +115,10 @@ class UploadXmlController @Inject() (
 
   def getUploadStatusAndRedirect(uploadId: UploadId): Action[AnyContent] =
     (identify andThen getData() andThen requireData).async { implicit request =>
-      def errorRedirect(errorCode: String, errorMessage: String, errorRequestId: String): Result =
-        Redirect(controllers.upload.routes.UploadXmlController.showError(errorCode, errorMessage, errorRequestId).url)
+      def errorRedirect(errorCode: String, errorMessage: String, errorRequestId: String): Future[Result] =
+        Future.successful(
+          Redirect(controllers.upload.routes.UploadXmlController.showError(errorCode, errorMessage, errorRequestId).url)
+        )
 
       // Delay the call to make sure the backend db has been populated by the upscan callback first
       pekko.pattern.after(config.upscanCallbackDelayInSeconds.seconds, actorSystem.scheduler) {
@@ -125,21 +127,18 @@ class UploadXmlController @Inject() (
             maybeUploadStatus match {
               case Some(uploadedSuccessfully: UploadedSuccessfully) =>
                 if (isFileNameTooLong(uploadedSuccessfully.name)) {
-                  Future.successful(errorRedirect(InvalidArgument.code, InvalidFileNameLength.message, ""))
+                  errorRedirect(InvalidArgument.code, InvalidFileNameLength.message, "")
                 } else if (isFileNameDisallowed(uploadedSuccessfully.name)) {
-                  Future.successful(errorRedirect(InvalidArgument.code, DisallowedCharacters.message, ""))
+                  errorRedirect(InvalidArgument.code, DisallowedCharacters.message, "")
                 } else if (isFileNotXml(uploadedSuccessfully.name)) {
                   // When running locally, upscan stub uploads non-XML successfully. Actual Upscan would return an UploadRejected.
-                  Future.successful(errorRedirect(InvalidArgument.code, TypeMismatch.message, ""))
+                  errorRedirect(InvalidArgument.code, TypeMismatch.message, "")
                 } else if (isFileEmpty(uploadedSuccessfully.size)) {
-                  Future.successful(errorRedirect(InvalidArgument.code, FileIsEmpty.message, ""))
+                  errorRedirect(InvalidArgument.code, FileIsEmpty.message, "")
                 } else {
-                  val uploadSuccessDetails =
-                    UploadSuccessDetails(uploadedSuccessfully.name, uploadedSuccessfully.downloadUrl)
                   for {
-                    updatedAnswers <-
-                      Future.fromTry(request.userAnswers.set(UploadSuccessDetailsPage, uploadSuccessDetails))
-                    _              <- sessionRepository.set(updatedAnswers)
+                    ua <- Future.fromTry(request.userAnswers.set(UploadDetailsUserAnswers, uploadedSuccessfully))
+                    _  <- sessionRepository.set(ua)
                   } yield Redirect(controllers.upload.routes.FileValidationController.onPageLoad().url)
                 }
               case Some(uploadRejected: UploadRejected)             =>
@@ -148,19 +147,19 @@ class UploadXmlController @Inject() (
                     s"[UploadXmlController][getUploadStatusAndRedirect] Upload rejected with 'octet-stream' in message. Error details: ${uploadRejected.details}"
                   )
                   val errorReason = uploadRejected.details.failureReason
-                  Future.successful(errorRedirect(OctetStream.code, errorReason.toLowerCase, ""))
+                  errorRedirect(OctetStream.code, errorReason.toLowerCase, "")
                 } else {
                   logWarn(
                     s"[UploadXmlController][getUploadStatusAndRedirect] Upload rejected. Error details: ${uploadRejected.details}"
                   )
-                  Future.successful(errorRedirect(InvalidArgument.code, TypeMismatch.message, ""))
+                  errorRedirect(InvalidArgument.code, TypeMismatch.message, "")
                 }
               case Some(Quarantined)                                =>
                 logWarn("[UploadXmlController][getUploadStatusAndRedirect] File upload returned quarantined status")
-                Future.successful(errorRedirect(VirusFile.code, "", ""))
+                errorRedirect(VirusFile.code, "", "")
               case Some(Failed)                                     =>
                 logWarn("[UploadXmlController][getUploadStatusAndRedirect] File upload returned failed status")
-                Future.successful(errorRedirect("UploadFailed", "", ""))
+                errorRedirect("UploadFailed", "", "")
               case Some(_)                                          =>
                 Future.successful(
                   Redirect(controllers.upload.routes.UploadXmlController.getUploadStatusAndRedirect(uploadId).url)
@@ -169,7 +168,7 @@ class UploadXmlController @Inject() (
                 logError(
                   s"[UploadXmlController][getUploadStatusAndRedirect] Unable to retrieve a record with uploadId ${uploadId.value}"
                 )
-                Future.successful(errorRedirect("UploadFailed", "", ""))
+                errorRedirect("UploadFailed", "", "")
             }
           case Left(error)              =>
             logError(s"[UploadXmlController][getUploadStatusAndRedirect] Error getting upload status: $error")

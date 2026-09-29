@@ -16,13 +16,13 @@
 
 package pages
 
-import models.upscan.UploadSuccessDetails
+import models.upscan.UploadStatus.UploadedSuccessfully
 import play.api.libs.json.JsPath
 
-case object UploadSuccessDetailsPage extends QuestionPage[UploadSuccessDetails] {
+case object UploadDetailsUserAnswers extends QuestionPage[UploadedSuccessfully] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "uploadSuccessDetails"
+  override def toString: String = "uploadDetails"
 
 }

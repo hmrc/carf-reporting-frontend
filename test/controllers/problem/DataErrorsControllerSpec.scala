@@ -19,7 +19,7 @@ package controllers.problem
 import base.SpecBase
 import config.FrontendAppConfig
 import models.problem.SchemaError
-import pages.{UploadSuccessDetailsPage, XmlErrorsPage}
+import pages.{UploadDetailsUserAnswers, XmlErrorsPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
@@ -33,7 +33,7 @@ class DataErrorsControllerSpec extends SpecBase {
 
     "must return OK and the correct view when errors and filename are both present, under the max" in {
       val userAnswers = emptyUserAnswers
-        .withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+        .withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
         .withPage(XmlErrorsPage, xmlFewErrors)
 
       val schemaErrors = xmlFewErrors.map { error =>
@@ -61,7 +61,7 @@ class DataErrorsControllerSpec extends SpecBase {
 
     "must return OK and truncate to 100 rows with hasMoreThanMax true when errors exceed the max" in {
       val userAnswers = emptyUserAnswers
-        .withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+        .withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
         .withPage(XmlErrorsPage, xmlManyErrors)
 
       val schemaErrors = xmlManyErrors.map { error =>
@@ -114,7 +114,7 @@ class DataErrorsControllerSpec extends SpecBase {
     }
 
     "must redirect to Journey Recovery when errors are empty but filename is present" in {
-      val userAnswers = emptyUserAnswers.withPage(UploadSuccessDetailsPage, uploadSuccessDetails)
+      val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 

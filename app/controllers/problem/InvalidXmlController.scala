@@ -18,7 +18,7 @@ package controllers.problem
 
 import config.FrontendAppConfig
 import controllers.actions.*
-import pages.UploadSuccessDetailsPage
+import pages.UploadDetailsUserAnswers
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -42,12 +42,12 @@ class InvalidXmlController @Inject() (
   def onPageLoad: Action[AnyContent] =
     (identify andThen getData() andThen uploadCompletionLock andThen requireData) { implicit request =>
       request.userAnswers
-        .get(UploadSuccessDetailsPage)
+        .get(UploadDetailsUserAnswers)
         .fold {
           logWarn("[InvalidXmlController][onPageLoad] Missing file name from user answers")
           Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
         } { uploadSuccessDetails =>
-          Ok(view(uploadSuccessDetails.fileName, appConfig.managementUrl))
+          Ok(view(uploadSuccessDetails.name, appConfig.managementUrl))
         }
     }
 }
