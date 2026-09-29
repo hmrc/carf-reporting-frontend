@@ -20,7 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.SDESConnector
 import models.errors.ApiError.InternalServerError
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, argThat}
 import org.mockito.Mockito.{reset, times, verify, when}
 import pages.*
 import play.api.inject.bind
@@ -178,7 +178,7 @@ class SendYourFileControllerSpec extends SpecBase {
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.StillCheckingYourFileController.onPageLoad().url
           verify(mockSDESConnector, times(1)).sendSubmission(any())(any(), any())
-          verify(mockSessionRepository, times(1)).set(any())
+          verify(mockSessionRepository, times(1)).set(argThat(_.get(DuplicateSubmissionLockPage).contains(true)))
         }
       }
 
