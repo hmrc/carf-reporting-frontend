@@ -20,7 +20,6 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.SubmissionDetailsConnector
 import models.errors.ApiError.InternalServerError
-import models.fileSubmission.FileStatus.*
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalactic.Prettifier.default
@@ -51,7 +50,8 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       when(mockAppConfig.managementUrl) thenReturn "managementUrl"
       when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
-      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any())).thenReturn(ResultT.fromValue(Pending))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(submissionDetailsPending))
 
       when(mockStillCheckingYourFileHelper.stillCheckingYourFileSummaryList(any())(any())).thenReturn(testSummaryList)
 
@@ -82,7 +82,8 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
           testRcaspName
         )(request, messages(application)).toString
 
-        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(1))
           .stillCheckingYourFileSummaryList(eqTo(testMessageRefId))(any())
       }
@@ -92,7 +93,8 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
       when(mockAppConfig.managementUrl) thenReturn "managementUrl"
       when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
-      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any())).thenReturn(ResultT.fromValue(Pending))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(submissionDetailsPending))
 
       when(mockStillCheckingYourFileHelper.stillCheckingYourFileSummaryList(any())(any())).thenReturn(testSummaryList)
 
@@ -123,14 +125,16 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
           "Nemona Champion"
         )(request, messages(application)).toString
 
-        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(1))
           .stillCheckingYourFileSummaryList(eqTo(testMessageRefId))(any())
       }
     }
 
     "must redirect to FilePassedChecks when file status is Passed" in {
-      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any())).thenReturn(ResultT.fromValue(Passed))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(orgSubmissionDetailsPassed))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -152,13 +156,15 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.FilePassedChecksController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to FileFailedChecks when file status is Failed" in {
-      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any())).thenReturn(ResultT.fromValue(Failed))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(submissionDetailsFailed))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -180,14 +186,15 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.FileFailedChecksController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to VirusFound when file status is VirusFound" in {
-      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
-        .thenReturn(ResultT.fromValue(VirusFound))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(submissionDetailsVirus))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -211,14 +218,15 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
           .onPageLoad(testUploadId.value)
           .url
 
-        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to FileNotAccepted when file status is UnprocessableErrorFile" in {
-      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
-        .thenReturn(ResultT.fromValue(UnprocessableErrorFile))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(submissionDetailsUnprocessableErrorFile))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -242,14 +250,15 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
           .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
           .url
 
-        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to Journey Recovery when file status is UnexpectedError" in {
-      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
-        .thenReturn(ResultT.fromValue(UnexpectedError))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(submissionDetailsUnexpectedError))
 
       val userAnswers = emptyUserAnswers
         .withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
@@ -271,13 +280,14 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
 
     "must redirect to Journey Recovery when there is an error getting the file status" in {
-      when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
         .thenReturn(ResultT.fromError(InternalServerError))
 
       val userAnswers = emptyUserAnswers
@@ -300,7 +310,8 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
@@ -325,7 +336,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector, times(0)).getFileStatus(any())(any(), any())
+        verify(mockSubmissionDetailsConnector, times(0)).getSubmissionDetailsByUploadId(any())(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
@@ -350,7 +361,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector, times(0)).getFileStatus(any())(any(), any())
+        verify(mockSubmissionDetailsConnector, times(0)).getSubmissionDetailsByUploadId(any())(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }
@@ -375,7 +386,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector, times(0)).getFileStatus(any())(any(), any())
+        verify(mockSubmissionDetailsConnector, times(0)).getSubmissionDetailsByUploadId(any())(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())
       }
     }

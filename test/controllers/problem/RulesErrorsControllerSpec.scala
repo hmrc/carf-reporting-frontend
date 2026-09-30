@@ -23,7 +23,7 @@ import models.errors.ApiError.InternalServerError
 import models.errors.BusinessRuleValidationErrors
 import models.problem.BusinessRuleError
 import models.problem.MessageBlock.Para
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -59,7 +59,7 @@ class RulesErrorsControllerSpec extends SpecBase {
 
   private val belowMaxErrors   = processTestBusinessRuleErrors(businessRuleValidationErrors)
   private val exactlyMaxErrors = processTestBusinessRuleErrors(businessRuleValidationManyErrors(100))
-  private val aboveMaxErrors   = processTestBusinessRuleErrors(businessRuleValidationManyErrors(101))
+  private val aboveMaxErrors   = processTestBusinessRuleErrors(businessRuleValidationManyErrors(150))
 
   lazy val rulesErrorsRoute: String = routes.RulesErrorsController.onPageLoad(testUploadId.value).url
 
@@ -91,6 +91,9 @@ class RulesErrorsControllerSpec extends SpecBase {
             request,
             messages(application)
           ).toString
+
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
       }
     }
 
@@ -119,6 +122,9 @@ class RulesErrorsControllerSpec extends SpecBase {
             request,
             messages(application)
           ).toString
+
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
       }
     }
 
@@ -126,7 +132,7 @@ class RulesErrorsControllerSpec extends SpecBase {
       when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
         .thenReturn(
           ResultT.fromValue(
-            submissionDetailsFailed.copy(businessRuleErrors = businessRuleValidationManyErrors(101))
+            submissionDetailsFailed.copy(businessRuleErrors = businessRuleValidationManyErrors(150))
           )
         )
 
@@ -152,6 +158,9 @@ class RulesErrorsControllerSpec extends SpecBase {
             request,
             messages(application)
           ).toString
+
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
       }
     }
 
@@ -169,6 +178,9 @@ class RulesErrorsControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
       }
     }
 
@@ -190,6 +202,9 @@ class RulesErrorsControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
       }
     }
 
@@ -207,6 +222,9 @@ class RulesErrorsControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+        verify(mockSubmissionDetailsConnector, times(1))
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
       }
     }
   }

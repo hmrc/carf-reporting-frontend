@@ -20,7 +20,6 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.{SDESConnector, SubmissionDetailsConnector}
 import models.errors.ApiError.InternalServerError
-import models.fileSubmission.FileStatus.*
 import models.fileSubmission.URL
 import org.mockito.ArgumentMatchers.{any, argThat, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -252,8 +251,8 @@ class SendYourFileControllerSpec extends SpecBase {
 
     ".getFileStatusAndRedirect" - {
       "must return NoContent when file status is Pending" in {
-        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
-          .thenReturn(ResultT.fromValue(Pending))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(submissionDetailsPending))
 
         val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
 
@@ -267,13 +266,14 @@ class SendYourFileControllerSpec extends SpecBase {
 
           status(result) mustEqual NO_CONTENT
 
-          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         }
       }
 
       "must return OK with url to file confirmation page when file status is Passed" in {
-        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
-          .thenReturn(ResultT.fromValue(Passed))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(orgSubmissionDetailsPassed))
 
         val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
 
@@ -290,13 +290,14 @@ class SendYourFileControllerSpec extends SpecBase {
             URL(controllers.routes.FileConfirmationController.onPageLoad(testUploadId.value).url)
           )
 
-          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         }
       }
 
       "must return OK with url to rules errors page when file status is Failed" in {
-        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
-          .thenReturn(ResultT.fromValue(Failed))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(submissionDetailsFailed))
 
         val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
 
@@ -313,13 +314,14 @@ class SendYourFileControllerSpec extends SpecBase {
             URL(controllers.problem.routes.RulesErrorsController.onPageLoad(testUploadId.value).url)
           )
 
-          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         }
       }
 
       "must return OK with url to virus found page when file status is VirusFound" in {
-        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
-          .thenReturn(ResultT.fromValue(VirusFound))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(submissionDetailsVirus))
 
         val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
 
@@ -336,13 +338,14 @@ class SendYourFileControllerSpec extends SpecBase {
             URL(controllers.problem.routes.VirusFoundController.onPageLoad(testUploadId.value).url)
           )
 
-          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         }
       }
 
       "must return OK with url to file-not-accepted when file status is UnprocessableErrorFile" in {
-        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
-          .thenReturn(ResultT.fromValue(UnprocessableErrorFile))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(submissionDetailsUnprocessableErrorFile))
 
         val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
 
@@ -363,13 +366,14 @@ class SendYourFileControllerSpec extends SpecBase {
             )
           )
 
-          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         }
       }
 
       "must return OK with url to journey recovery when file status is UnexpectedError" in {
-        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
-          .thenReturn(ResultT.fromValue(UnexpectedError))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+          .thenReturn(ResultT.fromValue(submissionDetailsUnexpectedError))
 
         val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
 
@@ -386,12 +390,13 @@ class SendYourFileControllerSpec extends SpecBase {
             URL(controllers.routes.JourneyRecoveryController.onPageLoad().url)
           )
 
-          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         }
       }
 
       "must return InternalServerError when SubmissionDetailsConnector returns an error" in {
-        when(mockSubmissionDetailsConnector.getFileStatus(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
           .thenReturn(ResultT.fromError(InternalServerError))
 
         val userAnswers = emptyUserAnswers.withPage(UploadIdPage, testUploadId)
@@ -406,7 +411,8 @@ class SendYourFileControllerSpec extends SpecBase {
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
 
-          verify(mockSubmissionDetailsConnector, times(1)).getFileStatus(eqTo(testUploadId))(any(), any())
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         }
       }
 
@@ -421,7 +427,7 @@ class SendYourFileControllerSpec extends SpecBase {
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
 
-          verify(mockSubmissionDetailsConnector, times(0)).getFileStatus(any())(any(), any())
+          verify(mockSubmissionDetailsConnector, times(0)).getSubmissionDetailsByUploadId(any())(any(), any())
         }
       }
 

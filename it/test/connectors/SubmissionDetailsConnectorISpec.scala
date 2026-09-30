@@ -19,7 +19,6 @@ package connectors
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import itutil.ApplicationWithWiremock
 import models.errors.ApiError.{InternalServerError, JsonValidationError, NotFoundError}
-import models.fileSubmission.FileStatus.Passed
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import play.api.http.Status.*
@@ -31,82 +30,6 @@ class SubmissionDetailsConnectorISpec
     with IntegrationPatience {
 
   lazy val connector: SubmissionDetailsConnector = app.injector.instanceOf[SubmissionDetailsConnector]
-
-  ".getFileStatus" - {
-    val baseUrlPattern = "/carf-reporting/file-status/.*"
-
-    "must successfully retrieve a FileStatus" in {
-      stubFor(
-        get(urlPathMatching(baseUrlPattern))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withBody("\"Accepted\"")
-          )
-      )
-
-      val result = connector.getFileStatus(testUploadId).value.futureValue
-
-      result mustBe Right(Passed)
-    }
-
-    "must return JsonValidationError when response JSON is invalid" in {
-      stubFor(
-        get(urlPathMatching(baseUrlPattern))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withBody("""{"not": "the expected shape"}""")
-          )
-      )
-
-      val result = connector.getFileStatus(testUploadId).value.futureValue
-
-      result mustBe Left(JsonValidationError)
-    }
-
-    "must return NotFoundError given a 404 response" in {
-      stubFor(
-        get(urlPathMatching(baseUrlPattern))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-
-      val result = connector.getFileStatus(testUploadId).value.futureValue
-
-      result mustBe Left(NotFoundError)
-    }
-
-    "must return InternalServerError given a 400 response" in {
-      stubFor(
-        get(urlPathMatching(baseUrlPattern))
-          .willReturn(
-            aResponse()
-              .withStatus(BAD_REQUEST)
-          )
-      )
-
-      val result = connector.getFileStatus(testUploadId).value.futureValue
-
-      result mustBe Left(InternalServerError)
-    }
-
-    "must return InternalServerError given a 500 response" in {
-      stubFor(
-        get(urlPathMatching(baseUrlPattern))
-          .willReturn(
-            aResponse()
-              .withStatus(INTERNAL_SERVER_ERROR)
-          )
-      )
-
-      val result = connector.getFileStatus(testUploadId).value.futureValue
-
-      result mustBe Left(InternalServerError)
-    }
-  }
 
   ".getSubmissionDetailsByUploadId" - {
     val baseUrlPattern = "/carf-reporting/submission-details/.*"

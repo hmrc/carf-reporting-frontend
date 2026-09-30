@@ -54,9 +54,9 @@ class StillCheckingYourFileController @Inject() (
 
       (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage), userAnswers.get(UploadIdPage))
         .mapN { (rcaspDetails, extractedFileDetails, uploadId) =>
-          submissionDetailsConnector.getFileStatus(uploadId).value.map {
-            case Right(fileStatus) =>
-              fileStatus match {
+          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId).value.map {
+            case Right(submissionDetails) =>
+              submissionDetails.fileStatus match {
                 case FileStatus.Pending                =>
                   val summaryList =
                     stillCheckingYourFileHelper.stillCheckingYourFileSummaryList(extractedFileDetails.messageRefId)
@@ -83,7 +83,7 @@ class StillCheckingYourFileController @Inject() (
                 case FileStatus.UnexpectedError        =>
                   Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
               }
-            case Left(error)       =>
+            case Left(error)              =>
               logWarn(s"[StillCheckingYourFileController][onPageLoad] Error getting file status: $error")
               Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
           }

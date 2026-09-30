@@ -49,21 +49,22 @@ class FileFailedChecksController @Inject() (
     (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
       (request.userAnswers.get(ExtractedFileDetailsPage), request.userAnswers.get(UploadIdPage))
         .mapN { (extractedFileDetails, uploadId) =>
-          submissionDetailsConnector.getFileStatus(uploadId).value.map {
-            case Right(Failed) =>
-              val summaryList =
-                fileCheckResultHelper.summaryList(
-                  messageRefId = extractedFileDetails.messageRefId,
-                  fileStatus = Failed,
-                  messagePrefix = "fileFailedChecks"
-                )
-              Ok(view(summaryList, uploadId.value))
-
-            case Right(otherStatus) =>
-              logWarn(s"[FileFailedChecksController][onPageLoad] File status was: $otherStatus")
-              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-
-            case Left(error) =>
+          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId).value.map {
+            case Right(submissionDetails) =>
+              submissionDetails.fileStatus match {
+                case Failed      =>
+                  val summaryList =
+                    fileCheckResultHelper.summaryList(
+                      messageRefId = extractedFileDetails.messageRefId,
+                      fileStatus = Failed,
+                      messagePrefix = "fileFailedChecks"
+                    )
+                  Ok(view(summaryList, uploadId.value))
+                case otherStatus =>
+                  logWarn(s"[FileFailedChecksController][onPageLoad] File status was: $otherStatus")
+                  Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+              }
+            case Left(error)              =>
               logWarn(s"[FileFailedChecksController][onPageLoad] Error retrieving file status: $error")
               Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
           }

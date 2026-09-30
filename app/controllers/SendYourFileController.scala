@@ -117,9 +117,9 @@ class SendYourFileController @Inject() (
           )
           Future.successful(InternalServerError)
         } { uploadId =>
-          submissionDetailsConnector.getFileStatus(uploadId).value.map {
-            case Right(fileStatus) =>
-              fileStatus match {
+          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId).value.map {
+            case Right(submissionDetails) =>
+              submissionDetails.fileStatus match {
                 case FileStatus.Pending                =>
                   NoContent
                 case FileStatus.Passed                 =>
@@ -141,7 +141,7 @@ class SendYourFileController @Inject() (
                 case FileStatus.UnexpectedError        =>
                   Ok(Json.toJson(URL(controllers.routes.JourneyRecoveryController.onPageLoad().url)))
               }
-            case Left(error)       =>
+            case Left(error)              =>
               logWarn(s"[SendYourFileController][getFileStatusAndRedirect] Error getting file status: $error")
               InternalServerError
           }

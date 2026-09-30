@@ -18,7 +18,7 @@ package connectors
 
 import config.FrontendAppConfig
 import models.errors.ApiError.{InternalServerError, JsonValidationError, NotFoundError}
-import models.fileSubmission.{FileStatus, SubmissionDetails}
+import models.fileSubmission.SubmissionDetails
 import models.upscan.UploadId
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.json.*
@@ -33,41 +33,6 @@ import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
 class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: FrontendAppConfig) {
-
-  def getFileStatus(uploadId: UploadId)(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[FileStatus] = {
-    val requestUrl = url"${config.carfReportingBaseUrl}/file-status/${uploadId.value}"
-
-    logInfo(s"[SubmissionDetailsConnector][getFileStatus] Getting file status for uploadId ${uploadId.value}")
-
-    ResultT.fromFuture {
-      httpClient
-        .get(requestUrl)
-        .execute[HttpResponse]
-        .map { response =>
-          response.status match {
-            case OK        =>
-              Try(response.json.as[FileStatus]) match {
-                case Success(fileStatus) => Right(fileStatus)
-                case Failure(_)          =>
-                  logWarn(
-                    s"[SubmissionDetailsConnector][getFileStatus] Error parsing response body for uploadId ${uploadId.value}"
-                  )
-                  Left(JsonValidationError)
-              }
-            case NOT_FOUND =>
-              logWarn(
-                s"[SubmissionDetailsConnector][getFileStatus] No submission details found for uploadId ${uploadId.value}"
-              )
-              Left(NotFoundError)
-            case status    =>
-              logError(
-                s"[SubmissionDetailsConnector][getFileStatus] Unexpected response: status $status from ${requestUrl.toURI}"
-              )
-              Left(InternalServerError)
-          }
-        }
-    }
-  }
 
   def getSubmissionDetailsByUploadId(
       uploadId: UploadId
@@ -100,7 +65,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
               Left(NotFoundError)
             case status    =>
               logError(
-                s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Unexpected response: status $status from ${requestUrl.toURI}"
+                s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Unexpected response: status $status, uploadId ${uploadId.value}"
               )
               Left(InternalServerError)
           }
@@ -134,7 +99,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
               }
             case status =>
               logError(
-                s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Unexpected response: status $status from ${requestUrl.toURI}"
+                s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Unexpected response: status $status, carfId $carfId"
               )
               Left(InternalServerError)
           }

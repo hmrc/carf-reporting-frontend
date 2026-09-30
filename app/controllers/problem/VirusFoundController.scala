@@ -42,15 +42,16 @@ class VirusFoundController @Inject() (
     with I18nSupport {
 
   def onPageLoad(uploadId: String): Action[AnyContent] = identify.async { implicit request =>
-    submissionDetailsConnector.getFileStatus(UploadId(uploadId)).value.map {
-      case Right(VirusFound) =>
-        Ok(view(appConfig.managementUrl))
-
-      case Right(otherStatus) =>
-        logWarn(s"[VirusFoundController][onPageLoad] File status was: $otherStatus")
-        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-
-      case Left(error) =>
+    submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId)).value.map {
+      case Right(submissionDetails) =>
+        submissionDetails.fileStatus match {
+          case VirusFound  =>
+            Ok(view(appConfig.managementUrl))
+          case otherStatus =>
+            logWarn(s"[VirusFoundController][onPageLoad] File status was: $otherStatus")
+            Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        }
+      case Left(error)              =>
         logWarn(s"[VirusFoundController][onPageLoad] Error retrieving file status: $error")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
