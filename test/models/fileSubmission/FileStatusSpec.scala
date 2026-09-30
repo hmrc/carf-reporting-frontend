@@ -31,8 +31,8 @@ class FileStatusSpec extends SpecBase {
     "json reads" - {
       "must parse to expected file status" in {
         Json.parse("\"Pending\"").as[FileStatus]                mustBe Pending
-        Json.parse("\"Passed\"").as[FileStatus]                 mustBe Passed
-        Json.parse("\"Failed\"").as[FileStatus]                 mustBe Failed
+        Json.parse("\"Accepted\"").as[FileStatus]               mustBe Passed
+        Json.parse("\"Rejected\"").as[FileStatus]               mustBe Failed
         Json.parse("\"VirusFound\"").as[FileStatus]             mustBe VirusFound
         Json.parse("\"UnprocessableErrorFile\"").as[FileStatus] mustBe UnprocessableErrorFile
         Json.parse("\"UnexpectedError\"").as[FileStatus]        mustBe UnexpectedError
@@ -40,17 +40,6 @@ class FileStatusSpec extends SpecBase {
 
       "must return a JsError when parsing an unexpected value" in {
         Json.parse("\"Unknown\"").validate[FileStatus] mustBe JsError("""Invalid FileStatus JSON: "Unknown"""")
-      }
-    }
-
-    "json writes" - {
-      "must write to json as expected" in {
-        Json.toJson(Pending).toString                mustBe "\"Pending\""
-        Json.toJson(Passed).toString                 mustBe "\"Passed\""
-        Json.toJson(Failed).toString                 mustBe "\"Failed\""
-        Json.toJson(VirusFound).toString             mustBe "\"VirusFound\""
-        Json.toJson(UnprocessableErrorFile).toString mustBe "\"UnprocessableErrorFile\""
-        Json.toJson(UnexpectedError).toString        mustBe "\"UnexpectedError\""
       }
     }
 

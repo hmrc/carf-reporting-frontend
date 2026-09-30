@@ -17,16 +17,16 @@
 package controllers.submission
 
 import config.FrontendAppConfig
-import controllers.actions._
-import models.fileSubmission.SlicedCachedFileDetails
+import connectors.SubmissionDetailsConnector
+import controllers.actions.*
+import models.fileSubmission.SubmissionDetails
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.AutomaticChecksStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.logWarn
 import views.html.submission.ResultOfAutomaticChecksView
 
-import java.time.LocalDateTime
+import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
@@ -34,7 +34,7 @@ class ResultOfAutomaticChecksController @Inject() (
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     appConfig: FrontendAppConfig,
-    automaticChecksStubService: AutomaticChecksStubService,
+    submissionDetailsConnector: SubmissionDetailsConnector,
     val controllerComponents: MessagesControllerComponents,
     view: ResultOfAutomaticChecksView
 )(implicit ec: ExecutionContext)
@@ -44,28 +44,22 @@ class ResultOfAutomaticChecksController @Inject() (
   def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
     val carfId = request.carfId
 
-    automaticChecksStubService
-      .getSubmissions(carfId)
-      .fold(
-        error => {
-          logWarn(
-            s"[ResultOfAutomaticChecksController][onPageLoad] Unable to retrieve submissions " +
-              s"for result-of-automatic-checks page. Error: $error"
-          )
-          Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-        },
-        submissions =>
-          if (submissions.nonEmpty) {
-            Ok(view(sortedByMostRecent(submissions), appConfig.managementUrl))
-          } else {
-            logWarn(
-              "[ResultOfAutomaticChecksController][onPageLoad] No submissions found for result-of-automatic-checks page."
-            )
-            Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-          }
-      )
+    submissionDetailsConnector.getSubmissionDetailsByCarfId(carfId).value.map {
+      case Right(submissions) if submissions.nonEmpty =>
+        Ok(view(sortedByMostRecent(submissions), appConfig.managementUrl))
+      case Right(_)                                   =>
+        logWarn(
+          "[ResultOfAutomaticChecksController][onPageLoad] No submissions found for result-of-automatic-checks page."
+        )
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+      case Left(error)                                =>
+        logWarn(
+          s"[ResultOfAutomaticChecksController][onPageLoad] Unable to retrieve submissions for result-of-automatic-checks page. Error: $error"
+        )
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 
-  private def sortedByMostRecent(submissions: Seq[SlicedCachedFileDetails]): Seq[SlicedCachedFileDetails] =
-    submissions.sortBy(_.dateSubmitted)(Ordering[LocalDateTime].reverse)
+  private def sortedByMostRecent(submissions: Seq[SubmissionDetails]): Seq[SubmissionDetails] =
+    submissions.sortBy(_.submissionTime)(Ordering[Instant].reverse)
 }

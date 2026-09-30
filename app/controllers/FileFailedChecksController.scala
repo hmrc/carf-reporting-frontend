@@ -17,12 +17,12 @@
 package controllers
 
 import cats.syntax.all.*
+import connectors.SubmissionDetailsConnector
 import controllers.actions.*
 import models.fileSubmission.FileStatus.Failed
 import pages.{ExtractedFileDetailsPage, UploadIdPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.XmlFileDetailsStubService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FileCheckResultHelper
 import utils.LoggerUtil.*
@@ -37,7 +37,7 @@ class FileFailedChecksController @Inject() (
     getData: DataRetrievalAction,
     requireData: DataRequiredAction,
     uploadCompletionLock: UploadCompletionLockAction,
-    stubService: XmlFileDetailsStubService,
+    submissionDetailsConnector: SubmissionDetailsConnector,
     fileCheckResultHelper: FileCheckResultHelper,
     val controllerComponents: MessagesControllerComponents,
     view: FileFailedChecksView
@@ -49,22 +49,22 @@ class FileFailedChecksController @Inject() (
     (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
       (request.userAnswers.get(ExtractedFileDetailsPage), request.userAnswers.get(UploadIdPage))
         .mapN { (extractedFileDetails, uploadId) =>
-          // TODO: Replace StubService method with actual call to check file status (CARF-621)
-          stubService.getFileStatus(request.carfId).value.map {
-            case Right(Failed) =>
-              val summaryList =
-                fileCheckResultHelper.summaryList(
-                  messageRefId = extractedFileDetails.messageRefId,
-                  fileStatus = Failed,
-                  messagePrefix = "fileFailedChecks"
-                )
-              Ok(view(summaryList, uploadId.value))
-
-            case Right(otherStatus) =>
-              logWarn(s"[FileFailedChecksController][onPageLoad] File status was: $otherStatus")
-              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-
-            case Left(error) =>
+          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId).value.map {
+            case Right(submissionDetails) =>
+              submissionDetails.fileStatus match {
+                case Failed      =>
+                  val summaryList =
+                    fileCheckResultHelper.summaryList(
+                      messageRefId = extractedFileDetails.messageRefId,
+                      fileStatus = Failed,
+                      messagePrefix = "fileFailedChecks"
+                    )
+                  Ok(view(summaryList, uploadId.value))
+                case otherStatus =>
+                  logWarn(s"[FileFailedChecksController][onPageLoad] File status was: $otherStatus")
+                  Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+              }
+            case Left(error)              =>
               logWarn(s"[FileFailedChecksController][onPageLoad] Error retrieving file status: $error")
               Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
           }

@@ -18,36 +18,34 @@ package controllers.submission
 
 import base.SpecBase
 import config.FrontendAppConfig
+import connectors.SubmissionDetailsConnector
 import models.errors.ApiError.InternalServerError
-import models.fileSubmission.{ResultOfAutomaticChecksStubData, SlicedCachedFileDetails}
+import models.fileSubmission.SubmissionDetails
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.AutomaticChecksStubService
 import types.ResultT
 import views.html.submission.ResultOfAutomaticChecksView
 
-import java.time.LocalDateTime
-
 class ResultOfAutomaticChecksControllerSpec extends SpecBase {
 
-  private val mockService: AutomaticChecksStubService = mock[AutomaticChecksStubService]
+  private val mockSubmissionDetailsConnector: SubmissionDetailsConnector = mock[SubmissionDetailsConnector]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockService)
+    reset(mockSubmissionDetailsConnector)
   }
 
   "ResultOfAutomaticChecks Controller" - {
 
-    "must return OK and the correct view when submissions are found" in {
+    "must return OK and the correct view when submissions are found, rendering submissions with the most recent at the top" in {
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByCarfId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(submissionDetailsList))
 
-      when(mockService.getSubmissions(any())).thenReturn(ResultT.fromValue(ResultOfAutomaticChecksStubData.allStatuses))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[AutomaticChecksStubService].toInstance(mockService))
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
         .build()
 
       running(application) {
@@ -57,22 +55,23 @@ class ResultOfAutomaticChecksControllerSpec extends SpecBase {
         val result = route(application, request).value
         val view   = application.injector.instanceOf[ResultOfAutomaticChecksView]
 
-        val expectedSorted =
-          ResultOfAutomaticChecksStubData.allStatuses.sortBy(_.dateSubmitted)(Ordering[LocalDateTime].reverse)
-
         status(result)          mustEqual OK
         contentAsString(result) mustEqual
-          view(expectedSorted, appConfig.managementUrl)(request, messages(application)).toString
+          view(submissionDetailsListSortedBySubmissionTime, appConfig.managementUrl)(
+            request,
+            messages(application)
+          ).toString
+
+        verify(mockSubmissionDetailsConnector, times(1)).getSubmissionDetailsByCarfId(any())(any(), any())
       }
     }
 
     "must redirect to Journey Recovery when the submissions list is empty" in {
-
-      when(mockService.getSubmissions(any()))
-        .thenReturn(ResultT.fromValue(Seq.empty[SlicedCachedFileDetails]))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByCarfId(any())(any(), any()))
+        .thenReturn(ResultT.fromValue(Seq.empty[SubmissionDetails]))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[AutomaticChecksStubService].toInstance(mockService))
+        .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
         .build()
 
       running(application) {
@@ -81,16 +80,17 @@ class ResultOfAutomaticChecksControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+        verify(mockSubmissionDetailsConnector, times(1)).getSubmissionDetailsByCarfId(any())(any(), any())
       }
     }
 
-    "must redirect to Journey Recovery when the service returns an error" in {
-
-      when(mockService.getSubmissions(any()))
-        .thenReturn(ResultT.fromError[Seq[SlicedCachedFileDetails]](InternalServerError))
+    "must redirect to Journey Recovery when SubmissionDetailsConnector returns an error" in {
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByCarfId(any())(any(), any()))
+        .thenReturn(ResultT.fromError[Seq[SubmissionDetails]](InternalServerError))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[AutomaticChecksStubService].toInstance(mockService))
+        .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
         .build()
 
       running(application) {
@@ -99,35 +99,8 @@ class ResultOfAutomaticChecksControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
 
-    "must render submissions with the most recent at the top" in {
-
-      val unsorted = Seq(
-        ResultOfAutomaticChecksStubData.unprocessableErrorFile,
-        ResultOfAutomaticChecksStubData.virusFoundFile,
-        ResultOfAutomaticChecksStubData.passedFile
-      )
-
-      when(mockService.getSubmissions(any())).thenReturn(ResultT.fromValue(unsorted))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[AutomaticChecksStubService].toInstance(mockService))
-        .build()
-
-      running(application) {
-        val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request   = FakeRequest(GET, routes.ResultOfAutomaticChecksController.onPageLoad().url)
-
-        val result = route(application, request).value
-        val view   = application.injector.instanceOf[ResultOfAutomaticChecksView]
-
-        val expectedSorted = unsorted.sortBy(_.dateSubmitted)(Ordering[LocalDateTime].reverse)
-
-        status(result)          mustEqual OK
-        contentAsString(result) mustEqual
-          view(expectedSorted, appConfig.managementUrl)(request, messages(application)).toString
+        verify(mockSubmissionDetailsConnector, times(1)).getSubmissionDetailsByCarfId(any())(any(), any())
       }
     }
   }
