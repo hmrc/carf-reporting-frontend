@@ -18,26 +18,26 @@ package controllers.actions
 
 import controllers.routes
 import models.requests.OptionalDataRequest
-import pages.UploadCompletionLockPage
+import pages.DuplicateSubmissionLockPage
 import play.api.mvc.{ActionFilter, Result, Results}
 import utils.LoggerUtil.logInfo
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class UploadCompletionLockAction @Inject() (implicit val ec: ExecutionContext)
+class DuplicateSubmissionLockAction @Inject() (implicit val ec: ExecutionContext)
     extends ActionFilter[OptionalDataRequest] {
 
   override protected def executionContext: ExecutionContext = ec
 
   override protected def filter[A](request: OptionalDataRequest[A]): Future[Option[Result]] = {
 
-    val submitted = request.userAnswers.exists(_.get(UploadCompletionLockPage).contains(true))
+    val submitted = request.userAnswers.exists(_.get(DuplicateSubmissionLockPage).contains(true))
 
     if (submitted) {
 
       logInfo(
-        s"[UploadCompletionLockAction] Blocking request after upload completion journey. path=${request.uri}"
+        s"[DuplicateSubmissionLockAction] Blocking request after send your file confirmation. path=${request.uri}"
       )
 
       Future.successful(
