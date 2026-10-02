@@ -25,7 +25,8 @@ trait Formatters {
     new Formatter[String] {
 
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] =
-        data.get(key) match {
+        val cleanedData = data.map { case (k, v) => k -> v.replaceAll("\\s+", " ") }
+        cleanedData.get(key) match {
           case None                      => Left(Seq(FormError(key, errorKey, args)))
           case Some(s) if s.trim.isEmpty => Left(Seq(FormError(key, errorKey, args)))
           case Some(s)                   => Right(s)
