@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package pages
+package models.fileSubmission
 
-import models.fileSubmission.FileStatus
-import play.api.libs.json.JsPath
+import play.api.libs.json.{Json, OFormat}
 
-case object FileStatusPage extends QuestionPage[FileStatus] {
+case class URL(url: String)
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "fileStatus"
-
+object URL {
+  implicit val format: OFormat[URL] = Json.format[URL]
 }
