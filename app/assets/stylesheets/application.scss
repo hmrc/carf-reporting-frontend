@@ -7,10 +7,6 @@ $govuk-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/govuk
 $hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-frontend/hmrc/assets";
 @import "partials/spinner";
 
-.text-overflow{
-  overflow-wrap: break-word;
-}
-
 .js-visible {
   display: none !important;
 }
@@ -102,12 +98,4 @@ $hmrc-assets-path: "/disclose-cross-border-arrangements/upload/assets/lib/hmrc-f
 
 span.govuk-visually-hidden {
   max-width: 0 !important;
-}
-
-.govuk-body {
-  word-wrap: break-word;
-}
-
-.govuk-heading-l {
-  overflow-wrap: break-word;
 }
