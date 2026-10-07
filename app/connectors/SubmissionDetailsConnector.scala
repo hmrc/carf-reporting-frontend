@@ -18,10 +18,9 @@ package connectors
 
 import config.FrontendAppConfig
 import models.errors.ApiError.{InternalServerError, JsonValidationError, NotFoundError}
-import models.fileSubmission.SubmissionDetails
+import models.fileSubmission.{DetailsOfFilesSent, SubmissionDetails}
 import models.upscan.UploadId
 import play.api.http.Status.{NOT_FOUND, OK}
-import play.api.libs.json.*
 import types.ResultT
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -74,12 +73,13 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
   }
 
   def getSubmissionDetailsByCarfId(
-      carfId: String
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[Seq[SubmissionDetails]] = {
-    val requestUrl = url"${config.carfReportingBaseUrl}/user-submission-details/$carfId"
+      carfId: String,
+      page: Int
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[DetailsOfFilesSent] = {
+    val requestUrl = url"${config.carfReportingBaseUrl}/user-submission-details/$carfId/$page"
 
     logInfo(
-      s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Getting submission details for carfId $carfId"
+      s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Getting submission details for carfId $carfId, page $page"
     )
 
     ResultT.fromFuture {
@@ -89,9 +89,9 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
         .map { response =>
           response.status match {
             case OK     =>
-              Try(response.json.as[Seq[SubmissionDetails]]) match {
-                case Success(fileDetailsList) => Right(fileDetailsList)
-                case Failure(_)               =>
+              Try(response.json.as[DetailsOfFilesSent]) match {
+                case Success(detailsOfFilesSent) => Right(detailsOfFilesSent)
+                case Failure(_)                  =>
                   logWarn(
                     s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Error parsing response body for carfId $carfId"
                   )

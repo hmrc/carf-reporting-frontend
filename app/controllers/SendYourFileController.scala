@@ -102,7 +102,9 @@ class SendYourFileController @Inject() (
             updatedUserAnswers <- Future.fromTry(request.userAnswers.set(DuplicateSubmissionLockPage, true))
             _                  <- sessionRepository.set(updatedUserAnswers)
           } yield Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad())
-        case Left(error) => Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        case Left(error) =>
+          logWarn(s"[SendYourFileController][onSubmit] Error submitting file to FTS: $error")
+          Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
       }
     }
   }

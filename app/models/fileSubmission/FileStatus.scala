@@ -50,20 +50,18 @@ object FileStatus {
       case Pending                                  => TagViewModel(Text(messages("fileStatus.pending"))).yellow()
       case Passed                                   => TagViewModel(Text(messages("fileStatus.passed"))).green()
       case Failed | VirusFound                      => TagViewModel(Text(messages("fileStatus.failed"))).red()
-      case UnprocessableErrorFile | UnexpectedError =>
-        TagViewModel(Text(messages("fileStatus.problem"))).purple()
+      case UnprocessableErrorFile | UnexpectedError => TagViewModel(Text(messages("fileStatus.problem"))).purple()
     }
 
-  def linkForFileStatus(fileStatus: FileStatus, uploadId: String)(implicit messages: Messages): HtmlContent =
+  def nextStepForFileStatus(fileStatus: FileStatus, uploadId: String)(implicit messages: Messages): HtmlContent =
     fileStatus match {
-      case Pending =>
-        HtmlContent(s"<span class='govuk-visually-hidden'>${messages("resultOfAutomaticChecks.nextStep.none")}</span>")
+      case Pending => HtmlContent(messages("detailsOfSentFiles.nextStep.pending"))
 
       case Passed =>
         HtmlContent(
           Link()(
             href = controllers.routes.FileConfirmationController.onPageLoad(uploadId).url,
-            key = "resultOfAutomaticChecks.nextStep.confirmation"
+            key = "detailsOfSentFiles.nextStep.confirmation"
           )
         )
 
@@ -71,7 +69,7 @@ object FileStatus {
         HtmlContent(
           Link()(
             href = controllers.problem.routes.RulesErrorsController.onPageLoad(uploadId).url,
-            key = "resultOfAutomaticChecks.nextStep.checkErrors"
+            key = "detailsOfSentFiles.nextStep.checkErrors"
           )
         )
 
@@ -79,7 +77,7 @@ object FileStatus {
         HtmlContent(
           Link()(
             href = controllers.problem.routes.VirusFoundController.onPageLoad(uploadId).url,
-            key = "resultOfAutomaticChecks.nextStep.checkProblem"
+            key = "detailsOfSentFiles.nextStep.checkProblem"
           )
         )
 
@@ -89,7 +87,7 @@ object FileStatus {
             href = controllers.routes.PlaceholderController
               .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
               .url,
-            key = "resultOfAutomaticChecks.nextStep.contactUs"
+            key = "detailsOfSentFiles.nextStep.contactUs"
           )
         )
 
@@ -97,7 +95,7 @@ object FileStatus {
         HtmlContent(
           Link()(
             href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
-            key = "resultOfAutomaticChecks.nextStep.uploadAgain"
+            key = "detailsOfSentFiles.nextStep.uploadAgain"
           )
         )
     }
