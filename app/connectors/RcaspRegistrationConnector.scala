@@ -35,7 +35,7 @@ class RcaspRegistrationConnector @Inject() (config: FrontendAppConfig, http: Htt
   def viewRcasps(
       carfId: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[List[RcaspDetails]] = {
-    val viewRcaspUrl = url"${config.carfRegistrationBaseUrl}/carf-management/view-rcasp/$carfId/none"
+    val viewRcaspUrl = url"${config.carfAccountBaseUrl}/carf-management/view-rcasp/$carfId/none"
 
     logInfo(s"[RcaspRegistrationConnector][viewRcasps] Calling endpoint: ${viewRcaspUrl.toString}")
 
