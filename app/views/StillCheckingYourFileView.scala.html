@@ -37,6 +37,7 @@
         )
         @messages("stillCheckingYourFile.p2.or")
         @link(
+            id = Some("upload-link"),
             href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
             key = "stillCheckingYourFile.uploadAnotherFile",
             fullStop = true
