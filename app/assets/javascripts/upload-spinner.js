@@ -25,7 +25,7 @@ $("#uploadForm").submit(function (e) {
             $(".govuk-form-group--error").removeClass("govuk-form-group--error");
             $("#file-upload-error").remove();
             $("#error-summary").remove();
-            $("#submit").remove();
+            $("#continue").remove();
         }
 
         addUploadSpinner();
