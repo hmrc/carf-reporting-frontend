@@ -16,6 +16,7 @@
 
 package controllers.submission
 
+import config.Constants.{ONE, ZERO}
 import config.FrontendAppConfig
 import connectors.SubmissionDetailsConnector
 import controllers.actions.*
@@ -45,7 +46,7 @@ class DetailsOfSentFilesController @Inject() (
     submissionDetailsConnector.getSubmissionDetailsByCarfId(request.carfId, page).value.map {
       case Right(detailsOfFilesSent) if detailsOfFilesSent.submissionRecords.nonEmpty =>
         val maybePagination: Option[Pagination] =
-          if (detailsOfFilesSent.totalPages > 1) {
+          if (detailsOfFilesSent.totalPages > ONE) {
             Some(
               PaginationViewModel(
                 currentPage = page,
@@ -56,7 +57,7 @@ class DetailsOfSentFilesController @Inject() (
           } else { None }
         Ok(view(detailsOfFilesSent.submissionRecords, maybePagination, appConfig.managementUrl))
       case Right(detailsOfFilesSent)
-          if detailsOfFilesSent.submissionRecords.isEmpty && detailsOfFilesSent.totalPages > 0 =>
+          if detailsOfFilesSent.submissionRecords.isEmpty && detailsOfFilesSent.totalPages > ZERO =>
         logInfo(s"[DetailsOfSentFilesController][onPageLoad] Page $page does not exist, redirecting to first page")
         Redirect(controllers.submission.routes.DetailsOfSentFilesController.onPageLoad())
       case Right(_)                                                                   =>
