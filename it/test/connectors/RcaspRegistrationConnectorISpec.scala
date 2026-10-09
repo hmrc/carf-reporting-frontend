@@ -34,7 +34,7 @@ class RcaspRegistrationConnectorISpec
 
   "viewRcasps" - {
 
-    val testUrl = s"/carf-management/view-rcasp/$testCarfId/none"
+    val testUrl = s"/carf-account/view-rcasp/$testCarfId/none"
 
     val validResponseBody: String =
       """

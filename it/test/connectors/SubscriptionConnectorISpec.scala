@@ -85,7 +85,7 @@ class SubscriptionConnectorISpec
 
   "displaySubscription" - {
 
-    val baseUrlPattern = "/carf-registration/subscription/display/.*"
+    val baseUrlPattern = "/carf-account/subscription/display/.*"
 
     "must successfully retrieve a DisplaySubscriptionResponse (individual)" in {
       stubFor(
