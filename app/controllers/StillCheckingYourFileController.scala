@@ -75,11 +75,7 @@ class StillCheckingYourFileController @Inject() (
                 case FileStatus.VirusFound             =>
                   Redirect(controllers.problem.routes.VirusFoundController.onPageLoad(uploadId.value))
                 case FileStatus.UnprocessableErrorFile =>
-                  Redirect(
-                    controllers.routes.PlaceholderController
-                      .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
-                      .url
-                  )
+                  Redirect(controllers.problem.routes.FileNotAcceptedController.onPageLoad().url)
                 case FileStatus.UnexpectedError        =>
                   Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
               }

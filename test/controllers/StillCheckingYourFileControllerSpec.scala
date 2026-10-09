@@ -246,10 +246,10 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
         val result  = route(application, request).value
 
         status(result)                 mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.PlaceholderController
-          .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
+        redirectLocation(result).value mustEqual controllers.problem.routes.FileNotAcceptedController
+          .onPageLoad()
           .url
-
+        
         verify(mockSubmissionDetailsConnector, times(1))
           .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         verify(mockStillCheckingYourFileHelper, times(0)).stillCheckingYourFileSummaryList(any())(any())

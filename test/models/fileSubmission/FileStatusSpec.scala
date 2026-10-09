@@ -83,8 +83,8 @@ class FileStatusSpec extends SpecBase {
         val content = linkForFileStatus(UnprocessableErrorFile, uploadId).asHtml.body
 
         content must include(
-          controllers.routes.PlaceholderController
-            .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
+          controllers.problem.routes.FileNotAcceptedController
+            .onPageLoad()
             .url
         )
         content must include(messages("resultOfAutomaticChecks.nextStep.contactUs"))
