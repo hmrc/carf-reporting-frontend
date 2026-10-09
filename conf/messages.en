@@ -41,7 +41,7 @@ journeyRecovery.startAgain.guidance = [Add content to explain why the user needs
 
 signedOut.title = For your security, we signed you out
 signedOut.heading = For your security, we signed you out
-signedOut.guidance = We did not save your answers.
+signedOut.guidance = If you have sent a file, you can view results of checks by signing back in to the service.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
@@ -209,6 +209,7 @@ fileConfirmation.2.email.sent = We have sent a confirmation email to {0} and {1}
 fileConfirmation.heading.next = What happens next
 fileConfirmation.p1.next = We will contact you if we have any questions about your report.
 
+
 fileConfirmation.heading.before = Before you go
 fileConfirmation.text.before = Your feedback helps us make our service better.
 fileConfirmation.feedback.link = Take a short survey
@@ -229,6 +230,12 @@ detailsOfSentFiles.table.head.messageRefId = MessageRefId
 detailsOfSentFiles.table.head.sent = Sent
 detailsOfSentFiles.table.head.result = Result
 detailsOfSentFiles.table.head.nextStep = Next step
+
+pageNotFound.title=Page not found
+pageNotFound.heading=Page not found
+pageNotFound.p1=If you typed the web address, check it is correct.
+pageNotFound.p2=If you pasted the web address, check you copied the entire address.
+pageNotFound.link=You can email {0} if you have any questions about this service.
 
 detailsOfSentFiles.nextStep.confirmation = Go to confirmation
 detailsOfSentFiles.nextStep.confirmationNotAvailable = Confirmation not available
