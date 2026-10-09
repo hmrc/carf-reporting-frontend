@@ -359,11 +359,7 @@ class SendYourFileControllerSpec extends SpecBase {
 
           status(result)        mustEqual OK
           contentAsJson(result) mustEqual Json.toJson(
-            URL(
-              controllers.routes.PlaceholderController
-                .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
-                .url
-            )
+              URL(controllers.problem.routes.FileNotAcceptedController.onPageLoad().url)
           )
 
           verify(mockSubmissionDetailsConnector, times(1))

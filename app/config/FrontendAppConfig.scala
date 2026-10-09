@@ -46,6 +46,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val managementUrl: String    = configuration.get[String]("urls.managementUrl")
   val yourRcaspsUrl: String    = configuration.get[String]("urls.yourRcaspsUrl")
 
+  val aeoiEmailAddress: String = configuration.get("email.aeoi")
+
   private val exitSurveyBaseUrl: String = configuration.get[String]("urls.feedbackFrontendBase")
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/carf-reporting-frontend?useServiceNavigation"
 

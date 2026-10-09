@@ -86,9 +86,7 @@ object FileStatus {
       case UnprocessableErrorFile =>
         HtmlContent(
           Link()(
-            href = controllers.routes.PlaceholderController
-              .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
-              .url,
+            href = controllers.problem.routes.FileNotAcceptedController.onPageLoad().url,
             key = "resultOfAutomaticChecks.nextStep.contactUs"
           )
         )

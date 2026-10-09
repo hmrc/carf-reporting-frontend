@@ -43,7 +43,7 @@ journeyRecovery.startAgain.guidance = [Add content to explain why the user needs
 
 signedOut.title = For your security, we signed you out
 signedOut.heading = For your security, we signed you out
-signedOut.guidance = We did not save your answers.
+signedOut.guidance = If you have sent a file, you can view results of checks by signing back in to the service.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
@@ -236,3 +236,8 @@ resultOfAutomaticChecks.nextStep.checkProblem = Check problem
 resultOfAutomaticChecks.nextStep.uploadAgain = Upload file again
 resultOfAutomaticChecks.nextStep.contactUs = Contact us
 
+pageNotFound.title=Page not found
+pageNotFound.heading=Page not found
+pageNotFound.p1=If you typed the web address, check it is correct.
+pageNotFound.p2=If you pasted the web address, check you copied the entire address.
+pageNotFound.link=You can email {0} if you have any questions about this service.
