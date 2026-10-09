@@ -76,7 +76,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
       carfId: String,
       page: Int
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[DetailsOfFilesSent] = {
-    val requestUrl = url"${config.carfReportingBaseUrl}/user-submission-details/$carfId/$page"
+    val requestUrl = url"${config.carfReportingBaseUrl}/user-submission-history/$carfId/$page"
 
     logInfo(
       s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Getting submission details for carfId $carfId, page $page"

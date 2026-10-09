@@ -181,7 +181,7 @@ class SubmissionDetailsConnectorISpec
   }
 
   ".getSubmissionDetailsByCarfId" - {
-    val baseUrlPattern = "/carf-reporting/user-submission-details/.*"
+    val baseUrlPattern = "/carf-reporting/user-submission-history/.*"
 
     val testSubmissionDetailsJson: String =
       """
