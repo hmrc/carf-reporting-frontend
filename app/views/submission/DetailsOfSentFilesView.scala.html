@@ -1,0 +1,77 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import models.fileSubmission.FileStatus
+@import models.fileSubmission.SubmissionRecord
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
+
+@this(
+        layout: templates.Layout,
+        link: components.Link,
+        govukTable: GovukTable,
+        govukTag: GovukTag,
+        govukPagination: GovukPagination
+)
+
+@(
+        submissions: Seq[SubmissionRecord],
+        maybePagination: Option[Pagination],
+        managementUrl: String
+)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("detailsOfSentFiles.title"))) {
+
+    <h1 class="govuk-heading-l">@messages("detailsOfSentFiles.heading")</h1>
+
+    <p class="govuk-body">@messages("detailsOfSentFiles.p1")</p>
+    <p class="govuk-body">@messages("detailsOfSentFiles.p2")</p>
+    <p class="govuk-body">@messages("detailsOfSentFiles.p3")</p>
+    <p class="govuk-body">@messages("detailsOfSentFiles.p4")</p>
+
+    <div class="rules-error-table-wrapper govuk-!-padding-top-2">
+    @govukTable(Table(
+        head = Some(Seq(
+            HeadCell(content = Text(messages("detailsOfSentFiles.table.head.rcasp")), classes = "govuk-table__header app-custom-class cbc-width-fi"),
+            HeadCell(content = Text(messages("detailsOfSentFiles.table.head.messageRefId")), classes = "govuk-table__header app-custom-class cbc-width-message"),
+            HeadCell(content = Text(messages("detailsOfSentFiles.table.head.sent")), classes = "govuk-table__header app-custom-class cbc-width-sent"),
+            HeadCell(content = Text(messages("detailsOfSentFiles.table.head.result")), classes = "govuk-table__header app-custom-class cbc-width-result"),
+            HeadCell(content = Text(messages("detailsOfSentFiles.table.head.nextStep")), classes = "govuk-table__header app-custom-class cbc-width-next")
+        )),
+        rows = submissions.map { submission =>
+            Seq(
+                TableRow(content = Text(submission.rcaspName), classes = "govuk-table__header long-word"),
+                TableRow(content = Text(submission.messageRefId), classes = "govuk-table__cell long-word-break-all"),
+                TableRow(content = Text(submission.formattedSubmissionTime)),
+                TableRow(content = HtmlContent(govukTag(submission.resultTag))),
+                TableRow(content = submission.nextStepHtmlContent)
+            )
+        },
+        caption = Some(messages("detailsOfSentFiles.table.caption")),
+        captionClasses = "govuk-table__caption--m"
+    ))
+    </div>
+
+    @maybePagination.map { pagination =>
+        @govukPagination(pagination)
+    }
+
+    <p class="govuk-body govuk-!-padding-top-3">
+    @link(
+        href = managementUrl,
+        key = "site.backToManagement"
+    )
+    </p>
+}

@@ -18,6 +18,11 @@ package config
 
 object Constants {
 
+  inline val ZERO  = 0
+  inline val ONE   = 1
+  inline val TWO   = 2
+  inline val THREE = 3
+
   val fileNameAllowedCharacters = "^[A-Za-z0-9_.-]+$"
 
   val bytesInMb = 1048576

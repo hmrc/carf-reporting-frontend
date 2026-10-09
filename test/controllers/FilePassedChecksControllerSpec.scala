@@ -19,7 +19,6 @@ package controllers
 import base.SpecBase
 import connectors.SubmissionDetailsConnector
 import models.errors.ApiError.InternalServerError
-import models.fileSubmission.FileStatus
 import models.fileSubmission.FileStatus.Passed
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*

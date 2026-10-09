@@ -19,6 +19,7 @@ package connectors
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import itutil.ApplicationWithWiremock
 import models.errors.ApiError.{InternalServerError, JsonValidationError, NotFoundError}
+import models.fileSubmission.DetailsOfFilesSent
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import play.api.http.Status.*
@@ -180,138 +181,145 @@ class SubmissionDetailsConnectorISpec
   }
 
   ".getSubmissionDetailsByCarfId" - {
-    val baseUrlPattern = "/carf-reporting/user-submission-details/.*"
+    val baseUrlPattern = "/carf-reporting/user-submission-history/.*"
 
     val testSubmissionDetailsJson: String =
       """
-        |[ {
-        |  "_id" : "123456",
-        |  "carfId" : "XE0000123456789",
-        |  "fileStatus" : "Rejected",
-        |  "fileName" : "test.xml",
-        |  "extractedFileDetails" : {
-        |    "messageRefId" : "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001",
-        |    "sendingEntityIn" : "ZMCAR0123456787",
-        |    "rcaspName" : "Timmy's Turtles",
-        |    "messageTypeIndic" : "CARF701",
-        |    "hasOtherNexus" : false,
-        |    "hasCryptoUsers" : true,
-        |    "docTypeIndic" : "OECD10",
-        |    "isTestData" : true,
-        |    "allCryptoUsersAreCorrections" : false,
-        |    "allCryptoUsersAreDeletions" : false
-        |  },
-        |  "rcaspDetails" : {
-        |    "RCASPID" : "ZMCAR0123456786",
-        |    "IsRCASPUser" : false,
-        |    "RCASPName" : "Timmy's Turtles",
-        |    "PrimaryContactDetails" : {
-        |      "ContactName" : "Nemona Champion",
-        |      "EmailAddress" : "john.doe@example.com"
+        |{
+        |  "submissionRecords" : [ {
+        |    "_id" : "123456",
+        |    "carfId" : "XE0000123456789",
+        |    "fileStatus" : "Rejected",
+        |    "fileName" : "test.xml",
+        |    "extractedFileDetails" : {
+        |      "messageRefId" : "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001",
+        |      "sendingEntityIn" : "ZMCAR0123456787",
+        |      "rcaspName" : "Timmy's Turtles",
+        |      "messageTypeIndic" : "CARF701",
+        |      "hasOtherNexus" : false,
+        |      "hasCryptoUsers" : true,
+        |      "docTypeIndic" : "OECD10",
+        |      "isTestData" : true,
+        |      "allCryptoUsersAreCorrections" : false,
+        |      "allCryptoUsersAreDeletions" : false
         |    },
-        |    "SecondaryContactDetails" : {
-        |      "ContactName" : "Clavell",
-        |      "EmailAddress" : "clavell@uva.edu.org"
-        |    }
-        |  },
-        |  "subscriptionDetails" : {
-        |    "carfReference" : "XE0000123456789",
-        |    "gbUser" : true,
-        |    "primaryContact" : {
-        |      "organisation" : {
-        |        "name" : "John Doe"
+        |    "rcaspDetails" : {
+        |      "RCASPID" : "ZMCAR0123456786",
+        |      "IsRCASPUser" : false,
+        |      "RCASPName" : "Timmy's Turtles",
+        |      "PrimaryContactDetails" : {
+        |        "ContactName" : "Nemona Champion",
+        |        "EmailAddress" : "john.doe@example.com"
         |      },
-        |      "email" : "GroupRep@FATCACRS.com"
+        |      "SecondaryContactDetails" : {
+        |        "ContactName" : "Clavell",
+        |        "EmailAddress" : "clavell@uva.edu.org"
+        |      }
         |    },
-        |    "secondaryContact" : {
-        |      "organisation" : {
-        |        "name" : "Jane Doe"
+        |    "subscriptionDetails" : {
+        |      "carfReference" : "XE0000123456789",
+        |      "gbUser" : true,
+        |      "primaryContact" : {
+        |        "organisation" : {
+        |          "name" : "John Doe"
+        |        },
+        |        "email" : "GroupRep@FATCACRS.com"
         |      },
-        |      "email" : "GroupRep2@FATCACRS.com"
-        |    }
-        |  },
-        |  "submissionTime" : {
-        |    "$date" : {
-        |      "$numberLong" : "1589978095789"
-        |    }
-        |  },
-        |  "lastStatusUpdateTime" : {
-        |    "$date" : {
-        |      "$numberLong" : "1589978097789"
-        |    }
-        |  },
-        |  "businessRuleErrors" : {
-        |    "fileError" : [ {
-        |      "code" : "50008",
-        |      "details" : "MessageRefId element must be from 26 to 100 characters."
-        |    } ],
-        |    "recordError" : [ {
-        |      "code" : "Temp 21",
-        |      "details" : "The value for OtherNexus Nexus must be either the same or a weaker nexus than the value of RCASP Nexus.",
-        |      "docRefIDInError" : [ "GB2026GB-XRCAS1234567890-CARF_Report2026_001-CryptoUsers-004", "GB2026GB-XRCAS1234567890-CARF_Report2026_001-CryptoUsers-005" ]
-        |    } ]
-        |  }
-        |}, {
-        |  "_id" : "123456",
-        |  "carfId" : "XE0000123456789",
-        |  "fileStatus" : "Pending",
-        |  "fileName" : "test.xml",
-        |  "extractedFileDetails" : {
-        |    "messageRefId" : "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001",
-        |    "sendingEntityIn" : "ZMCAR0123456787",
-        |    "rcaspName" : "Timmy's Turtles",
-        |    "messageTypeIndic" : "CARF701",
-        |    "hasOtherNexus" : false,
-        |    "hasCryptoUsers" : true,
-        |    "docTypeIndic" : "OECD10",
-        |    "isTestData" : true,
-        |    "allCryptoUsersAreCorrections" : false,
-        |    "allCryptoUsersAreDeletions" : false
-        |  },
-        |  "rcaspDetails" : {
-        |    "RCASPID" : "ZMCAR0123456788",
-        |    "IsRCASPUser" : false,
-        |    "FirstName" : "Nemona",
-        |    "LastName" : "Champion",
-        |    "PrimaryContactDetails" : {
-        |      "ContactName" : "Nemona Champion",
-        |      "EmailAddress" : "john.doe@example.com"
-        |    }
-        |  },
-        |  "subscriptionDetails" : {
-        |    "carfReference" : "XE0000123456789",
-        |    "gbUser" : true,
-        |    "primaryContact" : {
-        |      "organisation" : {
-        |        "name" : "John Doe"
-        |      },
-        |      "email" : "GroupRep@FATCACRS.com"
+        |      "secondaryContact" : {
+        |        "organisation" : {
+        |          "name" : "Jane Doe"
+        |        },
+        |        "email" : "GroupRep2@FATCACRS.com"
+        |      }
         |    },
-        |    "secondaryContact" : {
-        |      "organisation" : {
-        |        "name" : "Jane Doe"
+        |    "submissionTime" : {
+        |      "$date" : {
+        |        "$numberLong" : "1589978095789"
+        |      }
+        |    },
+        |    "lastStatusUpdateTime" : {
+        |      "$date" : {
+        |        "$numberLong" : "1589978097789"
+        |      }
+        |    },
+        |    "businessRuleErrors" : {
+        |      "fileError" : [ {
+        |        "code" : "50008",
+        |        "details" : "MessageRefId element must be from 26 to 100 characters."
+        |      } ],
+        |      "recordError" : [ {
+        |        "code" : "Temp 21",
+        |        "details" : "The value for OtherNexus Nexus must be either the same or a weaker nexus than the value of RCASP Nexus.",
+        |        "docRefIDInError" : [ "GB2026GB-XRCAS1234567890-CARF_Report2026_001-CryptoUsers-004", "GB2026GB-XRCAS1234567890-CARF_Report2026_001-CryptoUsers-005" ]
+        |      } ]
+        |    }
+        |  }, {
+        |    "_id" : "123456",
+        |    "carfId" : "XE0000123456789",
+        |    "fileStatus" : "Pending",
+        |    "fileName" : "test.xml",
+        |    "extractedFileDetails" : {
+        |      "messageRefId" : "GB2026GB-CARF01234567890-Cryptoasset-Reporting-Framework-XML-Report_for_2026_My-Company-Limited_0001",
+        |      "sendingEntityIn" : "ZMCAR0123456787",
+        |      "rcaspName" : "Timmy's Turtles",
+        |      "messageTypeIndic" : "CARF701",
+        |      "hasOtherNexus" : false,
+        |      "hasCryptoUsers" : true,
+        |      "docTypeIndic" : "OECD10",
+        |      "isTestData" : true,
+        |      "allCryptoUsersAreCorrections" : false,
+        |      "allCryptoUsersAreDeletions" : false
+        |    },
+        |    "rcaspDetails" : {
+        |      "RCASPID" : "ZMCAR0123456788",
+        |      "IsRCASPUser" : false,
+        |      "FirstName" : "Nemona",
+        |      "LastName" : "Champion",
+        |      "PrimaryContactDetails" : {
+        |        "ContactName" : "Nemona Champion",
+        |        "EmailAddress" : "john.doe@example.com"
+        |      }
+        |    },
+        |    "subscriptionDetails" : {
+        |      "carfReference" : "XE0000123456789",
+        |      "gbUser" : true,
+        |      "primaryContact" : {
+        |        "organisation" : {
+        |          "name" : "John Doe"
+        |        },
+        |        "email" : "GroupRep@FATCACRS.com"
         |      },
-        |      "email" : "GroupRep2@FATCACRS.com"
+        |      "secondaryContact" : {
+        |        "organisation" : {
+        |          "name" : "Jane Doe"
+        |        },
+        |        "email" : "GroupRep2@FATCACRS.com"
+        |      }
+        |    },
+        |    "submissionTime" : {
+        |      "$date" : {
+        |        "$numberLong" : "1589978091789"
+        |      }
+        |    },
+        |   "lastStatusUpdateTime" : {
+        |      "$date" : {
+        |        "$numberLong" : "1589978097789"
+        |      }
+        |    },
+        |    "businessRuleErrors" : {
+        |      "fileError" : [ ],
+        |      "recordError" : [ ]
         |    }
-        |  },
-        |  "submissionTime" : {
-        |    "$date" : {
-        |      "$numberLong" : "1589978091789"
-        |    }
-        |  },
-        | "lastStatusUpdateTime" : {
-        |    "$date" : {
-        |      "$numberLong" : "1589978097789"
-        |    }
-        |  },
-        |  "businessRuleErrors" : {
-        |    "fileError" : [ ],
-        |    "recordError" : [ ]
-        |  }
-        |} ]
+        |  }, {
+        |   "messageRefId" : "MSG-2024-0001",
+        |   "rcaspName" : "Nemona Champion",
+        |   "submissionTime" : "2020-04-20T12:34:56.789Z"
+        |  } ],
+        |  "totalPages" : 1
+        |}
         |""".stripMargin
 
-    "must successfully retrieve a list of SubmissionDetails" in {
+    "must successfully retrieve a DetailsOfFilesSent containing the list of SubmissionDetails" in {
       stubFor(
         get(urlPathMatching(baseUrlPattern))
           .willReturn(
@@ -321,9 +329,14 @@ class SubmissionDetailsConnectorISpec
           )
       )
 
-      val result = connector.getSubmissionDetailsByCarfId(testCarfId).value.futureValue
+      val result = connector.getSubmissionDetailsByCarfId(testCarfId, page = 1).value.futureValue
 
-      result mustBe Right(Seq(submissionDetailsFailed, submissionDetailsPending))
+      result mustBe Right(
+        DetailsOfFilesSent(
+          Seq(submissionDetailsFailed, submissionDetailsPending, submissionHistoryPassed),
+          totalPages = 1
+        )
+      )
     }
 
     "must return JsonValidationError when response JSON is invalid" in {
@@ -336,7 +349,7 @@ class SubmissionDetailsConnectorISpec
           )
       )
 
-      val result = connector.getSubmissionDetailsByCarfId(testCarfId).value.futureValue
+      val result = connector.getSubmissionDetailsByCarfId(testCarfId, page = 2).value.futureValue
 
       result mustBe Left(JsonValidationError)
     }
@@ -350,7 +363,7 @@ class SubmissionDetailsConnectorISpec
           )
       )
 
-      val result = connector.getSubmissionDetailsByCarfId(testCarfId).value.futureValue
+      val result = connector.getSubmissionDetailsByCarfId(testCarfId, page = 3).value.futureValue
 
       result mustBe Left(InternalServerError)
     }
@@ -364,7 +377,7 @@ class SubmissionDetailsConnectorISpec
           )
       )
 
-      val result = connector.getSubmissionDetailsByCarfId(testCarfId).value.futureValue
+      val result = connector.getSubmissionDetailsByCarfId(testCarfId, page = 4).value.futureValue
 
       result mustBe Left(InternalServerError)
     }

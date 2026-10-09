@@ -12,6 +12,8 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
+site.next = Next
+site.previous = Previous
 site.backToManagement = Back to manage your cryptoasset reports
 
 date.day = Day
@@ -29,10 +31,6 @@ timeout.signOut = Sign out
 error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem
-
-index.title = carf-reporting-frontend
-index.heading = carf-reporting-frontend
-index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
@@ -211,7 +209,6 @@ fileConfirmation.2.email.sent = We have sent a confirmation email to {0} and {1}
 fileConfirmation.heading.next = What happens next
 fileConfirmation.p1.next = We will contact you if we have any questions about your report.
 
-
 fileConfirmation.heading.before = Before you go
 fileConfirmation.text.before = Your feedback helps us make our service better.
 fileConfirmation.feedback.link = Take a short survey
@@ -219,20 +216,24 @@ fileConfirmation.feedback.link.text = to share your feedback on this service.
 fileConfirmation.link.text.print = Print this page
 fileConfirmation.link.text.upload = Upload another file
 
-resultOfAutomaticChecks.title = Result of automatic checks
-resultOfAutomaticChecks.heading = Result of automatic checks
-resultOfAutomaticChecks.p1 = This information will be available for 28 days from the date you uploaded the file.
-resultOfAutomaticChecks.nextStep.none = None
+detailsOfSentFiles.title = Details of files you have sent
+detailsOfSentFiles.heading = Details of files you have sent
+detailsOfSentFiles.p1 = Information about files that have passed the automatic checks will be permanently available.
+detailsOfSentFiles.p2 = You will be able to view the confirmation for files that have passed for 28 days after submission.
+detailsOfSentFiles.p3 = Information about files that have not passed the automatic checks will only be available for 28 days after submission.
+detailsOfSentFiles.p4 = Files with invalid XML cannot be shown here.
 
-resultOfAutomaticChecks.table.head.rcasp = RCASP
-resultOfAutomaticChecks.table.head.messageRefId = MessageRefId
-resultOfAutomaticChecks.table.head.sent = Sent
-resultOfAutomaticChecks.table.head.result = Result
-resultOfAutomaticChecks.table.head.nextStep = Next step
+detailsOfSentFiles.table.caption = Results of automatic file checks and next steps
+detailsOfSentFiles.table.head.rcasp = RCASP
+detailsOfSentFiles.table.head.messageRefId = MessageRefId
+detailsOfSentFiles.table.head.sent = Sent
+detailsOfSentFiles.table.head.result = Result
+detailsOfSentFiles.table.head.nextStep = Next step
 
-resultOfAutomaticChecks.nextStep.confirmation = Go to confirmation
-resultOfAutomaticChecks.nextStep.checkErrors = Check errors
-resultOfAutomaticChecks.nextStep.checkProblem = Check problem
-resultOfAutomaticChecks.nextStep.uploadAgain = Upload file again
-resultOfAutomaticChecks.nextStep.contactUs = Contact us
-
+detailsOfSentFiles.nextStep.confirmation = Go to confirmation
+detailsOfSentFiles.nextStep.confirmationNotAvailable = Confirmation not available
+detailsOfSentFiles.nextStep.checkErrors = Check errors
+detailsOfSentFiles.nextStep.checkProblem = Check problem
+detailsOfSentFiles.nextStep.uploadAgain = Upload file again
+detailsOfSentFiles.nextStep.contactUs = Contact us
+detailsOfSentFiles.nextStep.pending = Wait for checks to finish

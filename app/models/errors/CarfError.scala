@@ -20,10 +20,6 @@ import play.api.libs.json.*
 
 sealed trait CarfError
 
-case object ConversionError extends CarfError
-
-case class MandatoryInformationMissingError(value: String = "") extends CarfError
-
 sealed trait ApiError extends CarfError
 
 object ApiError {

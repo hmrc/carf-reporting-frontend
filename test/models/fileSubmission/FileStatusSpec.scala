@@ -54,47 +54,53 @@ class FileStatusSpec extends SpecBase {
       }
     }
 
-    ".linkForFileStatus" - {
+    ".nextStepForFileStatus" - {
 
       val uploadId = "test-upload-id"
 
+      "must render the required text for Pending" in {
+        val content = nextStepForFileStatus(Pending, uploadId).asHtml.body
+
+        content must include(messages("detailsOfSentFiles.nextStep.pending"))
+      }
+
       "must render a link to the file-confirmation page for Passed" in {
-        val content = linkForFileStatus(Passed, uploadId).asHtml.body
+        val content = nextStepForFileStatus(Passed, uploadId).asHtml.body
 
         content must include(controllers.routes.FileConfirmationController.onPageLoad(uploadId).url)
-        content must include(messages("resultOfAutomaticChecks.nextStep.confirmation"))
+        content must include(messages("detailsOfSentFiles.nextStep.confirmation"))
       }
 
       "must render a link to the rules-errors page for Failed" in {
-        val content = linkForFileStatus(Failed, uploadId).asHtml.body
+        val content = nextStepForFileStatus(Failed, uploadId).asHtml.body
 
         content must include(controllers.problem.routes.RulesErrorsController.onPageLoad(uploadId).url)
-        content must include(messages("resultOfAutomaticChecks.nextStep.checkErrors"))
+        content must include(messages("detailsOfSentFiles.nextStep.checkErrors"))
       }
 
       "must render a link to the virus-found page for VirusFound" in {
-        val content = linkForFileStatus(VirusFound, uploadId).asHtml.body
+        val content = nextStepForFileStatus(VirusFound, uploadId).asHtml.body
 
         content must include(controllers.problem.routes.VirusFoundController.onPageLoad(uploadId).url)
-        content must include(messages("resultOfAutomaticChecks.nextStep.checkProblem"))
+        content must include(messages("detailsOfSentFiles.nextStep.checkProblem"))
       }
 
       "must render a link to the file-not-accepted placeholder for UnprocessableErrorFile" in {
-        val content = linkForFileStatus(UnprocessableErrorFile, uploadId).asHtml.body
+        val content = nextStepForFileStatus(UnprocessableErrorFile, uploadId).asHtml.body
 
         content must include(
           controllers.routes.PlaceholderController
             .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
             .url
         )
-        content must include(messages("resultOfAutomaticChecks.nextStep.contactUs"))
+        content must include(messages("detailsOfSentFiles.nextStep.contactUs"))
       }
 
       "must render a link to upload the file again for UnexpectedError" in {
-        val content = linkForFileStatus(UnexpectedError, uploadId).asHtml.body
+        val content = nextStepForFileStatus(UnexpectedError, uploadId).asHtml.body
 
         content must include(controllers.upload.routes.UploadXmlController.onPageLoad().url)
-        content must include(messages("resultOfAutomaticChecks.nextStep.uploadAgain"))
+        content must include(messages("detailsOfSentFiles.nextStep.uploadAgain"))
       }
 
     }
