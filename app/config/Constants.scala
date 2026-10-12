@@ -18,11 +18,6 @@ package config
 
 object Constants {
 
-  inline val ZERO  = 0
-  inline val ONE   = 1
-  inline val TWO   = 2
-  inline val THREE = 3
-
   val fileNameAllowedCharacters = "^[A-Za-z0-9_.-]+$"
 
   val bytesInMb = 1048576
@@ -31,5 +26,11 @@ object Constants {
 
   inline final val ukTimeZoneStringId = "Europe/London"
 
-  inline val tempUploadIdStub = "123456"
+  object Pagination {
+    val firstPageNumber                   = 1
+    val singlePage                        = 1
+    val showPreviousEllipsesPageThreshold = 3
+    val showPreviousItemPageThreshold     = 2
+    val showNextEllipsesGapFromLastPage   = 2
+  }
 }

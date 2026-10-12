@@ -16,7 +16,7 @@
 
 package viewmodels.govuk
 
-import config.Constants.{ONE, THREE, TWO}
+import config.Constants.Pagination.*
 import uk.gov.hmrc.govukfrontend.views.viewmodels.pagination.*
 import play.api.i18n.Messages
 import play.api.mvc.Call
@@ -27,22 +27,23 @@ trait PaginationFluency {
 
   object PaginationViewModel {
     def apply(currentPage: Int, totalPages: Int, call: Int => Call)(implicit messages: Messages): Pagination = {
-      val showPreviousPageLink: Boolean = currentPage > ONE
+      val showPreviousPageLink: Boolean = currentPage > firstPageNumber
       val showNextPageLink: Boolean     = currentPage < totalPages
 
-      val firstItem: Option[PaginationItem] = Option.when(currentPage > ONE)(
+      val firstItem: Option[PaginationItem] = Option.when(currentPage > firstPageNumber)(
         PaginationItem(
-          href = call(1).url,
-          number = Some("1")
+          href = call(firstPageNumber).url,
+          number = Some(firstPageNumber.toString)
         )
       )
 
-      val previousEllipses: Option[PaginationItem] = Option.when(currentPage > THREE)(ellipsePaginationItem)
+      val previousEllipses: Option[PaginationItem] =
+        Option.when(currentPage > showPreviousEllipsesPageThreshold)(ellipsePaginationItem)
 
-      val previousItem: Option[PaginationItem] = Option.when(currentPage > TWO)(
+      val previousItem: Option[PaginationItem] = Option.when(currentPage > showPreviousItemPageThreshold)(
         PaginationItem(
-          href = call(currentPage - ONE).url,
-          number = Some((currentPage - ONE).toString)
+          href = call(currentPage - singlePage).url,
+          number = Some((currentPage - singlePage).toString)
         )
       )
 
@@ -54,14 +55,15 @@ trait PaginationFluency {
         )
       )
 
-      val nextItem: Option[PaginationItem] = Option.when((totalPages - currentPage) > ONE)(
+      val nextItem: Option[PaginationItem] = Option.when((totalPages - currentPage) > singlePage)(
         PaginationItem(
-          href = call(currentPage + ONE).url,
-          number = Some((currentPage + ONE).toString)
+          href = call(currentPage + singlePage).url,
+          number = Some((currentPage + singlePage).toString)
         )
       )
 
-      val nextEllipses: Option[PaginationItem] = Option.when((totalPages - currentPage) > TWO)(ellipsePaginationItem)
+      val nextEllipses: Option[PaginationItem] =
+        Option.when((totalPages - currentPage) > showNextEllipsesGapFromLastPage)(ellipsePaginationItem)
 
       val lastItem: Option[PaginationItem] = Option.when(currentPage < totalPages)(
         PaginationItem(
@@ -81,12 +83,12 @@ trait PaginationFluency {
       ).flatten
 
       Pagination(
-        items = Option.when(totalPages > ONE)(pageItems),
+        items = Option.when(totalPages > singlePage)(pageItems),
         next = Option.when(showNextPageLink)(
-          PaginationLink(call(currentPage + ONE).url, Some(messages("site.next")))
+          PaginationLink(call(currentPage + singlePage).url, Some(messages("site.next")))
         ),
         previous = Option.when(showPreviousPageLink)(
-          PaginationLink(call(currentPage - ONE).url, Some(messages("site.previous")))
+          PaginationLink(call(currentPage - singlePage).url, Some(messages("site.previous")))
         )
       )
     }
