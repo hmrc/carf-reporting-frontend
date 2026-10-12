@@ -15,11 +15,10 @@
  *@
 
 @this(
-    layout: templates.Layout,
-    govukButton: GovukButton
+    layout: templates.Layout
 )
 
-@(continueUrl: String)(implicit request: Request[_], messages: Messages)
+@(aeoiEmailAddress: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("journeyRecovery.continue.title"))) {
 
@@ -28,9 +27,9 @@
     <p class="govuk-body">@messages("journeyRecovery.continue.guidance")</p>
 
     <p class="govuk-body">
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-                .asLink(continueUrl)
-        )
+        @messages("journeyRecovery.continue.p2.part1")
+        <a href="mailto:@aeoiEmailAddress" class="govuk-link">@aeoiEmailAddress</a>
+        @messages("journeyRecovery.continue.p2.part3")
     </p>
+
 }

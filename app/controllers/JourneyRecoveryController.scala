@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.IdentifierAction
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,6 +31,7 @@ import javax.inject.Inject
 class JourneyRecoveryController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     identify: IdentifierAction,
+    frontendAppConfig: FrontendAppConfig,
     continueView: JourneyRecoveryContinueView,
     startAgainView: JourneyRecoveryStartAgainView
 ) extends FrontendBaseController
@@ -49,7 +51,7 @@ class JourneyRecoveryController @Inject() (
     }
 
     safeUrl
-      .map(url => Ok(continueView(url)))
+      .map(_ => Ok(continueView(frontendAppConfig.aeoiEmailAddress)))
       .getOrElse(Ok(startAgainView()))
   }
 }

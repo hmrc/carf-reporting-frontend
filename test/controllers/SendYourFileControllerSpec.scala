@@ -359,7 +359,7 @@ class SendYourFileControllerSpec extends SpecBase {
 
           status(result)        mustEqual OK
           contentAsJson(result) mustEqual Json.toJson(
-              URL(controllers.problem.routes.FileNotAcceptedController.onPageLoad().url)
+            URL(controllers.problem.routes.FileNotAcceptedController.onPageLoad().url)
           )
 
           verify(mockSubmissionDetailsConnector, times(1))
