@@ -246,7 +246,8 @@ pageUnavailable.heading = This page is no longer available
 fileNotAccepted.title = Sorry, there is a problem with the service
 fileNotAccepted.heading = Sorry, there is a problem with the service
 fileNotAccepted.p1 = We have not accepted your file.
-fileNotAccepted.p2 = You must email {0} so we can resolve the problem. Include the subject line ‘CARF file not accepted’.
+fileNotAccepted.p2.part1 = You must email
+fileNotAccepted.p2.part3 = so we can resolve the problem. Include the subject line ‘CARF file not accepted’.
 
 detailsOfSentFiles.nextStep.confirmation = Go to confirmation
 detailsOfSentFiles.nextStep.confirmationNotAvailable = Confirmation not available
