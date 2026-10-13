@@ -42,6 +42,7 @@ class PageUnavailableControllerSpec extends SpecBase {
 
       "must return OK and the correct view" in {
         when(mockAppConfig.managementUrl) thenReturn testManagementUrl
+        when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
         val application = applicationBuilder(userAnswers = None)
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))

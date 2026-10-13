@@ -40,6 +40,7 @@ class UnauthorisedControllerSpec extends SpecBase {
 
     "must return OK and the correct view" in {
       when(mockAppConfig.aeoiEmailAddress) thenReturn testEmailAddress
+      when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
       val application = applicationBuilder(userAnswers = None)
         .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))

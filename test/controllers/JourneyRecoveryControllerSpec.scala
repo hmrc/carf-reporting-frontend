@@ -43,6 +43,7 @@ class JourneyRecoveryControllerSpec extends SpecBase {
 
       "must return OK and the journey recovery view" in {
         when(mockAppConfig.aeoiEmailAddress) thenReturn testEmailAddress
+        when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
         val application = applicationBuilder(userAnswers = None)
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
@@ -65,6 +66,7 @@ class JourneyRecoveryControllerSpec extends SpecBase {
 
       "must return OK and the journey recovery view, ignoring the continue Url" in {
         when(mockAppConfig.aeoiEmailAddress) thenReturn testEmailAddress
+        when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
         val application = applicationBuilder(userAnswers = None)
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))

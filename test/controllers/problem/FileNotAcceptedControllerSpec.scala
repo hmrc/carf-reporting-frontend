@@ -17,8 +17,8 @@
 package controllers.problem
 
 import base.SpecBase
-import org.mockito.ArgumentMatchers.any
 import config.FrontendAppConfig
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -42,6 +42,7 @@ class FileNotAcceptedControllerSpec extends SpecBase {
 
       "must return OK and the correct view" in {
         when(mockAppConfig.aeoiEmailAddress) thenReturn testEmailAddress
+        when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
         val application = applicationBuilder(userAnswers = None)
           .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
