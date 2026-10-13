@@ -42,8 +42,11 @@ signedOut.title = For your security, we signed you out
 signedOut.heading = For your security, we signed you out
 signedOut.guidance = If you have sent a file, you can view results of checks by signing back in to the service.
 
-unauthorised.title = You can’t access this service with this account
-unauthorised.heading = You can’t access this service with this account
+unauthorised.title = You cannot access this page
+unauthorised.heading = You cannot access this page
+unauthorised.p1.part1 = You can email
+unauthorised.p1.part3 = if you need support with using the service.
+unauthorised.link = Refer to the cryptoasset reporting guidance
 
 uploadXml.title = Upload an XML file
 uploadXml.heading = Upload an XML file
