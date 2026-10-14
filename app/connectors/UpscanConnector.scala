@@ -92,7 +92,7 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
           response.status match {
             case OK => Right(())
             case _  =>
-              logWarn(s"[UpscanConnector][saveRequestedUpload] Unexpected response with status ${response.status}")
+              logError(s"[UpscanConnector][saveRequestedUpload] Unexpected response with status ${response.status}")
               Left(InternalServerError)
           }
         }

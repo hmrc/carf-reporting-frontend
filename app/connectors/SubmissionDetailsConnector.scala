@@ -58,7 +58,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
                   Left(JsonValidationError)
               }
             case NOT_FOUND =>
-              logWarn(
+              logError(
                 s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] No submission details found for uploadId ${uploadId.value}"
               )
               Left(NotFoundError)
