@@ -20,7 +20,7 @@ import controllers.routes
 import models.requests.OptionalDataRequest
 import pages.UploadCompletionLockPage
 import play.api.mvc.{ActionFilter, Result, Results}
-import utils.LoggerUtil.logInfo
+import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +37,7 @@ class UploadCompletionLockAction @Inject() (implicit val ec: ExecutionContext)
     if (submitted) {
 
       logInfo(
-        s"[UploadCompletionLockAction] Blocking request after upload completion journey. path=${request.uri}"
+        s"[UploadCompletionLockAction][filter] Blocking request after upload completion journey. path=${request.uri}"
       )
 
       Future.successful(

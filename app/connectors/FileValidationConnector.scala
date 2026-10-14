@@ -54,7 +54,7 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
               Try(response.json.as[ExtractedFileDetails]) match {
                 case Success(extractedFileDetails) => Right(extractedFileDetails)
                 case Failure(_)                    =>
-                  logWarn(
+                  logError(
                     s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 200) from $requestUrl"
                   )
                   Left(JsonValidationError)
@@ -63,7 +63,7 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
               Try(response.json.as[XmlValidationError]) match {
                 case Success(xmlValidationError) => Left(xmlValidationError)
                 case Failure(_)                  =>
-                  logWarn(
+                  logError(
                     s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 422) from $requestUrl"
                   )
                   Left(JsonValidationError)

@@ -50,16 +50,16 @@ class RcaspRegistrationConnector @Inject() (config: FrontendAppConfig, http: Htt
                 case Success(viewRcaspResponse) =>
                   Right(viewRcaspResponse.ViewRCASP.ResponseDetails.RCASPList)
                 case Failure(_)                 =>
-                  logWarn(
+                  logError(
                     s"[RcaspRegistrationConnector][viewRcasps] Error parsing ViewRcaspResponse from $viewRcaspUrl"
                   )
                   Left(JsonValidationError)
               }
             case NOT_FOUND =>
-              logInfo(s"[RcaspRegistrationConnector][viewRcasps] No RCASPs found for carfId: $carfId")
+              logError(s"[RcaspRegistrationConnector][viewRcasps] No RCASPs found for carfId: $carfId")
               Right(List.empty)
             case status    =>
-              logWarn(
+              logError(
                 s"[RcaspRegistrationConnector][viewRcasps] Unexpected response: status $status from $viewRcaspUrl"
               )
               Left(InternalServerError)

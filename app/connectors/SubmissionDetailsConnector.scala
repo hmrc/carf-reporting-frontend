@@ -53,7 +53,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
               Try(response.json.as[SubmissionDetails]) match {
                 case Success(fileDetails) => Right(fileDetails)
                 case Failure(_)           =>
-                  logWarn(
+                  logError(
                     s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Error parsing response body for uploadId ${uploadId.value}"
                   )
                   Left(JsonValidationError)
@@ -92,7 +92,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
               Try(response.json.as[Seq[SubmissionDetails]]) match {
                 case Success(fileDetailsList) => Right(fileDetailsList)
                 case Failure(_)               =>
-                  logWarn(
+                  logError(
                     s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Error parsing response body for carfId $carfId"
                   )
                   Left(JsonValidationError)

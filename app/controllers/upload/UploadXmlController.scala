@@ -81,7 +81,9 @@ class UploadXmlController @Inject() (
             case None                        => form.withError("file-upload", "uploadXml.error.file.select")
           }
         case _                                   =>
-          logWarn(s"Upscan error $errorCode: $errorMessage, requestId is $errorRequestId")
+          logWarn(
+            s"[UploadXmlController][showError] Upscan error $errorCode: $errorMessage, requestId is $errorRequestId"
+          )
           form.withError("file-upload", "uploadXml.error.file.content.unknown")
       }
       initialUpscanCall(formWithErrors)

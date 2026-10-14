@@ -29,7 +29,7 @@ import uk.gov.hmrc.http
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
-import utils.LoggerUtil.logWarn
+import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -66,11 +66,11 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
               Try(response.json.as[PreparedUpload]) match {
                 case Success(preparedUpload) => Right(preparedUpload.toUpscanInitiateResponse)
                 case Failure(exception)      =>
-                  logWarn("[UpscanConnector][upscanFormInitiate] Error parsing response body as PreparedUpload")
+                  logError("[UpscanConnector][upscanFormInitiate] Error parsing response body as PreparedUpload")
                   Left(JsonValidationError)
               }
             case _  =>
-              logWarn(s"[UpscanConnector][upscanFormInitiate] Unexpected response with status ${response.status}")
+              logError(s"[UpscanConnector][upscanFormInitiate] Unexpected response with status ${response.status}")
               Left(InternalServerError)
           }
         }
@@ -111,14 +111,14 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
             Try(response.json.as[UploadStatus]) match {
               case Success(status)    => Right(Some(status))
               case Failure(exception) =>
-                logWarn("[UpscanConnector][getUploadStatus] Error parsing response body as UploadStatus")
+                logError("[UpscanConnector][getUploadStatus] Error parsing response body as UploadStatus")
                 Left(JsonValidationError)
             }
           case NOT_FOUND =>
-            logWarn(s"[UpscanConnector][getUploadStatus] No record found for uploadId ${uploadId.value}")
+            logError(s"[UpscanConnector][getUploadStatus] No record found for uploadId ${uploadId.value}")
             Right(None)
           case _         =>
-            logWarn(s"[UpscanConnector][getUploadStatus] Unexpected response with status ${response.status}")
+            logError(s"[UpscanConnector][getUploadStatus] Unexpected response with status ${response.status}")
             Left(InternalServerError)
         }
       }

@@ -41,7 +41,9 @@ class JourneyRecoveryController @Inject() (
         case Right(safeUrl) =>
           Some(safeUrl.url)
         case Left(message)  =>
-          logInfo(message)
+          logWarn(
+            s"[JourneyRecoveryController][onPageLoad] Unable to retrieve safe url with following message: $message"
+          )
           None
       }
     }
