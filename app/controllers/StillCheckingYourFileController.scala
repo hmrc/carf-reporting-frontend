@@ -75,7 +75,7 @@ class StillCheckingYourFileController @Inject() (
                 case FileStatus.VirusFound             =>
                   Redirect(controllers.problem.routes.VirusFoundController.onPageLoad(uploadId.value))
                 case FileStatus.UnprocessableErrorFile =>
-                  Redirect(controllers.problem.routes.FileNotAcceptedController.onPageLoad().url)
+                  Redirect(controllers.problem.routes.FileNotAcceptedController.onPageLoad(uploadId.value))
                 case FileStatus.UnexpectedError        =>
                   Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
               }

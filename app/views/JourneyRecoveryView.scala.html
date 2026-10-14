@@ -20,16 +20,16 @@
 
 @(aeoiEmailAddress: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("journeyRecovery.continue.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("journeyRecovery.title")), showBackLink = false) {
 
-    <h1 class="govuk-heading-l">@messages("journeyRecovery.continue.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("journeyRecovery.heading")</h1>
 
-    <p class="govuk-body">@messages("journeyRecovery.continue.guidance")</p>
+    <p class="govuk-body">@messages("journeyRecovery.guidance")</p>
 
     <p class="govuk-body">
-        @messages("journeyRecovery.continue.p2.part1")
+        @messages("journeyRecovery.p2.part1")
         <a href="mailto:@aeoiEmailAddress" class="govuk-link">@aeoiEmailAddress</a>
-        @messages("journeyRecovery.continue.p2.part3")
+        @messages("journeyRecovery.p2.part3")
     </p>
 
 }

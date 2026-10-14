@@ -90,7 +90,7 @@ class FileStatusSpec extends SpecBase {
 
         content must include(
           controllers.problem.routes.FileNotAcceptedController
-            .onPageLoad()
+            .onPageLoad(uploadId)
             .url
         )
         content must include(messages("detailsOfSentFiles.nextStep.contactUs"))

@@ -17,23 +17,43 @@
 package controllers.problem
 
 import config.FrontendAppConfig
-import controllers.actions.IdentifierAction
-import play.api.i18n.I18nSupport
+import connectors.SubmissionDetailsConnector
+import controllers.actions.*
+import models.fileSubmission.FileStatus.UnprocessableErrorFile
+import models.upscan.UploadId
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.LoggerUtil.*
 import views.html.problem.FileNotAcceptedView
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class FileNotAcceptedController @Inject() (
-    val controllerComponents: MessagesControllerComponents,
+    override val messagesApi: MessagesApi,
     identify: IdentifierAction,
     frontendAppConfig: FrontendAppConfig,
+    submissionDetailsConnector: SubmissionDetailsConnector,
+    val controllerComponents: MessagesControllerComponents,
     view: FileNotAcceptedView
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
-    Ok(view(frontendAppConfig.aeoiEmailAddress))
+  def onPageLoad(uploadId: String): Action[AnyContent] = identify.async { implicit request =>
+    submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId)).value.map {
+      case Right(submissionDetails) =>
+        submissionDetails.fileStatus match {
+          case UnprocessableErrorFile =>
+            Ok(view(frontendAppConfig.aeoiEmailAddress))
+          case otherStatus            =>
+            logWarn(s"[FileNotAcceptedController][onPageLoad] File status was: $otherStatus")
+            Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+        }
+      case Left(error)              =>
+        logWarn(s"[FileNotAcceptedController][onPageLoad] Error retrieving file status: $error")
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 }

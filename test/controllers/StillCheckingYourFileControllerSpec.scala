@@ -247,7 +247,7 @@ class StillCheckingYourFileControllerSpec extends SpecBase {
 
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.problem.routes.FileNotAcceptedController
-          .onPageLoad()
+          .onPageLoad(testUploadId.value)
           .url
 
         verify(mockSubmissionDetailsConnector, times(1))
