@@ -52,7 +52,7 @@
         )),
         rows = submissions.map { submission =>
             Seq(
-                TableRow(content = Text(submission.rcaspName), classes = "govuk-table__header long-word"),
+                TableRow(content = Text(submission.rcaspName), classes = "govuk-table__header results-name"),
                 TableRow(content = Text(submission.messageRefId), classes = "govuk-table__cell long-word-break-all"),
                 TableRow(content = Text(submission.formattedSubmissionTime)),
                 TableRow(content = HtmlContent(govukTag(submission.resultTag))),
