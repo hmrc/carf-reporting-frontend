@@ -56,7 +56,8 @@ class DataErrorsController @Inject() (
 
         case (xmlErrors, _) =>
           logWarn(
-            s"Unable to retrieve data errors or file name for data-errors page. Errors length: ${xmlErrors.map(_.length)}"
+            s"[DataErrorsController][onPageLoad] Unable to retrieve data errors or file name for data-errors page. Errors length: ${xmlErrors
+                .map(_.length)}"
           )
           Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
       }

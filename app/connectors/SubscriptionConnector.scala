@@ -37,7 +37,7 @@ class SubscriptionConnector @Inject() (val config: FrontendAppConfig, val http: 
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[DisplaySubscriptionResponse] = {
     val baseUrl = url"${config.carfAccountBaseUrl}/carf-account/subscription/display/$carfId"
 
-    logDebug(s"[SubscriptionConnector][displaySubscription] Displaying subscription for carfId: $carfId")
+    logInfo(s"[SubscriptionConnector][displaySubscription] Displaying subscription for carfId: $carfId")
 
     ResultT.fromFuture(
       http
@@ -49,18 +49,18 @@ class SubscriptionConnector @Inject() (val config: FrontendAppConfig, val http: 
               Try(httpResponse.json.as[DisplaySubscriptionResponse]) match {
                 case Success(data)      => Right(data)
                 case Failure(exception) =>
-                  logWarn(
+                  logError(
                     s"[SubscriptionConnector][displaySubscription] Error parsing DisplaySubscriptionResponse with endpoint: ${baseUrl.toURI}"
                   )
                   Left(JsonValidationError)
               }
             case NOT_FOUND =>
-              logWarn(
+              logError(
                 s"[SubscriptionConnector][displaySubscription] No match could be found for carfId $carfId. Status code: ${httpResponse.status}, from endpoint: ${baseUrl.toURI}"
               )
               Left(NotFoundError)
             case _         =>
-              logWarn(
+              logError(
                 s"[SubscriptionConnector][displaySubscription] Unexpected response. Status code: ${httpResponse.status}, from endpoint: ${baseUrl.toURI}"
               )
               Left(InternalServerError)

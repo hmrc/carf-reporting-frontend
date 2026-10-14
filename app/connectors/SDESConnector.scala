@@ -26,7 +26,7 @@ import types.ResultT
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
-import utils.LoggerUtil.{logDebug, logWarn}
+import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -39,7 +39,7 @@ class SDESConnector @Inject() (val config: FrontendAppConfig, val http: HttpClie
 
     val baseUrl = url"${config.carfReportingBaseUrl}/submit"
 
-    logDebug(
+    logInfo(
       s"[SDESConnector][sendSubmission] Sending submission uploadId/correlationId: " +
         s"${submissionRequest.uploadId.value}"
     )
@@ -53,7 +53,7 @@ class SDESConnector @Inject() (val config: FrontendAppConfig, val http: HttpClie
           httpResponse.status match {
             case NO_CONTENT => Right(())
             case _          =>
-              logWarn(
+              logError(
                 s"[SDESConnector][sendSubmission] Unexpected response. Status code: ${httpResponse.status}, from endpoint: ${baseUrl.toURI}"
               )
               Left(InternalServerError)

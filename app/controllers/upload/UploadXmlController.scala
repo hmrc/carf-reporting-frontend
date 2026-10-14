@@ -81,7 +81,9 @@ class UploadXmlController @Inject() (
             case None                        => form.withError("file-upload", "uploadXml.error.file.select")
           }
         case _                                   =>
-          logWarn(s"Upscan error $errorCode: $errorMessage, requestId is $errorRequestId")
+          logWarn(
+            s"[UploadXmlController][showError] Upscan error $errorCode: $errorMessage, requestId is $errorRequestId"
+          )
           form.withError("file-upload", "uploadXml.error.file.content.unknown")
       }
       initialUpscanCall(formWithErrors)
@@ -104,11 +106,11 @@ class UploadXmlController @Inject() (
               _                   <- sessionRepository.set(updatedAnswers)
             } yield Ok(view(preparedForm, upscanInitiateResponse))
           case Left(error) =>
-            logError(s"[UploadXmlController][initialUpscanCall] Error setting initial upload status: $error")
+            logWarn(s"[UploadXmlController][initialUpscanCall] Error setting initial upload status: $error")
             Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
       case Left(error)                   =>
-        logError(s"[UploadXmlController][initialUpscanCall] Error getting UpscanInitiateResponse: $error")
+        logWarn(s"[UploadXmlController][initialUpscanCall] Error getting UpscanInitiateResponse: $error")
         Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
     }
   }
@@ -165,13 +167,13 @@ class UploadXmlController @Inject() (
                   Redirect(controllers.upload.routes.UploadXmlController.getUploadStatusAndRedirect(uploadId).url)
                 )
               case None                                             =>
-                logError(
+                logWarn(
                   s"[UploadXmlController][getUploadStatusAndRedirect] Unable to retrieve a record with uploadId ${uploadId.value}"
                 )
                 errorRedirect("UploadFailed", "", "")
             }
           case Left(error)              =>
-            logError(s"[UploadXmlController][getUploadStatusAndRedirect] Error getting upload status: $error")
+            logWarn(s"[UploadXmlController][getUploadStatusAndRedirect] Error getting upload status: $error")
             Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
       }

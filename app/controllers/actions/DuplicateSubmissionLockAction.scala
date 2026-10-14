@@ -20,7 +20,7 @@ import controllers.routes
 import models.requests.OptionalDataRequest
 import pages.DuplicateSubmissionLockPage
 import play.api.mvc.{ActionFilter, Result, Results}
-import utils.LoggerUtil.logInfo
+import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +37,7 @@ class DuplicateSubmissionLockAction @Inject() (implicit val ec: ExecutionContext
     if (submitted) {
 
       logInfo(
-        s"[DuplicateSubmissionLockAction] Blocking request after send your file confirmation. path=${request.uri}"
+        s"[DuplicateSubmissionLockAction][filter] Blocking request after send your file confirmation. path=${request.uri}"
       )
 
       Future.successful(
