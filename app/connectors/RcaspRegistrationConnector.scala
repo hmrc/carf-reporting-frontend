@@ -56,7 +56,7 @@ class RcaspRegistrationConnector @Inject() (config: FrontendAppConfig, http: Htt
                   Left(JsonValidationError)
               }
             case NOT_FOUND =>
-              logError(s"[RcaspRegistrationConnector][viewRcasps] No RCASPs found for carfId: $carfId")
+              logInfo(s"[RcaspRegistrationConnector][viewRcasps] No RCASPs found for carfId: $carfId")
               Right(List.empty)
             case status    =>
               logError(

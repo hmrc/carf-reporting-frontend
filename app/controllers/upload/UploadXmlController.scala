@@ -106,11 +106,11 @@ class UploadXmlController @Inject() (
               _                   <- sessionRepository.set(updatedAnswers)
             } yield Ok(view(preparedForm, upscanInitiateResponse))
           case Left(error) =>
-            logError(s"[UploadXmlController][initialUpscanCall] Error setting initial upload status: $error")
+            logWarn(s"[UploadXmlController][initialUpscanCall] Error setting initial upload status: $error")
             Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
       case Left(error)                   =>
-        logError(s"[UploadXmlController][initialUpscanCall] Error getting UpscanInitiateResponse: $error")
+        logWarn(s"[UploadXmlController][initialUpscanCall] Error getting UpscanInitiateResponse: $error")
         Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
     }
   }
@@ -167,7 +167,7 @@ class UploadXmlController @Inject() (
                   Redirect(controllers.upload.routes.UploadXmlController.getUploadStatusAndRedirect(uploadId).url)
                 )
               case None                                             =>
-                logError(
+                logWarn(
                   s"[UploadXmlController][getUploadStatusAndRedirect] Unable to retrieve a record with uploadId ${uploadId.value}"
                 )
                 errorRedirect("UploadFailed", "", "")
