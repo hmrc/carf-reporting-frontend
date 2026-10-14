@@ -173,7 +173,7 @@ class UploadXmlController @Inject() (
                 errorRedirect("UploadFailed", "", "")
             }
           case Left(error)              =>
-            logError(s"[UploadXmlController][getUploadStatusAndRedirect] Error getting upload status: $error")
+            logWarn(s"[UploadXmlController][getUploadStatusAndRedirect] Error getting upload status: $error")
             Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
       }
