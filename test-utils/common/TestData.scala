@@ -22,7 +22,7 @@ import models.DocTypeIndic.*
 import models.MessageTypeIndic.*
 import models.errors.{BusinessRuleValidationErrors, FileError, RecordError, XmlError}
 import models.fileSubmission.FileStatus.Passed
-import models.fileSubmission.{FileStatus, SubmissionDetails}
+import models.fileSubmission.{DetailsOfFilesSent, FileStatus, SubmissionDetails, SubmissionHistoryPassed}
 import models.requests.sdes.{FileName, SubmissionRequest}
 import models.responses.*
 import models.upscan.*
@@ -31,6 +31,7 @@ import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryList, SummaryListRow}
 import viewmodels.govuk.all.{ActionItemViewModel, FluentActionItem, SummaryListRowViewModel, ValueViewModel}
 
+import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, LocalDateTime, ZoneId}
 
 trait TestData extends Generators {
@@ -326,15 +327,6 @@ trait TestData extends Generators {
       submissionTime = Instant.now(clock).minusSeconds(5)
     )
 
-  val submissionDetailsList: Seq[SubmissionDetails] = Seq(
-    submissionDetailsPending,
-    submissionDetailsFailed,
-    orgSubmissionDetailsPassed,
-    submissionDetailsUnprocessableErrorFile,
-    submissionDetailsUnexpectedError,
-    submissionDetailsVirus
-  )
-
   val submissionDetailsListSortedBySubmissionTime: Seq[SubmissionDetails] = Seq(
     orgSubmissionDetailsPassed,
     submissionDetailsFailed,
@@ -374,4 +366,31 @@ trait TestData extends Generators {
     testFileSize,
     testChecksum
   )
+
+  val submissionHistoryPassed: SubmissionHistoryPassed =
+    SubmissionHistoryPassed(
+      messageRefId = "MSG-2024-0001",
+      rcaspName = "Nemona Champion",
+      submissionTime = Instant.now(clock).minus(30, ChronoUnit.DAYS)
+    )
+
+  def submissionHistoryPassedList(numRecords: Int): Seq[SubmissionHistoryPassed] =
+    (1 to numRecords).map(_ + 28).map { daysAgo =>
+      SubmissionHistoryPassed(
+        messageRefId = s"MSG-2024-00$daysAgo",
+        rcaspName = "Other RCASP Ltd",
+        submissionTime = Instant.now(clock).minus(daysAgo, ChronoUnit.DAYS)
+      )
+    }
+
+  val detailsOfFilesSent: DetailsOfFilesSent =
+    DetailsOfFilesSent(
+      submissionDetailsListSortedBySubmissionTime :+ submissionHistoryPassed,
+      totalPages = 1
+    )
+
+  val detailsOfFilesSentNoRecords: DetailsOfFilesSent = DetailsOfFilesSent(Seq.empty, totalPages = 0)
+
+  val detailsOfFilesSentMultiplePages: DetailsOfFilesSent =
+    DetailsOfFilesSent(submissionHistoryPassedList(50), totalPages = 3)
 }

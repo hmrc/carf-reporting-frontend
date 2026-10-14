@@ -26,5 +26,11 @@ object Constants {
 
   inline final val ukTimeZoneStringId = "Europe/London"
 
-  inline val tempUploadIdStub = "123456"
+  object Pagination {
+    val firstPageNumber                   = 1
+    val singlePage                        = 1
+    val showPreviousEllipsesPageThreshold = 3
+    val showPreviousItemPageThreshold     = 2
+    val showNextEllipsesGapFromLastPage   = 2
+  }
 }
