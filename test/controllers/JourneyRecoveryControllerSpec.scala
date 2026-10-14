@@ -23,7 +23,6 @@ import org.mockito.Mockito.{reset, when}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import views.html.JourneyRecoveryView
 
 class JourneyRecoveryControllerSpec extends SpecBase {
@@ -39,50 +38,23 @@ class JourneyRecoveryControllerSpec extends SpecBase {
 
   "JourneyRecovery Controller" - {
 
-    "when no continue Url is supplied" - {
+    "must return OK and the journey recovery view" in {
+      when(mockAppConfig.aeoiEmailAddress) thenReturn testEmailAddress
+      when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
-      "must return OK and the journey recovery view" in {
-        when(mockAppConfig.aeoiEmailAddress) thenReturn testEmailAddress
-        when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
+        .build()
 
-        val application = applicationBuilder(userAnswers = None)
-          .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
-          .build()
+      running(application) {
+        val request = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad().url)
 
-        running(application) {
-          val request = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad().url)
+        val result = route(application, request).value
 
-          val result = route(application, request).value
+        val view = application.injector.instanceOf[JourneyRecoveryView]
 
-          val view = application.injector.instanceOf[JourneyRecoveryView]
-
-          status(result)          mustEqual OK
-          contentAsString(result) mustEqual view(testEmailAddress)(request, messages(application)).toString
-        }
-      }
-    }
-
-    "when a continue Url is supplied" - {
-
-      "must return OK and the journey recovery view, ignoring the continue Url" in {
-        when(mockAppConfig.aeoiEmailAddress) thenReturn testEmailAddress
-        when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
-
-        val application = applicationBuilder(userAnswers = None)
-          .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
-          .build()
-
-        running(application) {
-          val continueUrl = RedirectUrl("/foo")
-          val request     = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad(Some(continueUrl)).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[JourneyRecoveryView]
-
-          status(result)          mustEqual OK
-          contentAsString(result) mustEqual view(testEmailAddress)(request, messages(application)).toString
-        }
+        status(result)          mustEqual OK
+        contentAsString(result) mustEqual view(testEmailAddress)(request, messages(application)).toString
       }
     }
   }

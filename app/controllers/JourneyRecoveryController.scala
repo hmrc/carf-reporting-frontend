@@ -20,7 +20,6 @@ import config.FrontendAppConfig
 import controllers.actions.IdentifierAction
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.JourneyRecoveryView
 
@@ -34,7 +33,7 @@ class JourneyRecoveryController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(continueUrl: Option[RedirectUrl] = None): Action[AnyContent] = identify { implicit request =>
+  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
     Ok(view(frontendAppConfig.aeoiEmailAddress))
   }
 }

@@ -91,6 +91,9 @@ class FileNotAcceptedControllerSpec extends SpecBase {
 
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         }
       }
 
@@ -111,6 +114,9 @@ class FileNotAcceptedControllerSpec extends SpecBase {
 
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+
+          verify(mockSubmissionDetailsConnector, times(1))
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
         }
       }
     }
