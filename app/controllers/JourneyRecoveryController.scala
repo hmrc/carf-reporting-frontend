@@ -16,40 +16,24 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.IdentifierAction
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.binders.*
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.*
-import views.html.{JourneyRecoveryContinueView, JourneyRecoveryStartAgainView}
+import views.html.JourneyRecoveryView
 
 import javax.inject.Inject
 
 class JourneyRecoveryController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     identify: IdentifierAction,
-    continueView: JourneyRecoveryContinueView,
-    startAgainView: JourneyRecoveryStartAgainView
+    frontendAppConfig: FrontendAppConfig,
+    view: JourneyRecoveryView
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(continueUrl: Option[RedirectUrl] = None): Action[AnyContent] = identify { implicit request =>
-    val safeUrl: Option[String] = continueUrl.flatMap { unsafeUrl =>
-      unsafeUrl.getEither(OnlyRelative) match {
-        case Right(safeUrl) =>
-          Some(safeUrl.url)
-        case Left(message)  =>
-          logWarn(
-            s"[JourneyRecoveryController][onPageLoad] Unable to retrieve safe url with following message: $message"
-          )
-          None
-      }
-    }
-
-    safeUrl
-      .map(url => Ok(continueView(url)))
-      .getOrElse(Ok(startAgainView()))
+  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
+    Ok(view(frontendAppConfig.aeoiEmailAddress))
   }
 }

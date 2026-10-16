@@ -15,22 +15,23 @@
  *@
 
 @this(
-        layout: templates.Layout,
-        govukButton: GovukButton
+        layout: templates.Layout
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(aeoiEmailAddress: String)(implicit request: RequestHeader, messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("journeyRecovery.startAgain.title"))) {
+@layout(pageTitle = titleNoForm(messages("pageNotFound.title"))) {
 
-    <h1 class="govuk-heading-l">@messages("journeyRecovery.startAgain.heading")</h1>
+ <h1 class="govuk-heading-l">@messages("pageNotFound.heading")</h1>
 
-    <p class="govuk-body">@messages("journeyRecovery.startAgain.guidance")</p>
+ <p class="govuk-body">@messages("pageNotFound.p1")</p>
 
-    <p class="govuk-body">
-    @govukButton(
-        ButtonViewModel(messages("site.startAgain"))
-        .asLink(controllers.upload.routes.UploadXmlController.onPageLoad().url)
-    )
-    </p>
+ <p class="govuk-body">@messages("pageNotFound.p2")</p>
+
+ <p class="govuk-body">
+  @messages("pageNotFound.p3.part1")
+  <a href="mailto:@aeoiEmailAddress" class="govuk-link">@aeoiEmailAddress</a>
+  @messages("pageNotFound.p3.part3")
+ </p>
+
 }

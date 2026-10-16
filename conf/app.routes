@@ -6,7 +6,7 @@ GET         /assets/*file                               controllers.Assets.versi
 
 GET         /refresh-session                            controllers.KeepAliveController.keepAlive()
 
-GET         /there-is-a-problem                         controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /problem/there-is-a-problem                 controllers.JourneyRecoveryController.onPageLoad()
 
 GET         /placeholder                                controllers.PlaceholderController.onPageLoad(message: String)
 
@@ -14,7 +14,8 @@ GET         /account/sign-out-survey                    controllers.auth.AuthCon
 GET         /account/sign-out                           controllers.auth.AuthController.signOutNoSurvey()
 GET         /problem/signed-out                         controllers.auth.SignedOutController.onPageLoad()
 
-GET         /unauthorised                               controllers.UnauthorisedController.onPageLoad()
+GET         /problem/unauthorised                       controllers.UnauthorisedController.onPageLoad()
+GET         /problem/page-unavailable                   controllers.problem.PageUnavailableController.onPageLoad()
 
 GET         /upload-file                                controllers.upload.UploadXmlController.onPageLoad()
 GET         /status                                     controllers.upload.UploadXmlController.getUploadStatusAndRedirect(uploadId: upscan.UploadId)
@@ -45,6 +46,8 @@ GET         /file-failed-checks                         controllers.FileFailedCh
 GET         /problem/virus-found/:uploadId              controllers.problem.VirusFoundController.onPageLoad(uploadId: String)
 
 GET         /problem/rules-errors/:uploadId             controllers.problem.RulesErrorsController.onPageLoad(uploadId: String)
+
+GET         /problem/file-not-accepted/:uploadId        controllers.problem.FileNotAcceptedController.onPageLoad(uploadId: String)
 
 GET         /file-confirmation/:uploadId                controllers.FileConfirmationController.onPageLoad(uploadId: String)
 

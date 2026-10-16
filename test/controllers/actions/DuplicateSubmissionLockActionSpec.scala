@@ -17,7 +17,6 @@
 package controllers.actions
 
 import base.SpecBase
-import controllers.routes
 import models.UserAnswers
 import models.requests.OptionalDataRequest
 import pages.DuplicateSubmissionLockPage
@@ -85,8 +84,8 @@ class DuplicateSubmissionLockActionSpec extends SpecBase {
         val redirectResult = Future.successful(result.get)
 
         status(redirectResult)                 mustEqual SEE_OTHER
-        redirectLocation(redirectResult).value mustEqual routes.PlaceholderController
-          .onPageLoad("Should nav to /problem/page-unavailable (CARF-537)")
+        redirectLocation(redirectResult).value mustEqual controllers.problem.routes.PageUnavailableController
+          .onPageLoad()
           .url
       }
     }

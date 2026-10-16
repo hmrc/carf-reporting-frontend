@@ -16,7 +16,6 @@
 
 package controllers.actions
 
-import controllers.routes
 import models.requests.OptionalDataRequest
 import pages.UploadCompletionLockPage
 import play.api.mvc.{ActionFilter, Result, Results}
@@ -43,7 +42,7 @@ class UploadCompletionLockAction @Inject() (implicit val ec: ExecutionContext)
       Future.successful(
         Some(
           Results.Redirect(
-            routes.PlaceholderController.onPageLoad("Should nav to /problem/page-unavailable (CARF-537)")
+            controllers.problem.routes.PageUnavailableController.onPageLoad()
           )
         )
       )

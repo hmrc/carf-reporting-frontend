@@ -132,13 +132,8 @@ class SendYourFileController @Inject() (
                   Ok(Json.toJson(URL(controllers.problem.routes.VirusFoundController.onPageLoad(uploadId.value).url)))
                 case FileStatus.UnprocessableErrorFile =>
                   Ok(
-                    Json.toJson(
-                      URL(
-                        controllers.routes.PlaceholderController
-                          .onPageLoad("Should redirect to /problem/file-not-accepted (ticket TBC)")
-                          .url
-                      )
-                    )
+                    Json
+                      .toJson(URL(controllers.problem.routes.FileNotAcceptedController.onPageLoad(uploadId.value).url))
                   )
                 case FileStatus.UnexpectedError        =>
                   Ok(Json.toJson(URL(controllers.routes.JourneyRecoveryController.onPageLoad().url)))

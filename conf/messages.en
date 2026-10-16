@@ -24,7 +24,7 @@ date.error.month = month
 date.error.year = year
 
 timeout.title = You’re about to be signed out
-timeout.message = For security reasons, you will be signed out of this service in
+timeout.message = For your security, we will sign you out in
 timeout.keepAlive = Stay signed in
 timeout.signOut = Sign out
 
@@ -32,19 +32,21 @@ error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem
 
-journeyRecovery.continue.title = Sorry, there is a problem with the service
-journeyRecovery.continue.heading = Sorry, there is a problem with the service
-journeyRecovery.continue.guidance = [Add content to explain how to proceed.]
-journeyRecovery.startAgain.title = Sorry, there is a problem with the service
-journeyRecovery.startAgain.heading = Sorry, there is a problem with the service
-journeyRecovery.startAgain.guidance = [Add content to explain why the user needs to start again.]
+journeyRecovery.title = Sorry, there is a problem with the service
+journeyRecovery.heading = Sorry, there is a problem with the service
+journeyRecovery.guidance = Try again later. If you have sent a file, you can view results of checks in the service later.
+journeyRecovery.p2.part1 = You can email
+journeyRecovery.p2.part3 = if you need to contact someone about your cryptoasset reporting.
 
 signedOut.title = For your security, we signed you out
 signedOut.heading = For your security, we signed you out
-signedOut.guidance = We did not save your answers.
+signedOut.guidance = If you have sent a file, you can view results of checks by signing back in to the service.
 
-unauthorised.title = You can’t access this service with this account
-unauthorised.heading = You can’t access this service with this account
+unauthorised.title = You cannot access this page
+unauthorised.heading = You cannot access this page
+unauthorised.p1.part1 = You can email
+unauthorised.p1.part3 = if you need support with using the service.
+unauthorised.link = Refer to the cryptoasset reporting guidance
 
 uploadXml.title = Upload an XML file
 uploadXml.heading = Upload an XML file
@@ -209,6 +211,7 @@ fileConfirmation.2.email.sent = We have sent a confirmation email to {0} and {1}
 fileConfirmation.heading.next = What happens next
 fileConfirmation.p1.next = We will contact you if we have any questions about your report.
 
+
 fileConfirmation.heading.before = Before you go
 fileConfirmation.text.before = Your feedback helps us make our service better.
 fileConfirmation.feedback.link = Take a short survey
@@ -229,6 +232,22 @@ detailsOfSentFiles.table.head.messageRefId = MessageRefId
 detailsOfSentFiles.table.head.sent = Sent
 detailsOfSentFiles.table.head.result = Result
 detailsOfSentFiles.table.head.nextStep = Next step
+
+pageNotFound.title = Page not found
+pageNotFound.heading = Page not found
+pageNotFound.p1 = If you typed the web address, check it is correct.
+pageNotFound.p2 = If you pasted the web address, check you copied the entire address.
+pageNotFound.p3.part1 = You can email
+pageNotFound.p3.part3 = if you have any questions about this service.
+
+pageUnavailable.title = This page is no longer available
+pageUnavailable.heading = This page is no longer available
+
+fileNotAccepted.title = Sorry, there is a problem with the service
+fileNotAccepted.heading = Sorry, there is a problem with the service
+fileNotAccepted.p1 = We have not accepted your file.
+fileNotAccepted.p2.part1 = You must email
+fileNotAccepted.p2.part3 = so we can resolve the problem. Include the subject line ‘CARF file not accepted’.
 
 detailsOfSentFiles.nextStep.confirmation = Go to confirmation
 detailsOfSentFiles.nextStep.confirmationNotAvailable = Confirmation not available

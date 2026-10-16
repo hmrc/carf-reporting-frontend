@@ -17,74 +17,44 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, when}
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
-import views.html.{JourneyRecoveryContinueView, JourneyRecoveryStartAgainView}
+import views.html.JourneyRecoveryView
 
 class JourneyRecoveryControllerSpec extends SpecBase {
 
+  val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
+
+  val testEmailAddress: String = "aeoi.enquiries@hmrc.gov.uk"
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockAppConfig)
+  }
+
   "JourneyRecovery Controller" - {
 
-    "when a relative continue Url is supplied" - {
+    "must return OK and the journey recovery view" in {
+      when(mockAppConfig.aeoiEmailAddress) thenReturn testEmailAddress
+      when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
 
-      "must return OK and the continue view" in {
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
+        .build()
 
-        val application = applicationBuilder(userAnswers = None).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad().url)
 
-        running(application) {
-          val continueUrl = RedirectUrl("/foo")
-          val request     = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad(Some(continueUrl)).url)
+        val result = route(application, request).value
 
-          val result = route(application, request).value
+        val view = application.injector.instanceOf[JourneyRecoveryView]
 
-          val continueView = application.injector.instanceOf[JourneyRecoveryContinueView]
-
-          status(result)          mustEqual OK
-          contentAsString(result) mustEqual continueView(continueUrl.unsafeValue)(
-            request,
-            messages(application)
-          ).toString
-        }
-      }
-    }
-
-    "when an absolute continue Url is supplied" - {
-
-      "must return OK and the start again view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val continueUrl = RedirectUrl("https://foo.com")
-          val request     = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad(Some(continueUrl)).url)
-
-          val result = route(application, request).value
-
-          val startAgainView = application.injector.instanceOf[JourneyRecoveryStartAgainView]
-
-          status(result)          mustEqual OK
-          contentAsString(result) mustEqual startAgainView()(request, messages(application)).toString
-        }
-      }
-    }
-
-    "when no continue Url is supplied" - {
-
-      "must return OK and the start again view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad().url)
-
-          val result = route(application, request).value
-
-          val startAgainView = application.injector.instanceOf[JourneyRecoveryStartAgainView]
-
-          status(result)          mustEqual OK
-          contentAsString(result) mustEqual startAgainView()(request, messages(application)).toString
-        }
+        status(result)          mustEqual OK
+        contentAsString(result) mustEqual view(testEmailAddress)(request, messages(application)).toString
       }
     }
   }
