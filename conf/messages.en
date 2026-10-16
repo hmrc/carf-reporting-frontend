@@ -32,12 +32,6 @@ error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem
 
-journeyRecovery.continue.title = Sorry, there is a problem with the service
-journeyRecovery.continue.heading = Sorry, there is a problem with the service
-journeyRecovery.continue.guidance = Try again later. If you have sent a file, you can view results of checks in the service later.
-journeyRecovery.continue.p2.part1 = You can email
-journeyRecovery.continue.p2.part3 = if you need to contact someone about your cryptoasset reporting.
-
 journeyRecovery.title = Sorry, there is a problem with the service
 journeyRecovery.heading = Sorry, there is a problem with the service
 journeyRecovery.guidance = Try again later. If you have sent a file, you can view results of checks in the service later.
