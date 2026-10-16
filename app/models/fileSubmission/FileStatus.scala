@@ -84,7 +84,7 @@ object FileStatus {
       case UnprocessableErrorFile =>
         HtmlContent(
           Link()(
-            href = controllers.problem.routes.FileNotAcceptedController.onPageLoad().url,
+            href = controllers.problem.routes.FileNotAcceptedController.onPageLoad(uploadId).url,
             key = "detailsOfSentFiles.nextStep.contactUs"
           )
         )
