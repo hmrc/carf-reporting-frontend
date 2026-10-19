@@ -105,8 +105,8 @@ class FileConfirmationControllerSpec extends SpecBase {
         val orgFileDetailsOneEmail =
           orgSubmissionDetailsPassed.copy(
             subscriptionDetails = displaySubscriptionDetailsOrg.copy(secondaryContact = None),
-            extractedFileDetails =
-              extractedFileDetailsTestData.copy(hasOtherNexus = true, hasCryptoUsers = false, isTestData = false)
+            extractedFileDetails = extractedFileDetailsTestData
+              .copy(rcaspName = None, hasOtherNexus = true, hasCryptoUsers = false, isTestData = false)
           )
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
@@ -134,6 +134,8 @@ class FileConfirmationControllerSpec extends SpecBase {
           val expectedEmailHtml =
             s"We have sent a confirmation email to ${displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails.head}."
 
+          val defaultRcaspName = "the RCASP"
+
           status(result)          mustEqual OK
           contentAsString(result)      must include(expectedEmailHtml)
           contentAsString(result) mustEqual view(
@@ -142,14 +144,17 @@ class FileConfirmationControllerSpec extends SpecBase {
             managementUrl,
             expectedEmailHtml,
             true,
-            testRcaspName
+            defaultRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
             .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
           verify(mockFileConfirmationHelper, times(1))
             .rows(
-              eqTo(extractedFileDetailsTestData.copy(hasOtherNexus = true, hasCryptoUsers = false, isTestData = false)),
+              eqTo(
+                extractedFileDetailsTestData
+                  .copy(rcaspName = None, hasOtherNexus = true, hasCryptoUsers = false, isTestData = false)
+              ),
               eqTo(testRcaspName)
             )(any())
           verify(mockSessionRepository, times(1)).set(argThat(_.get(UploadCompletionLockPage).contains(true)))
