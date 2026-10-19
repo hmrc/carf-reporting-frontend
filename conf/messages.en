@@ -215,6 +215,7 @@ fileConfirmation.overseas.heading = Reporting in another country
 fileConfirmation.overseas.p1 = You have told us that {0} is electing to report in another country outside the UK.
 fileConfirmation.overseas.p2 = You do not need to tell us again in future years. We will assume this remains true unless you send a full report for {0}.
 fileConfirmation.overseas.p3 = You will still need to send a report of their UK-resident cryptoasset users.
+fileConfirmation.overseas.defaultRcaspName = the RCASP
 
 fileConfirmation.heading.before = Before you go
 fileConfirmation.text.before = Your feedback helps us make our service better.

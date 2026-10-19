@@ -103,8 +103,10 @@ class FileConfirmationControllerSpec extends SpecBase {
 
       "must return OK and the correct view when user answers are complete 1 email" in {
         val orgFileDetailsOneEmail =
-          orgSubmissionDetailsPassed.copy(subscriptionDetails =
-            displaySubscriptionDetailsOrg.copy(secondaryContact = None)
+          orgSubmissionDetailsPassed.copy(
+            subscriptionDetails = displaySubscriptionDetailsOrg.copy(secondaryContact = None),
+            extractedFileDetails =
+              extractedFileDetailsTestData.copy(hasOtherNexus = true, hasCryptoUsers = false, isTestData = false)
           )
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
@@ -139,14 +141,17 @@ class FileConfirmationControllerSpec extends SpecBase {
             formattedDateTime,
             managementUrl,
             expectedEmailHtml,
-            false,
+            true,
             testRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
             .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
           verify(mockFileConfirmationHelper, times(1))
-            .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
+            .rows(
+              eqTo(extractedFileDetailsTestData.copy(hasOtherNexus = true, hasCryptoUsers = false, isTestData = false)),
+              eqTo(testRcaspName)
+            )(any())
           verify(mockSessionRepository, times(1)).set(argThat(_.get(UploadCompletionLockPage).contains(true)))
         }
       }
