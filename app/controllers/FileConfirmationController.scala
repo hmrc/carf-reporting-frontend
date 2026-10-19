@@ -81,17 +81,16 @@ class FileConfirmationController @Inject (
   )(implicit request: Request[_], messages: Messages): Result = {
     val userEmailAddresses = submissionDetails.subscriptionDetails.getEmailsFromSubscriptionDetails
     val rcaspDetails       = submissionDetails.rcaspDetails
-    val rcaspName          = submissionDetails.extractedFileDetails.rcaspName match {
-      case Some(name) => name
-      case None       =>
+    val isOverseas         = submissionDetails.extractedFileDetails.getReportType == NotificationOfReportingOutsideUk
+    val rcaspName          = submissionDetails.extractedFileDetails.rcaspName.getOrElse {
+      if (isOverseas) {
         logWarn(
           "[FileConfirmationController][onPageLoad] Failed to retrieve RCASP name from file, fallback default value used instead"
         )
-        messages("fileConfirmation.overseas.defaultRcaspName")
+      }
+      messages("fileConfirmation.overseas.defaultRcaspName")
     }
-
-    val isOverseas      = submissionDetails.extractedFileDetails.getReportType == NotificationOfReportingOutsideUk
-    val summaryListRows = helper.rows(submissionDetails.extractedFileDetails, rcaspDetails.getName)
+    val summaryListRows    = helper.rows(submissionDetails.extractedFileDetails, rcaspDetails.getName)
 
     val summary = SummaryListViewModel(rows = summaryListRows)
 
