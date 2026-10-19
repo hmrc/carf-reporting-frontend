@@ -18,13 +18,11 @@ package controllers
 
 import cats.syntax.all.*
 import config.FrontendAppConfig
-import connectors.SDESConnector
-import connectors.SubmissionDetailsConnector
+import connectors.{SDESConnector, SubmissionDetailsConnector}
 import controllers.actions.*
 import models.ReportType
 import models.fileSubmission.{FileStatus, URL}
 import models.requests.sdes.{FileName, SubmissionRequest}
-import models.responses.getName
 import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -60,7 +58,7 @@ class SendYourFileController @Inject() (
       (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
         .mapN { (rcaspDetails, extractedFileDetails) =>
           val maybeWarningMessage =
-            ReportType.warningMessageForReportType(extractedFileDetails.getReportType, rcaspDetails.getName)
+            ReportType.warningMessageForReportType(extractedFileDetails.getReportType)
           Ok(view(maybeWarningMessage, appConfig.spinnerMaxPollingAttempts))
         }
         .getOrElse {

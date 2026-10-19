@@ -22,7 +22,7 @@
         printLink: components.PrintLink
 )
 
-@(summaryList: SummaryList, dateFormatted: String, manageRCASPUrl: String, emailString: String)(implicit request: Request[_], messages: Messages)
+@(summaryList: SummaryList, dateFormatted: String, manageRCASPUrl: String, emailString: String, isOverseas: Boolean, rcaspName: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("fileConfirmation.title")), showBackLink = false) {
 
@@ -43,6 +43,13 @@
     <h2 class="govuk-heading-m">@messages("fileConfirmation.heading.next")</h2>
     <p class="govuk-body">@messages("fileConfirmation.p1.next")</p>
 
+    @if(isOverseas) {
+        <h2 class="govuk-heading-m">@messages("fileConfirmation.overseas.heading")</h2>
+        <p class="govuk-body">@messages("fileConfirmation.overseas.p1", rcaspName)</p>
+        <p class="govuk-body">@messages("fileConfirmation.overseas.p2", rcaspName)</p>
+        <p class="govuk-body">@messages("fileConfirmation.overseas.p3")</p>
+    }
+
     <h2 class="govuk-heading-m">@messages("fileConfirmation.heading.before")</h2>
     <p class="govuk-body">@messages("fileConfirmation.text.before")</p>
     <p class="govuk-body">
@@ -57,26 +64,26 @@
 
     <div class="govuk-!-padding-top-3 govuk-!-display-none-print">
         <ul class="govuk-list">
-        <li>
-        @printLink(
-            key = "fileConfirmation.link.text.print",
-            id = Some("print-link")
-        )
-        </li>
-        <li>
-        @link(
-            controllers.upload.routes.UploadXmlController.onPageLoad().url,
-            "fileConfirmation.link.text.upload",
-            id = Some("upload-link")
-        )
-        </li>
-        <li>
-        @link(
-            href = manageRCASPUrl,
-            key = "site.backToManagement",
-            id = Some("management-link")
-        )
-        </li>
+            <li>
+            @printLink(
+                key = "fileConfirmation.link.text.print",
+                id = Some("print-link")
+            )
+            </li>
+            <li>
+            @link(
+                controllers.upload.routes.UploadXmlController.onPageLoad().url,
+                "fileConfirmation.link.text.upload",
+                id = Some("upload-link")
+            )
+            </li>
+            <li>
+            @link(
+                href = manageRCASPUrl,
+                key = "site.backToManagement",
+                id = Some("management-link")
+            )
+            </li>
         </ul>
     </div>
 

@@ -19,6 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import connectors.SubmissionDetailsConnector
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
+import models.ReportType.NotificationOfReportingOutsideUk
 import models.fileSubmission.FileStatus.Passed
 import models.fileSubmission.SubmissionDetails
 import models.responses.{getEmails, getEmailsFromSubscriptionDetails, getName}
@@ -80,7 +81,9 @@ class FileConfirmationController @Inject (
   )(implicit request: Request[_], messages: Messages): Result = {
     val userEmailAddresses = submissionDetails.subscriptionDetails.getEmailsFromSubscriptionDetails
     val rcaspDetails       = submissionDetails.rcaspDetails
-    val summaryListRows    = helper.rows(submissionDetails.extractedFileDetails, rcaspDetails.getName)
+    val rcaspName          = rcaspDetails.getName
+    val isOverseas         = submissionDetails.extractedFileDetails.getReportType == NotificationOfReportingOutsideUk
+    val summaryListRows    = helper.rows(submissionDetails.extractedFileDetails, rcaspName)
 
     val summary = SummaryListViewModel(rows = summaryListRows)
 
@@ -90,7 +93,7 @@ class FileConfirmationController @Inject (
     val rcaspEmailAddresses = rcaspDetails.getEmails
     val emailAddressHtml    = generateEmailAddressHtml(userEmailAddresses, isRcaspUser, rcaspEmailAddresses)
 
-    Ok(view(summary, formattedDate, config.managementUrl, emailAddressHtml))
+    Ok(view(summary, formattedDate, config.managementUrl, emailAddressHtml, isOverseas, rcaspName))
   }
 
   private def generateEmailAddressHtml(

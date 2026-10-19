@@ -88,7 +88,9 @@ class FileConfirmationControllerSpec extends SpecBase {
             testSummaryList,
             formattedDateTime,
             managementUrl,
-            expectedEmailHtml
+            expectedEmailHtml,
+            false,
+            testRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
@@ -136,7 +138,9 @@ class FileConfirmationControllerSpec extends SpecBase {
             testSummaryList,
             formattedDateTime,
             managementUrl,
-            expectedEmailHtml
+            expectedEmailHtml,
+            false,
+            testRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
@@ -187,7 +191,9 @@ class FileConfirmationControllerSpec extends SpecBase {
             testSummaryList,
             formattedDateTime,
             managementUrl,
-            expectedEmailHtml
+            expectedEmailHtml,
+            false,
+            testRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
@@ -234,7 +240,9 @@ class FileConfirmationControllerSpec extends SpecBase {
             testSummaryList,
             formattedDateTime,
             managementUrl,
-            expectedEmailHtml
+            expectedEmailHtml,
+            false,
+            testRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
