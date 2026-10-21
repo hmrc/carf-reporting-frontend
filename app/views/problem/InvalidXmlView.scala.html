@@ -27,8 +27,11 @@
     <h1 class="govuk-heading-l long-word">@messages("invalidXml.heading")</h1>
 
     <p class="govuk-body">@messages("invalidXml.p1", fileName)</p>
+    <p class="govuk-body">@messages("invalidXml.p2")</p>
 
-    <p class="govuk-body govuk-!-margin-bottom-2">@messages("invalidXml.p2")</p>
+    <h2 class="govuk-heading-m">@messages("invalidXml.h2")</h2>
+
+    <p class="govuk-body govuk-!-margin-bottom-2">@messages("invalidXml.p3")</p>
     <ul class="govuk-list govuk-list--bullet">
         <li>@messages("invalidXml.bullet.1")</li>
         <li>@messages("invalidXml.bullet.2")</li>
@@ -36,28 +39,27 @@
     </ul>
 
     <p class="govuk-body">
-        @messages("invalidXml.p3")
-        <code class="code--slim">@messages("invalidXml.p3.namespaceCode")</code>.
+        @messages("invalidXml.p4")
+        <code class="code--slim">@messages("invalidXml.p4.namespaceCode")</code>.
     </p>
 
     <p class="govuk-body">
-        @messages("invalidXml.p4")
-        @link(
-            href = controllers.routes.PlaceholderController.onPageLoad("TODO: Technical guidance for XML files link CARF-595").url,
-            key = "invalidXml.p4.linkText",
-            fullStop = true
-        )
+    @link(
+        href = controllers.routes.PlaceholderController.onPageLoad("TODO: Technical guidance for XML files link CARF-595").url,
+        key = "invalidXml.p5.linkText")
     </p>
+
+    <h2 class="govuk-heading-m govuk-!-display-none-print">@messages("invalidXml.h3")</h2>
 
     <ul class="govuk-list govuk-!-display-none-print">
         <li>
-        @printLink(key = "invalidXml.p5.linkText", id = Some("print-link"))
+        @printLink(key = "invalidXml.p6.linkText", id = Some("print-link"))
         </li>
         <li>
         @link(
             id = Some("upload-link"),
             href = controllers.upload.routes.UploadXmlController.onPageLoad().url,
-            key = "invalidXml.p6.linkText"
+            key = "invalidXml.p7.linkText"
         )
         </li>
         <li>
