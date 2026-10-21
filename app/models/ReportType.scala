@@ -49,13 +49,12 @@ object ReportType {
     }
 
   def warningMessageForReportType(
-      reportType: ReportType,
-      rcaspName: String
+      reportType: ReportType
   )(implicit messages: Messages): Option[String] =
     reportType match {
       case TestData                                        => Some(messages("reportType.testData.warning"))
       case NotificationOfReportingOutsideUk                =>
-        Some(messages("reportType.notificationOfReportingOutsideUk.warning", rcaspName))
+        Some(messages("reportType.notificationOfReportingOutsideUk.warning"))
       case DeletionOfExistingReport                        => Some(messages("reportType.deletionOfExistingReport.warning"))
       case CorrectedInformationForExistingReport           =>
         Some(messages("reportType.correctedInformationForExistingReport.warning"))

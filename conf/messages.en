@@ -113,20 +113,20 @@ checkYourFileDetails.fileInformation.change = Change file
 
 reportType.testData = Test data
 reportType.nilReport = No reportable information
-reportType.notificationOfReportingOutsideUk = Notification of reporting outside of the UK
+reportType.notificationOfReportingOutsideUk = Notification that this RCASP elects to report in another country outside the UK
 reportType.newInformation = New information
 reportType.additionalInformationForExistingReport = Additional information for an existing report
-reportType.deletionOfExistingReport = Deletion of an existing report
+reportType.deletionOfExistingReport = Deletion of the whole of an existing report
 reportType.correctedInformationForExistingReport = Corrected information for an existing report
-reportType.deletedInformationForExistingReport = Deleted information for an existing report
+reportType.deletedInformationForExistingReport = Deletion of selected information from an existing report
 reportType.correctedAndDeletedInformationForExistingReport = Corrected and deleted information for an existing report
 reportType.reportableInformation = Reportable information
 
 reportType.testData.warning = We cannot complete all checks on test data or accept the file.
-reportType.notificationOfReportingOutsideUk.warning = With this file, you’re notifying us that {0} is reporting for the Cryptoasset Reporting Framework outside of the UK.
-reportType.deletionOfExistingReport.warning = This will permanently delete an existing report.
+reportType.notificationOfReportingOutsideUk.warning = Sending this file will tell us that this RCASP is electing to report in another country outside the UK. You will still need to send HMRC a report of their UK tax-resident cryptoasset users if there are any.
+reportType.deletionOfExistingReport.warning = This will permanently delete the whole of an existing report.
 reportType.correctedInformationForExistingReport.warning = This will permanently change reported information marked as a correction.
-reportType.deletedInformationForExistingReport.warning = This will permanently delete reported information marked for deletion.
+reportType.deletedInformationForExistingReport.warning = This will permanently delete some of the information in an existing report.
 reportType.correctedAndDeletedInformationForExistingReport.warning = This will permanently change reported information marked as a correction. It will also permanently delete reported information marked for deletion.
 
 sendYourFile.title = Send your file
@@ -213,6 +213,11 @@ fileConfirmation.2.email.sent = We have sent a confirmation email to {0} and {1}
 fileConfirmation.heading.next = What happens next
 fileConfirmation.p1.next = We will contact you if we have any questions about your report.
 
+fileConfirmation.overseas.heading = Reporting in another country
+fileConfirmation.overseas.p1 = You have told us that {0} is electing to report in another country outside the UK.
+fileConfirmation.overseas.p2 = You do not need to tell us again in future years. We will assume this remains true unless you send a full report for {0}.
+fileConfirmation.overseas.p3 = You will still need to send a report of their UK-resident cryptoasset users.
+fileConfirmation.overseas.defaultRcaspName = the RCASP
 
 fileConfirmation.heading.before = Before you go
 fileConfirmation.text.before = Your feedback helps us make our service better.

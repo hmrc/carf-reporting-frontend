@@ -19,6 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import connectors.SubmissionDetailsConnector
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
+import models.ReportType.NotificationOfReportingOutsideUk
 import models.fileSubmission.FileStatus.Passed
 import models.fileSubmission.SubmissionDetails
 import models.responses.{getEmails, getEmailsFromSubscriptionDetails, getName}
@@ -80,6 +81,15 @@ class FileConfirmationController @Inject (
   )(implicit request: Request[_], messages: Messages): Result = {
     val userEmailAddresses = submissionDetails.subscriptionDetails.getEmailsFromSubscriptionDetails
     val rcaspDetails       = submissionDetails.rcaspDetails
+    val isOverseas         = submissionDetails.extractedFileDetails.getReportType == NotificationOfReportingOutsideUk
+    val rcaspName          = submissionDetails.extractedFileDetails.rcaspName.getOrElse {
+      if (isOverseas) {
+        logWarn(
+          "[FileConfirmationController][onPageLoad] Failed to retrieve RCASP name from file, fallback default value used instead"
+        )
+      }
+      messages("fileConfirmation.overseas.defaultRcaspName")
+    }
     val summaryListRows    = helper.rows(submissionDetails.extractedFileDetails, rcaspDetails.getName)
 
     val summary = SummaryListViewModel(rows = summaryListRows)
@@ -90,7 +100,7 @@ class FileConfirmationController @Inject (
     val rcaspEmailAddresses = rcaspDetails.getEmails
     val emailAddressHtml    = generateEmailAddressHtml(userEmailAddresses, isRcaspUser, rcaspEmailAddresses)
 
-    Ok(view(summary, formattedDate, config.managementUrl, emailAddressHtml))
+    Ok(view(summary, formattedDate, config.managementUrl, emailAddressHtml, isOverseas, rcaspName))
   }
 
   private def generateEmailAddressHtml(

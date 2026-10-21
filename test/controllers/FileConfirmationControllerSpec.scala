@@ -88,7 +88,9 @@ class FileConfirmationControllerSpec extends SpecBase {
             testSummaryList,
             formattedDateTime,
             managementUrl,
-            expectedEmailHtml
+            expectedEmailHtml,
+            false,
+            testRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
@@ -101,8 +103,10 @@ class FileConfirmationControllerSpec extends SpecBase {
 
       "must return OK and the correct view when user answers are complete 1 email" in {
         val orgFileDetailsOneEmail =
-          orgSubmissionDetailsPassed.copy(subscriptionDetails =
-            displaySubscriptionDetailsOrg.copy(secondaryContact = None)
+          orgSubmissionDetailsPassed.copy(
+            subscriptionDetails = displaySubscriptionDetailsOrg.copy(secondaryContact = None),
+            extractedFileDetails = extractedFileDetailsTestData
+              .copy(rcaspName = None, hasOtherNexus = true, hasCryptoUsers = false, isTestData = false)
           )
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
@@ -130,19 +134,29 @@ class FileConfirmationControllerSpec extends SpecBase {
           val expectedEmailHtml =
             s"We have sent a confirmation email to ${displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails.head}."
 
+          val defaultRcaspName = "the RCASP"
+
           status(result)          mustEqual OK
           contentAsString(result)      must include(expectedEmailHtml)
           contentAsString(result) mustEqual view(
             testSummaryList,
             formattedDateTime,
             managementUrl,
-            expectedEmailHtml
+            expectedEmailHtml,
+            true,
+            defaultRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
             .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
           verify(mockFileConfirmationHelper, times(1))
-            .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
+            .rows(
+              eqTo(
+                extractedFileDetailsTestData
+                  .copy(rcaspName = None, hasOtherNexus = true, hasCryptoUsers = false, isTestData = false)
+              ),
+              eqTo(testRcaspName)
+            )(any())
           verify(mockSessionRepository, times(1)).set(argThat(_.get(UploadCompletionLockPage).contains(true)))
         }
       }
@@ -187,7 +201,9 @@ class FileConfirmationControllerSpec extends SpecBase {
             testSummaryList,
             formattedDateTime,
             managementUrl,
-            expectedEmailHtml
+            expectedEmailHtml,
+            false,
+            testRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
@@ -234,7 +250,9 @@ class FileConfirmationControllerSpec extends SpecBase {
             testSummaryList,
             formattedDateTime,
             managementUrl,
-            expectedEmailHtml
+            expectedEmailHtml,
+            false,
+            testRcaspName
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
