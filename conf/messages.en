@@ -198,6 +198,7 @@ rulesErrors.table.caption = Errors
 rulesErrors.table.head.code = Code
 rulesErrors.table.head.docRefId = DocRefId
 rulesErrors.table.head.error = Error
+
 fileConfirmation.title = File successfully sent
 fileConfirmation.label.heading = File successfully sent
 fileConfirmation.label.filePassed = Your file passed our automatic checks on
@@ -240,6 +241,14 @@ detailsOfSentFiles.table.head.sent = Sent
 detailsOfSentFiles.table.head.result = Result
 detailsOfSentFiles.table.head.nextStep = Next step
 
+detailsOfSentFiles.nextStep.confirmation = Go to confirmation
+detailsOfSentFiles.nextStep.confirmationNotAvailable = Confirmation not available
+detailsOfSentFiles.nextStep.checkErrors = Check errors
+detailsOfSentFiles.nextStep.checkProblem = Check problem
+detailsOfSentFiles.nextStep.uploadAgain = Upload file again
+detailsOfSentFiles.nextStep.contactUs = Contact us
+detailsOfSentFiles.nextStep.pending = Wait for checks to finish
+
 pageNotFound.title = Page not found
 pageNotFound.heading = Page not found
 pageNotFound.p1 = If you typed the web address, check it is correct.
@@ -255,11 +264,3 @@ fileNotAccepted.heading = Sorry, there is a problem with the service
 fileNotAccepted.p1 = We have not accepted your file.
 fileNotAccepted.p2.part1 = You must email
 fileNotAccepted.p2.part3 = so we can resolve the problem. Include the subject line ‘CARF file not accepted’.
-
-detailsOfSentFiles.nextStep.confirmation = Go to confirmation
-detailsOfSentFiles.nextStep.confirmationNotAvailable = Confirmation not available
-detailsOfSentFiles.nextStep.checkErrors = Check errors
-detailsOfSentFiles.nextStep.checkProblem = Check problem
-detailsOfSentFiles.nextStep.uploadAgain = Upload file again
-detailsOfSentFiles.nextStep.contactUs = Contact us
-detailsOfSentFiles.nextStep.pending = Wait for checks to finish
