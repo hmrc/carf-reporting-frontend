@@ -41,16 +41,13 @@ class SubscriptionConnectorISpec
       |    "processingDate": "2024-01-25T09:26:17Z",
       |    "carfSubscriptionDetails": {
       |      "carfReference": "XE0000123456789",
-      |      "tradingName": "CARF LTD",
       |      "gbUser": true,
       |      "primaryContact": {
       |        "individual": {
       |          "firstName": "Jane",
       |          "lastName": "Smith"
       |        },
-      |        "email": "GroupRep@FATCACRS.com",
-      |        "phone": "01232473743",
-      |        "mobile": "07232473743"
+      |        "email": "john.doe@example.com"
       |      }
       |    }
       |  }
@@ -63,21 +60,19 @@ class SubscriptionConnectorISpec
       |    "processingDate": "2024-01-25T09:26:17Z",
       |    "carfSubscriptionDetails": {
       |      "carfReference": "XE0000123456789",
-      |      "tradingName": "CARF LTD",
+      |      "tradingName": "Trading Name",
       |      "gbUser": true,
       |      "primaryContact": {
       |        "organisation": {
       |          "name": "John Doe"
       |        },
-      |        "email": "GroupRep@FATCACRS.com",
-      |        "phone": "01232473743",
-      |        "mobile": "07232473743"
+      |        "email": "john.doe@example.com"
       |      },
       |      "secondaryContact": {
       |        "organisation": {
       |          "name": "Jane Doe"
       |        },
-      |        "email": "GroupRep2@FATCACRS.com"
+      |        "email": "jane.doe@example.com"
       |      }
       |    }
       |  }

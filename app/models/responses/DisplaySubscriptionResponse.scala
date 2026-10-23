@@ -32,6 +32,7 @@ object DisplaySubscriptionSuccess {
 
 case class DisplaySubscriptionDetails(
     carfReference: String,
+    tradingName: Option[String],
     gbUser: Boolean,
     primaryContact: DisplaySubscriptionContact,
     secondaryContact: Option[DisplaySubscriptionContact]

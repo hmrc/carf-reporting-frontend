@@ -24,13 +24,13 @@ class DisplaySubscriptionDetailsSpec extends SpecBase {
     ".getEmailsFromSubscriptionDetails" - {
       "when there are primary and secondary user details" in {
         displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails mustBe List(
-          "GroupRep@FATCACRS.com",
-          "GroupRep2@FATCACRS.com"
+          testEmail,
+          "jane.doe@example.com"
         )
       }
 
       "when there are only primary user details" in {
-        displaySubscriptionDetailsIndividual.getEmailsFromSubscriptionDetails mustBe List("GroupRep@FATCACRS.com")
+        displaySubscriptionDetailsIndividual.getEmailsFromSubscriptionDetails mustBe List(testEmail)
       }
     }
   }

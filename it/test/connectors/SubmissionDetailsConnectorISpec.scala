@@ -69,18 +69,19 @@ class SubmissionDetailsConnectorISpec
         |  },
         |  "subscriptionDetails" : {
         |    "carfReference" : "XE0000123456789",
+        |    "tradingName" : "Trading Name",
         |    "gbUser" : true,
         |    "primaryContact" : {
         |      "organisation" : {
         |        "name" : "John Doe"
         |      },
-        |      "email" : "GroupRep@FATCACRS.com"
+        |      "email" : "john.doe@example.com"
         |    },
         |    "secondaryContact" : {
         |      "organisation" : {
         |        "name" : "Jane Doe"
         |      },
-        |      "email" : "GroupRep2@FATCACRS.com"
+        |      "email" : "jane.doe@example.com"
         |    }
         |  },
         |  "submissionTime" : {
@@ -218,18 +219,19 @@ class SubmissionDetailsConnectorISpec
         |    },
         |    "subscriptionDetails" : {
         |      "carfReference" : "XE0000123456789",
+        |      "tradingName" : "Trading Name",
         |      "gbUser" : true,
         |      "primaryContact" : {
         |        "organisation" : {
         |          "name" : "John Doe"
         |        },
-        |        "email" : "GroupRep@FATCACRS.com"
+        |        "email" : "john.doe@example.com"
         |      },
         |      "secondaryContact" : {
         |        "organisation" : {
         |          "name" : "Jane Doe"
         |        },
-        |        "email" : "GroupRep2@FATCACRS.com"
+        |        "email" : "jane.doe@example.com"
         |      }
         |    },
         |    "submissionTime" : {
@@ -282,18 +284,19 @@ class SubmissionDetailsConnectorISpec
         |    },
         |    "subscriptionDetails" : {
         |      "carfReference" : "XE0000123456789",
+        |      "tradingName" : "Trading Name",
         |      "gbUser" : true,
         |      "primaryContact" : {
         |        "organisation" : {
         |          "name" : "John Doe"
         |        },
-        |        "email" : "GroupRep@FATCACRS.com"
+        |        "email" : "john.doe@example.com"
         |      },
         |      "secondaryContact" : {
         |        "organisation" : {
         |          "name" : "Jane Doe"
         |        },
-        |        "email" : "GroupRep2@FATCACRS.com"
+        |        "email" : "jane.doe@example.com"
         |      }
         |    },
         |    "submissionTime" : {

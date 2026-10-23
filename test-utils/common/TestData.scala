@@ -134,10 +134,12 @@ trait TestData extends Generators {
   val testRcaspId      = "ZMCAR0123456787"
   val testRcaspName    = "Timmy's Turtles"
 
+  val testTradingName = "Trading Name"
   val testFirstName   = "Nemona"
   val testLastName    = "Champion"
   val testContactName = s"$testFirstName $testLastName"
   val testEmail       = "john.doe@example.com"
+  val testPhone       = "07123456789"
 
   val organisationRegisteredBusinessRcaspDetails =
     OrganisationRcaspDetailsRcaspUser(
@@ -170,11 +172,12 @@ trait TestData extends Generators {
 
   lazy val displaySubscriptionDetailsIndividual: DisplaySubscriptionDetails = DisplaySubscriptionDetails(
     carfReference = testCarfId,
+    tradingName = None,
     gbUser = true,
     primaryContact = DisplaySubscriptionContact(
       individual = Some(DisplaySubscriptionIndividual("Jane", "Smith")),
       organisation = None,
-      email = "GroupRep@FATCACRS.com"
+      email = testEmail
     ),
     secondaryContact = None
   )
@@ -188,17 +191,18 @@ trait TestData extends Generators {
 
   val displaySubscriptionDetailsOrg = DisplaySubscriptionDetails(
     carfReference = testCarfId,
+    tradingName = Some(testTradingName),
     gbUser = true,
     primaryContact = DisplaySubscriptionContact(
       individual = None,
       organisation = Some(DisplaySubscriptionOrganisation(name = "John Doe")),
-      email = "GroupRep@FATCACRS.com"
+      email = testEmail
     ),
     secondaryContact = Some(
       DisplaySubscriptionContact(
         individual = None,
         organisation = Some(DisplaySubscriptionOrganisation(name = "Jane Doe")),
-        email = "GroupRep2@FATCACRS.com"
+        email = "jane.doe@example.com"
       )
     )
   )
