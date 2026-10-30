@@ -24,6 +24,7 @@ sealed trait MessageBlock
 object MessageBlock {
   final case class Para(text: String) extends MessageBlock
   final case class Bullets(items: Seq[String]) extends MessageBlock
+  final case class ListNoBullet(items: Seq[String]) extends MessageBlock
 }
 
 final case class BusinessRuleError(
