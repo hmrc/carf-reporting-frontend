@@ -30,10 +30,10 @@ case class ExtractedFileDetails(
     isTestData: Boolean,
     allCryptoUsersAreCorrections: Boolean,
     allCryptoUsersAreDeletions: Boolean,
-    reportType: Option[ReportType] = None // sent by the BE. TODO: make required (follow-up ticket)
+    reportType: Option[ReportType] = None // sent by the BE. TODO: make required (follow-up ticket CARF-743)
 ) {
 
-  // TODO: remove with the follow-up ticket
+  // TODO: remove with the follow-up ticket CARF-743
   def getReportType: ReportType = reportType.getOrElse(calculateReportType)
 
   private def calculateReportType: ReportType =
