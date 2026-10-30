@@ -19,8 +19,12 @@
 @if(docRefIds.isEmpty) {
     N/A
 } else {
-    @for((docRefId, index) <- docRefIds.zipWithIndex) {
-        @if(index != 0) { <br/> }
-        <div class="@if(index != 0) {govuk-!-padding-top-2}">@docRefId</div>
+    @docRefIds.zipWithIndex.map { case (docRefId, index) =>
+        @if(index > 0) {
+            <div class="govuk-!-padding-top-2"></div>
+            @docRefId
+        } else {
+            @docRefId
+        }
     }
 }

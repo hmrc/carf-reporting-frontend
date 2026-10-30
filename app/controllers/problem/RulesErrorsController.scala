@@ -27,11 +27,13 @@ import models.upscan.UploadId
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.ErrorContentMapper.getContentForError
 import utils.LoggerUtil.logWarn
 import views.html.problem.RulesErrorsView
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 class RulesErrorsController @Inject() (
     override val messagesApi: MessagesApi,
@@ -71,23 +73,31 @@ class RulesErrorsController @Inject() (
     }
   }
 
-  // TODO: Map business rule errors to required content (ticket TBC)
-  private def processBusinessRuleErrors(businessRuleErrors: BusinessRuleValidationErrors): Seq[BusinessRuleError] = {
-    val processedFileErrors   = businessRuleErrors.fileError.map { error =>
-      BusinessRuleError(
-        error.code,
-        docRefIds = Seq.empty,
-        message = error.details.fold(Seq(Para("")))(message => Seq(Para(message)))
-      )
-    }
-    val processedRecordErrors = businessRuleErrors.recordError.map { error =>
-      BusinessRuleError(
-        error.code,
-        docRefIds = error.docRefIDInError,
-        message = error.details.fold(Seq(Para("")))(message => Seq(Para(message)))
-      )
+  private def processBusinessRuleErrors(
+      businessRuleValidationErrors: BusinessRuleValidationErrors
+  ): Seq[BusinessRuleError] = {
+
+    val businessRuleFileErrors = businessRuleValidationErrors.fileError.map { error =>
+      getContentForError(error.code).fold(
+        BusinessRuleError(error.code, Seq("N/A"), Seq(Para(error.details.getOrElse(""))))
+      )(identity)
     }
 
-    (processedFileErrors ++ processedRecordErrors).sortBy(_.errorCode)
+    val businessRuleRecordErrors = businessRuleValidationErrors.recordError.map { error =>
+      getContentForError(error.code).fold(
+        BusinessRuleError(error.code, error.docRefIDInError, Seq(Para(error.details.getOrElse(""))))
+      ) { businessRuleError =>
+        if (error.docRefIDInError.nonEmpty) {
+          businessRuleError.copy(docRefIds = error.docRefIDInError)
+        } else {
+          businessRuleError
+        }
+      }
+    }
+
+    Try((businessRuleFileErrors ++ businessRuleRecordErrors).sortBy(_.errorCode.toInt))
+      .getOrElse(
+        (businessRuleFileErrors ++ businessRuleRecordErrors).sortBy(_.errorCode)
+      )
   }
 }
