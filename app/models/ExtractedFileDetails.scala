@@ -29,10 +29,14 @@ case class ExtractedFileDetails(
     docTypeIndic: Option[DocTypeIndic],
     isTestData: Boolean,
     allCryptoUsersAreCorrections: Boolean,
-    allCryptoUsersAreDeletions: Boolean
+    allCryptoUsersAreDeletions: Boolean,
+    reportType: Option[ReportType] = None // sent by the BE. TODO: make required (follow-up ticket CARF-743)
 ) {
 
-  def getReportType: ReportType =
+  // TODO: remove with the follow-up ticket CARF-743
+  def getReportType: ReportType = reportType.getOrElse(calculateReportType)
+
+  private def calculateReportType: ReportType =
     if (isTestData) TestData
     else {
       messageTypeIndic match {
@@ -53,7 +57,6 @@ case class ExtractedFileDetails(
         case MessageTypeIndic.CARF703 => NilReport
       }
     }
-
 }
 
 object ExtractedFileDetails {
