@@ -77,22 +77,21 @@ class RulesErrorsController @Inject() (
       businessRuleValidationErrors: BusinessRuleValidationErrors
   ): Seq[BusinessRuleError] = {
 
+    val emptyDocRefs = Seq("N/A")
+
     val businessRuleFileErrors = businessRuleValidationErrors.fileError.map { error =>
-      getContentForError(error.code).fold(
-        BusinessRuleError(error.code, Seq("N/A"), Seq(Para(error.details.getOrElse(""))))
-      )(identity)
+      getContentForError(error.code, emptyDocRefs).getOrElse(
+        BusinessRuleError(error.code, emptyDocRefs, Seq(Para(error.details.getOrElse(""))))
+      )
     }
 
     val businessRuleRecordErrors = businessRuleValidationErrors.recordError.map { error =>
-      getContentForError(error.code).fold(
-        BusinessRuleError(error.code, error.docRefIDInError, Seq(Para(error.details.getOrElse(""))))
-      ) { businessRuleError =>
-        if (error.docRefIDInError.nonEmpty) {
-          businessRuleError.copy(docRefIds = error.docRefIDInError)
-        } else {
-          businessRuleError
-        }
-      }
+
+      val filledDocRefIds = if error.docRefIDInError.isEmpty then emptyDocRefs else error.docRefIDInError
+
+      getContentForError(error.code, filledDocRefIds).getOrElse(
+        BusinessRuleError(error.code, filledDocRefIds, Seq(Para(error.details.getOrElse(""))))
+      )
     }
 
     Try((businessRuleFileErrors ++ businessRuleRecordErrors).sortBy(_.errorCode.toInt))

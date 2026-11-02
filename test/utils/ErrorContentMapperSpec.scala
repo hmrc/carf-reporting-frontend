@@ -23,19 +23,24 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class ErrorContentMapperSpec extends AnyWordSpec with Matchers {
 
+  private inline def emptyDocRefIds = Seq("N/A")
+
   "ErrorContentMapper" must {
 
     "getContentForError" must {
 
       "return the BusinessRuleError when given an exact numeric error code without the prefix" in {
+
+        val docRefIds = Seq("GB2026GB-XRCAS1234567890-CARF_Report2026_001-RCASP-001")
+
         val errorCode = "3"
         val expected  = BusinessRuleError(
           errorCode = "3",
-          docRefIds = Seq("GB2026GB-XRCAS1234567890-CARF_Report2026_001-RCASP-001"),
+          docRefIds = docRefIds,
           message = Seq(Para("The file must not contain emoji Unicode characters"))
         )
 
-        val result = ErrorContentMapper.getContentForError(errorCode)
+        val result = ErrorContentMapper.getContentForError(errorCode, docRefIds)
 
         result mustBe Some(expected)
       }
@@ -44,13 +49,13 @@ class ErrorContentMapperSpec extends AnyWordSpec with Matchers {
         val errorCode = "CARF Error Code 10"
         val expected  = BusinessRuleError(
           errorCode = "10",
-          docRefIds = Seq("N/A"),
+          docRefIds = emptyDocRefIds,
           message = Seq(
             Para("MessageRefId element value must be different to any you have used in a valid past submission")
           )
         )
 
-        val result = ErrorContentMapper.getContentForError(errorCode)
+        val result = ErrorContentMapper.getContentForError(errorCode, emptyDocRefIds)
 
         result mustBe Some(expected)
       }
@@ -59,13 +64,13 @@ class ErrorContentMapperSpec extends AnyWordSpec with Matchers {
         val errorCode = "carf error Code 10"
         val expected  = BusinessRuleError(
           errorCode = "10",
-          docRefIds = Seq("N/A"),
+          docRefIds = emptyDocRefIds,
           message = Seq(
             Para("MessageRefId element value must be different to any you have used in a valid past submission")
           )
         )
 
-        val result = ErrorContentMapper.getContentForError(errorCode)
+        val result = ErrorContentMapper.getContentForError(errorCode, emptyDocRefIds)
 
         result mustBe Some(expected)
       }
@@ -105,11 +110,11 @@ class ErrorContentMapperSpec extends AnyWordSpec with Matchers {
 
         val expected = BusinessRuleError(
           errorCode = "1",
-          docRefIds = Seq("N/A"),
+          docRefIds = emptyDocRefIds,
           message = expectedContent
         )
 
-        val result = ErrorContentMapper.getContentForError(errorCode)
+        val result = ErrorContentMapper.getContentForError(errorCode, emptyDocRefIds)
 
         result mustBe Some(expected)
       }
@@ -117,7 +122,7 @@ class ErrorContentMapperSpec extends AnyWordSpec with Matchers {
       "return None when given an unknown error code" in {
         val errorCode = "999"
 
-        val result = ErrorContentMapper.getContentForError(errorCode)
+        val result = ErrorContentMapper.getContentForError(errorCode, emptyDocRefIds)
 
         result mustBe None
       }
@@ -125,7 +130,7 @@ class ErrorContentMapperSpec extends AnyWordSpec with Matchers {
       "return None when given an empty string" in {
         val errorCode = ""
 
-        val result = ErrorContentMapper.getContentForError(errorCode)
+        val result = ErrorContentMapper.getContentForError(errorCode, emptyDocRefIds)
 
         result mustBe None
       }

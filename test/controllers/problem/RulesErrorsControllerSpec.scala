@@ -38,26 +38,24 @@ class RulesErrorsControllerSpec extends SpecBase {
 
   private val mockSubmissionDetailsConnector: SubmissionDetailsConnector = mock[SubmissionDetailsConnector]
 
+  private val emptyDocRefs: Seq[String] = Seq("N/A")
+
   private def processTestBusinessRuleErrors(
       businessRuleErrors: BusinessRuleValidationErrors
   ): Seq[BusinessRuleError] = {
 
     val processedFileErrors = businessRuleErrors.fileError.map { error =>
-      getContentForError(error.code).fold(
-        BusinessRuleError(error.code, Seq("N/A"), Seq(Para(error.details.getOrElse(""))))
-      )(identity)
+      getContentForError(error.code, emptyDocRefs).getOrElse(
+        BusinessRuleError(error.code, emptyDocRefs, Seq(Para(error.details.getOrElse(""))))
+      )
     }
 
     val processedRecordErrors = businessRuleErrors.recordError.map { error =>
-      getContentForError(error.code).fold(
-        BusinessRuleError(error.code, error.docRefIDInError, Seq(Para(error.details.getOrElse(""))))
-      ) { businessRuleError =>
-        if (error.docRefIDInError.nonEmpty) {
-          businessRuleError.copy(docRefIds = error.docRefIDInError)
-        } else {
-          businessRuleError
-        }
-      }
+
+      val filledDocRefIds = if error.docRefIDInError.isEmpty then emptyDocRefs else error.docRefIDInError
+      getContentForError(error.code, filledDocRefIds).getOrElse(
+        BusinessRuleError(error.code, filledDocRefIds, Seq(Para(error.details.getOrElse(""))))
+      )
     }
 
     val combinedErrors = processedFileErrors ++ processedRecordErrors
@@ -139,7 +137,7 @@ class RulesErrorsControllerSpec extends SpecBase {
       }
     }
 
-    "return OK and use mapped docRefIds when record error docRefIDInError is empty" in {
+    "return OK and use empty (N/A) docRefIds when record error docRefIDInError is empty" in {
       val emptyDocRefRecordError = RecordError("17", Some("Details"), Seq.empty)
       val errorsWithEmptyDocRef  = BusinessRuleValidationErrors(Seq.empty, Seq(emptyDocRefRecordError))
 
