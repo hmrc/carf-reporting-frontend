@@ -186,7 +186,7 @@ virusFound.link1 = Upload a different file
 
 rulesErrors.title = There is a problem with your file data
 rulesErrors.heading = There is a problem with your file data
-rulesErrors.p1 = We cannot accept the file {0} because it does not meet the business rules.
+rulesErrors.p1 = We cannot accept the file {0} because it does not meet the HMRC file requirements.
 rulesErrors.h2 = What you can do next
 rulesErrors.list.1.linkText = Print this page
 rulesErrors.list.2 = View the errors on this page.
