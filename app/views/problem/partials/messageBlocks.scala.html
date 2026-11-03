@@ -15,7 +15,7 @@
  *@
 
 @import models.problem.MessageBlock
-@import models.problem.MessageBlock.{Bullets, Para}
+@import models.problem.MessageBlock.{Bullets, Para, ListNoBullet}
 
 @(blocks: Seq[MessageBlock])
 
@@ -26,6 +26,7 @@
                 @defining(previousBlock match {
                     case Some(_: Bullets) => " govuk-!-margin-top-4"
                     case Some(_: Para) => " govuk-!-margin-top-3"
+                    case Some(_: ListNoBullet) => " govuk-!-margin-top-4"
                     case _ => ""
                 }) { marginClass =>
                     <p class="govuk-body@marginClass">@text</p>
@@ -33,6 +34,13 @@
             }
             case Bullets(items) => {
                 <ul class="govuk-list govuk-list--bullet">
+                @for(item <- items) {
+                    <li>@item</li>
+                }
+                </ul>
+            }
+            case ListNoBullet(items) => {
+                <ul class="govuk-list govuk-list">
                 @for(item <- items) {
                     <li>@item</li>
                 }
