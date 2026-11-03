@@ -31,6 +31,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.LoggerUtil.logWarn
 import views.html.SendYourFileView
+import models.getReportType
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
