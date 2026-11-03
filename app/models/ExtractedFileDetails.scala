@@ -31,25 +31,28 @@ case class ExtractedFileDetails(
     allCryptoUsersAreCorrections: Boolean,
     allCryptoUsersAreDeletions: Boolean,
     reportType: Option[ReportType] = None // sent by the BE. TODO: make required (follow-up ticket CARF-743)
-) {
+)
 
-  // TODO: remove with the follow-up ticket CARF-743
-  def getReportType: ReportType = reportType.getOrElse(calculateReportType)
+// TODO: remove with the follow-up ticket CARF-743
+extension (details: ExtractedFileDetails) {
+
+  def getReportType: ReportType = details.reportType.getOrElse(calculateReportType)
 
   private def calculateReportType: ReportType =
-    if (isTestData) TestData
+    if (details.isTestData) TestData
     else {
-      messageTypeIndic match {
+      details.messageTypeIndic match {
         case MessageTypeIndic.CARF701 =>
-          if (hasOtherNexus && !hasCryptoUsers) NotificationOfReportingOutsideUk
-          else if (docTypeIndic.contains(DocTypeIndic.OECD0)) AdditionalInformationForExistingReport
+          if (details.hasOtherNexus && !details.hasCryptoUsers) NotificationOfReportingOutsideUk
+          else if (details.docTypeIndic.contains(DocTypeIndic.OECD0)) AdditionalInformationForExistingReport
           else NewInformation
         case MessageTypeIndic.CARF702 =>
-          docTypeIndic match {
+          details.docTypeIndic match {
             case Some(DocTypeIndic.OECD3)                            => DeletionOfExistingReport
             case Some(DocTypeIndic.OECD0) | Some(DocTypeIndic.OECD2) =>
-              if (allCryptoUsersAreCorrections || !hasCryptoUsers) CorrectedInformationForExistingReport
-              else if (docTypeIndic.contains(DocTypeIndic.OECD0) && allCryptoUsersAreDeletions)
+              if (details.allCryptoUsersAreCorrections || !details.hasCryptoUsers)
+                CorrectedInformationForExistingReport
+              else if (details.docTypeIndic.contains(DocTypeIndic.OECD0) && details.allCryptoUsersAreDeletions)
                 DeletedInformationForExistingReport
               else CorrectedAndDeletedInformationForExistingReport
             case _                                                   => ReportableInformationFallback
