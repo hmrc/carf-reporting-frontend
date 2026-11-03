@@ -52,7 +52,7 @@ class RulesErrorsControllerSpec extends SpecBase {
 
     val processedRecordErrors = businessRuleErrors.recordError.map { error =>
 
-      val filledDocRefIds = if error.docRefIDInError.isEmpty then emptyDocRefs else error.docRefIDInError
+      val filledDocRefIds = if error.docRefIDInError.isEmpty then Seq("Unknown") else error.docRefIDInError
       getContentForError(error.code, filledDocRefIds).getOrElse(
         BusinessRuleError(error.code, filledDocRefIds, Seq(Para(error.details.getOrElse(""))))
       )
