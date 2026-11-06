@@ -33,6 +33,7 @@ import utils.LoggerUtil.logWarn
 import utils.{DateTimeFormats, FileConfirmationHelper}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.FileConfirmationView
+import models.getReportType
 
 import java.time.ZoneOffset
 import javax.inject.Inject

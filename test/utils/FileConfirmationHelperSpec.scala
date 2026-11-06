@@ -22,6 +22,7 @@ import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.HtmlContent
 import viewmodels.govuk.all.{SummaryListRowViewModel, ValueViewModel}
 import viewmodels.implicits.*
+import models.getReportType
 
 class FileConfirmationHelperSpec extends SpecBase {
 

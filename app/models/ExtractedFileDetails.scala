@@ -29,23 +29,30 @@ case class ExtractedFileDetails(
     docTypeIndic: Option[DocTypeIndic],
     isTestData: Boolean,
     allCryptoUsersAreCorrections: Boolean,
-    allCryptoUsersAreDeletions: Boolean
-) {
+    allCryptoUsersAreDeletions: Boolean,
+    reportType: Option[ReportType] = None // sent by the BE. TODO: make required (follow-up ticket CARF-743)
+)
 
-  def getReportType: ReportType =
-    if (isTestData) TestData
+// TODO: remove with the follow-up ticket CARF-743
+extension (details: ExtractedFileDetails) {
+
+  def getReportType: ReportType = details.reportType.getOrElse(calculateReportType)
+
+  private def calculateReportType: ReportType =
+    if (details.isTestData) TestData
     else {
-      messageTypeIndic match {
+      details.messageTypeIndic match {
         case MessageTypeIndic.CARF701 =>
-          if (hasOtherNexus && !hasCryptoUsers) NotificationOfReportingOutsideUk
-          else if (docTypeIndic.contains(DocTypeIndic.OECD0)) AdditionalInformationForExistingReport
+          if (details.hasOtherNexus && !details.hasCryptoUsers) NotificationOfReportingOutsideUk
+          else if (details.docTypeIndic.contains(DocTypeIndic.OECD0)) AdditionalInformationForExistingReport
           else NewInformation
         case MessageTypeIndic.CARF702 =>
-          docTypeIndic match {
+          details.docTypeIndic match {
             case Some(DocTypeIndic.OECD3)                            => DeletionOfExistingReport
             case Some(DocTypeIndic.OECD0) | Some(DocTypeIndic.OECD2) =>
-              if (allCryptoUsersAreCorrections || !hasCryptoUsers) CorrectedInformationForExistingReport
-              else if (docTypeIndic.contains(DocTypeIndic.OECD0) && allCryptoUsersAreDeletions)
+              if (details.allCryptoUsersAreCorrections || !details.hasCryptoUsers)
+                CorrectedInformationForExistingReport
+              else if (details.docTypeIndic.contains(DocTypeIndic.OECD0) && details.allCryptoUsersAreDeletions)
                 DeletedInformationForExistingReport
               else CorrectedAndDeletedInformationForExistingReport
             case _                                                   => ReportableInformationFallback
@@ -53,7 +60,6 @@ case class ExtractedFileDetails(
         case MessageTypeIndic.CARF703 => NilReport
       }
     }
-
 }
 
 object ExtractedFileDetails {

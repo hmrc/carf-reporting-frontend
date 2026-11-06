@@ -21,6 +21,7 @@ import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.{ActionItem, Actions, SummaryList, SummaryListRow}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import viewmodels.govuk.all.{ActionItemViewModel, FluentKey, FluentSummaryList, FluentValue, KeyViewModel, SummaryListViewModel, ValueViewModel}
+import models.getReportType
 
 class CheckYourFileDetailsHelper {
 

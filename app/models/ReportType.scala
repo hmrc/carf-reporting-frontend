@@ -17,6 +17,7 @@
 package models
 
 import play.api.i18n.Messages
+import play.api.libs.json.*
 
 enum ReportType {
   case TestData
@@ -33,6 +34,17 @@ enum ReportType {
 
 object ReportType {
 
+  implicit val reportTypeFormat: Format[ReportType] = Format(
+    Reads {
+      case JsString(name) =>
+        ReportType.values
+          .find(_.toString == name)
+          .fold[JsResult[ReportType]](JsError(s"Unknown ReportType: $name"))(JsSuccess(_))
+      case _              => JsError("Expected a string for ReportType")
+    },
+    Writes(reportType => JsString(reportType.toString))
+  )
+
   def fileInformationMessageForReportType(reportType: ReportType)(implicit messages: Messages): String =
     reportType match {
       case TestData                                        => messages("reportType.testData")
@@ -48,9 +60,7 @@ object ReportType {
       case ReportableInformationFallback                   => messages("reportType.reportableInformation")
     }
 
-  def warningMessageForReportType(
-      reportType: ReportType
-  )(implicit messages: Messages): Option[String] =
+  def warningMessageForReportType(reportType: ReportType)(implicit messages: Messages): Option[String] =
     reportType match {
       case TestData                                        => Some(messages("reportType.testData.warning"))
       case NotificationOfReportingOutsideUk                =>
