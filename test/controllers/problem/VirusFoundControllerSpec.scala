@@ -42,7 +42,7 @@ class VirusFoundControllerSpec extends SpecBase {
   "VirusFoundController" - {
 
     "must return OK when file status is VirusFound" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
         .thenReturn(ResultT.fromValue(submissionDetailsVirus))
 
       val application =
@@ -60,12 +60,13 @@ class VirusFoundControllerSpec extends SpecBase {
         contentAsString(result) mustEqual
           view(appConfig.managementUrl)(request, messages(application)).toString
 
-        verify(mockSubmissionDetailsConnector).getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector)
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
       }
     }
 
     "must redirect to Journey Recovery when file status is not VirusFound" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
         .thenReturn(ResultT.fromValue(orgSubmissionDetailsPassed))
 
       val application =
@@ -80,12 +81,13 @@ class VirusFoundControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector).getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector)
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
       }
     }
 
     "must redirect to Journey Recovery when retrieving file status fails" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
         .thenReturn(ResultT.fromError(InternalServerError))
 
       val application =
@@ -100,7 +102,8 @@ class VirusFoundControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector).getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector)
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
       }
     }
   }

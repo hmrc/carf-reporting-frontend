@@ -79,9 +79,10 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
 
   def saveRequestedUpload(
       uploadId: UploadId,
-      fileReference: Reference
+      fileReference: Reference,
+      carfId: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[Unit] = {
-    val uploadUrl = url"$backendUrl/upscan/upload"
+    val uploadUrl = url"$backendUrl/upscan/upload/$carfId"
 
     ResultT.fromFuture {
       http
@@ -100,9 +101,10 @@ class UpscanConnector @Inject() (val config: FrontendAppConfig, val http: HttpCl
   }
 
   def getUploadStatus(
-      uploadId: UploadId
+      uploadId: UploadId,
+      carfId: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[Option[UploadStatus]] = {
-    val statusUrl = url"$backendUrl/upscan/status/${uploadId.value}"
+    val statusUrl = url"$backendUrl/upscan/status/${uploadId.value}/$carfId"
 
     ResultT.fromFuture {
       http.get(statusUrl).execute[HttpResponse].map { response =>

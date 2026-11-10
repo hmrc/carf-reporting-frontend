@@ -82,7 +82,7 @@ class SDESConnectorSpec extends ApplicationWithWiremock
     "sendSubmission" - {
       "return Right(()) when the downstream service returns NO_CONTENT (204)" in {
         stubFor(
-          post(urlPathMatching("/carf-reporting/submit"))
+          post(urlPathMatching(s"/carf-reporting/submit/$testCarfId"))
             .willReturn(
               aResponse()
                 .withBody(Json.parse(testSubmissionRequestJson).toString)
@@ -90,14 +90,14 @@ class SDESConnectorSpec extends ApplicationWithWiremock
             )
         )
 
-        val result = connector.sendSubmission(testSubmissionRequest).value.futureValue
+        val result = connector.sendSubmission(testSubmissionRequest, testCarfId).value.futureValue
 
         result mustBe Right(())
       }
 
       "return Left(InternalServerError) when the downstream service returns an unexpected status (e.g., 400)" in {
         stubFor(
-          post(urlPathMatching("/carf-reporting/submit"))
+          post(urlPathMatching(s"/carf-reporting/submit/$testCarfId"))
             .willReturn(
               aResponse()
                 .withBody(Json.parse(testSubmissionRequestJson).toString)
@@ -105,14 +105,14 @@ class SDESConnectorSpec extends ApplicationWithWiremock
             )
         )
 
-        val result = connector.sendSubmission(testSubmissionRequest).value.futureValue
+        val result = connector.sendSubmission(testSubmissionRequest, testCarfId).value.futureValue
 
         result mustBe Left(InternalServerError)
       }
 
       "return Left(InternalServerError) when the downstream service returns an unexpected status (e.g., 500)" in {
         stubFor(
-          post(urlEqualTo("/carf-reporting/submit"))
+          post(urlEqualTo(s"/carf-reporting/submit/$testCarfId"))
             .willReturn(
               aResponse()
                 .withBody(Json.parse(testSubmissionRequestJson).toString)
@@ -120,7 +120,7 @@ class SDESConnectorSpec extends ApplicationWithWiremock
             )
         )
 
-        val result = connector.sendSubmission(testSubmissionRequest).value.futureValue
+        val result = connector.sendSubmission(testSubmissionRequest, testCarfId).value.futureValue
 
         result mustBe Left(InternalServerError)
       }

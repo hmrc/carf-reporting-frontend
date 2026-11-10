@@ -59,7 +59,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -80,7 +81,8 @@ class UploadXmlControllerSpec extends SpecBase {
           contentAsString(result) mustEqual view(form, upscanInitiateResponse)(request, messages(application)).toString
 
           verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-          verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+          verify(mockUpscanConnector, times(1))
+            .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
           verify(mockSessionRepository, times(1)).set(
             argThat(ua =>
               ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty &&
@@ -107,7 +109,8 @@ class UploadXmlControllerSpec extends SpecBase {
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
           verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-          verify(mockUpscanConnector, times(0)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+          verify(mockUpscanConnector, times(0))
+            .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
           verify(mockSessionRepository, times(0)).set(any())
         }
       }
@@ -116,7 +119,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
           .thenReturn(ResultT.fromError(InternalServerError))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -132,7 +135,8 @@ class UploadXmlControllerSpec extends SpecBase {
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
           verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-          verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+          verify(mockUpscanConnector, times(1))
+            .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
           verify(mockSessionRepository, times(0)).set(any())
         }
       }
@@ -143,7 +147,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -160,7 +165,8 @@ class UploadXmlControllerSpec extends SpecBase {
           contentAsString(result) must include("The selected file must be 250MB or less")
 
           verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-          verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+          verify(mockUpscanConnector, times(1))
+            .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
           verify(mockSessionRepository, times(1)).set(
             argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
           )
@@ -171,7 +177,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -187,7 +194,8 @@ class UploadXmlControllerSpec extends SpecBase {
         contentAsString(result) must include("Select a file")
 
         verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-        verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+        verify(mockUpscanConnector, times(1))
+          .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(
           argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
         )
@@ -197,7 +205,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -213,7 +222,8 @@ class UploadXmlControllerSpec extends SpecBase {
         contentAsString(result) must include("The selected file contains a virus")
 
         verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-        verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+        verify(mockUpscanConnector, times(1))
+          .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(
           argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
         )
@@ -223,7 +233,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -243,7 +254,8 @@ class UploadXmlControllerSpec extends SpecBase {
         )
 
         verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-        verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+        verify(mockUpscanConnector, times(1))
+          .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(
           argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
         )
@@ -253,7 +265,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -273,7 +286,8 @@ class UploadXmlControllerSpec extends SpecBase {
         )
 
         verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-        verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+        verify(mockUpscanConnector, times(1))
+          .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(
           argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
         )
@@ -283,7 +297,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -302,7 +317,8 @@ class UploadXmlControllerSpec extends SpecBase {
         contentAsString(result) must include("The selected file is empty")
 
         verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-        verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+        verify(mockUpscanConnector, times(1))
+          .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(
           argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
         )
@@ -312,7 +328,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -331,7 +348,8 @@ class UploadXmlControllerSpec extends SpecBase {
         contentAsString(result) must include("The selected file must be an XML")
 
         verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-        verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+        verify(mockUpscanConnector, times(1))
+          .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(
           argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
         )
@@ -341,7 +359,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -357,7 +376,8 @@ class UploadXmlControllerSpec extends SpecBase {
         contentAsString(result) must include("Select a file")
 
         verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-        verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+        verify(mockUpscanConnector, times(1))
+          .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(
           argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
         )
@@ -367,7 +387,8 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any())).thenReturn(ResultT.fromValue(()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
+          .thenReturn(ResultT.fromValue(()))
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -383,7 +404,8 @@ class UploadXmlControllerSpec extends SpecBase {
         contentAsString(result) must include("The selected file could not be uploaded")
 
         verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-        verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+        verify(mockUpscanConnector, times(1))
+          .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(
           argThat(ua => ua.get(UploadIdPage).nonEmpty && ua.get(FileReferencePage).nonEmpty)
         )
@@ -407,7 +429,8 @@ class UploadXmlControllerSpec extends SpecBase {
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
           verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-          verify(mockUpscanConnector, times(0)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+          verify(mockUpscanConnector, times(0))
+            .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
           verify(mockSessionRepository, times(0)).set(any())
         }
       }
@@ -416,7 +439,7 @@ class UploadXmlControllerSpec extends SpecBase {
         when(mockUpscanConnector.upscanFormInitiate(any())(any(), any()))
           .thenReturn(ResultT.fromValue(upscanInitiateResponse))
 
-        when(mockUpscanConnector.saveRequestedUpload(any(), any())(any(), any()))
+        when(mockUpscanConnector.saveRequestedUpload(any(), any(), any())(any(), any()))
           .thenReturn(ResultT.fromError(InternalServerError))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -433,7 +456,8 @@ class UploadXmlControllerSpec extends SpecBase {
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
           verify(mockUpscanConnector, times(1)).upscanFormInitiate(any())(any(), any())
-          verify(mockUpscanConnector, times(1)).saveRequestedUpload(any(), eqTo(testReference))(any(), any())
+          verify(mockUpscanConnector, times(1))
+            .saveRequestedUpload(any(), eqTo(testReference), eqTo(testCarfId))(any(), any())
           verify(mockSessionRepository, times(0)).set(any())
         }
       }
@@ -448,7 +472,7 @@ class UploadXmlControllerSpec extends SpecBase {
             additionalVerify: => Future[Boolean]
         ): Unit = {
           reset(mockUpscanConnector, mockSessionRepository)
-          when(mockUpscanConnector.getUploadStatus(any())(any(), any()))
+          when(mockUpscanConnector.getUploadStatus(any(), any())(any(), any()))
             .thenReturn(ResultT.fromValue(Some(uploadStatus)))
 
           when(mockAppConfig.upscanCallbackDelayInSeconds).thenReturn(0)
@@ -469,7 +493,7 @@ class UploadXmlControllerSpec extends SpecBase {
             status(result)                 mustBe SEE_OTHER
             redirectLocation(result).value mustBe expectedRedirectUrl
 
-            verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId))(any(), any())
+            verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
             additionalVerify
           }
         }
@@ -531,7 +555,7 @@ class UploadXmlControllerSpec extends SpecBase {
       }
 
       "must show error when UpscanConnector .getUploadStatus returns None" in {
-        when(mockUpscanConnector.getUploadStatus(any())(any(), any())).thenReturn(ResultT.fromValue(None))
+        when(mockUpscanConnector.getUploadStatus(any(), any())(any(), any())).thenReturn(ResultT.fromValue(None))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(bind[UpscanConnector].toInstance(mockUpscanConnector))
@@ -544,13 +568,13 @@ class UploadXmlControllerSpec extends SpecBase {
           status(result)                 mustBe SEE_OTHER
           redirectLocation(result).value mustBe upload.routes.UploadXmlController.showError("UploadFailed", "", "").url
 
-          verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId))(any(), any())
+          verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
           verify(mockSessionRepository, times(0)).set(any())
         }
       }
 
       "must redirect to journey recovery when UpscanConnector .getUploadStatus returns an error" in {
-        when(mockUpscanConnector.getUploadStatus(any())(any(), any()))
+        when(mockUpscanConnector.getUploadStatus(any(), any())(any(), any()))
           .thenReturn(ResultT.fromError(InternalServerError))
 
         when(mockAppConfig.upscanCallbackDelayInSeconds).thenReturn(0)
@@ -569,7 +593,7 @@ class UploadXmlControllerSpec extends SpecBase {
           status(result)                 mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-          verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId))(any(), any())
+          verify(mockUpscanConnector, times(1)).getUploadStatus(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
           verify(mockSessionRepository, times(0)).set(any())
         }
       }

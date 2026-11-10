@@ -44,7 +44,7 @@ class FilePassedChecksControllerSpec extends SpecBase {
   "FilePassedChecksController" - {
 
     "must return OK and render the view when file status is Passed and and user answers contains the required data" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
         .thenReturn(ResultT.fromValue(orgSubmissionDetailsPassed))
 
       when(
@@ -79,7 +79,8 @@ class FilePassedChecksControllerSpec extends SpecBase {
           messages(application)
         ).toString
 
-        verify(mockSubmissionDetailsConnector).getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector)
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
         verify(mockFileCheckResultHelper).summaryList(
           eqTo(testMessageRefId),
           eqTo(Passed),
@@ -89,7 +90,7 @@ class FilePassedChecksControllerSpec extends SpecBase {
     }
 
     "must redirect to Journey Recovery when file status is not Passed" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
         .thenReturn(ResultT.fromValue(submissionDetailsFailed))
 
       val userAnswers = emptyUserAnswers
@@ -114,13 +115,14 @@ class FilePassedChecksControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector).getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector)
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
         verifyNoInteractions(mockFileCheckResultHelper)
       }
     }
 
     "must redirect to Journey Recovery when retrieving file status fails" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
         .thenReturn(ResultT.fromError(InternalServerError))
 
       val userAnswers = emptyUserAnswers
@@ -145,7 +147,8 @@ class FilePassedChecksControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockSubmissionDetailsConnector).getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+        verify(mockSubmissionDetailsConnector)
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
         verifyNoInteractions(mockFileCheckResultHelper)
       }
     }

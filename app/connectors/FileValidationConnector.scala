@@ -37,9 +37,10 @@ import scala.util.{Failure, Success, Try}
 class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpClientV2) {
 
   def validateAndExtract(
-      downloadUrl: String
+      downloadUrl: String,
+      carfId: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[ExtractedFileDetails] = {
-    val requestUrl = url"${config.carfReportingBaseUrl}/validate-extract-xml"
+    val requestUrl = url"${config.carfReportingBaseUrl}/validate-extract-xml/$carfId"
 
     logInfo(s"[FileValidationConnector][validateAndExtract] Calling endpoint: ${requestUrl.toURI}")
 

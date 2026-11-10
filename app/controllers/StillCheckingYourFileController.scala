@@ -54,7 +54,7 @@ class StillCheckingYourFileController @Inject() (
 
       (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage), userAnswers.get(UploadIdPage))
         .mapN { (rcaspDetails, extractedFileDetails, uploadId) =>
-          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId).value.map {
+          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId, request.carfId).value.map {
             case Right(submissionDetails) =>
               submissionDetails.fileStatus match {
                 case FileStatus.Pending                =>

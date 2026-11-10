@@ -47,7 +47,7 @@ class RulesErrorsController @Inject() (
     with I18nSupport {
 
   def onPageLoad(uploadId: String): Action[AnyContent] = identify.async { implicit request =>
-    submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId)).value.map {
+    submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId), request.carfId).value.map {
       case Right(fileDetails) if fileDetails.fileStatus == Failed =>
         if (fileDetails.businessRuleErrors.fileError.nonEmpty || fileDetails.businessRuleErrors.recordError.nonEmpty) {
           val processedErrors = processBusinessRuleErrors(fileDetails.businessRuleErrors)

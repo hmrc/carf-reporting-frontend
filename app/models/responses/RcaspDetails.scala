@@ -33,7 +33,7 @@ extension (rcaspDetails: RcaspDetails) {
   def getEmails: List[String] =
     rcaspDetails match {
       case individual: IndividualRcaspDetails            => List(individual.PrimaryContactDetails.EmailAddress)
-      case rcaspUser: OrganisationRcaspDetailsRcaspUser  => List.empty
+      case _: OrganisationRcaspDetailsRcaspUser          => List.empty
       case standardOrg: OrganisationRcaspDetailsStandard =>
         List(
           Some(standardOrg.PrimaryContactDetails.EmailAddress),

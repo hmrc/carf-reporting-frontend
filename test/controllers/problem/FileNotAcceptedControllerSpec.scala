@@ -49,7 +49,7 @@ class FileNotAcceptedControllerSpec extends SpecBase {
       "must return OK and the correct view when file status is UnprocessableErrorFile" in {
         when(mockAppConfig.aeoiEmailAddress) thenReturn testEmailAddress
         when(mockAppConfig.feedbackUrl(any())) thenReturn "feedbackUrl"
-        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
           .thenReturn(ResultT.fromValue(submissionDetailsUnprocessableErrorFile))
 
         val application = applicationBuilder(userAnswers = None)
@@ -70,12 +70,12 @@ class FileNotAcceptedControllerSpec extends SpecBase {
           contentAsString(result) mustEqual view(testEmailAddress)(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
-            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
         }
       }
 
       "must redirect to Journey Recovery when file status is not UnprocessableErrorFile" in {
-        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
           .thenReturn(ResultT.fromValue(orgSubmissionDetailsPassed))
 
         val application = applicationBuilder(userAnswers = None)
@@ -93,12 +93,12 @@ class FileNotAcceptedControllerSpec extends SpecBase {
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
           verify(mockSubmissionDetailsConnector, times(1))
-            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
         }
       }
 
       "must redirect to Journey Recovery when SubmissionDetailsConnector returns an error" in {
-        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
           .thenReturn(ResultT.fromError(InternalServerError))
 
         val application = applicationBuilder(userAnswers = None)
@@ -116,7 +116,7 @@ class FileNotAcceptedControllerSpec extends SpecBase {
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
           verify(mockSubmissionDetailsConnector, times(1))
-            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
         }
       }
     }

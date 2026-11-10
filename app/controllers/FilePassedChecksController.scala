@@ -49,7 +49,7 @@ class FilePassedChecksController @Inject() (
     (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
       (request.userAnswers.get(ExtractedFileDetailsPage), request.userAnswers.get(UploadIdPage))
         .mapN { (extractedFileDetails, uploadId) =>
-          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId).value.map {
+          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId, request.carfId).value.map {
             case Right(submissionDetails) =>
               submissionDetails.fileStatus match {
                 case Passed      =>
