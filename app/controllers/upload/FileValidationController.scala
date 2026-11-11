@@ -47,7 +47,7 @@ class FileValidationController @Inject() (
           logWarn("[FileValidationController][onPageLoad] Missing UploadSuccessDetails from user answers")
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         } { uploadSuccessDetails =>
-          fileValidationConnector.validateAndExtract(uploadSuccessDetails.downloadUrl).value.flatMap {
+          fileValidationConnector.validateAndExtract(uploadSuccessDetails.downloadUrl, request.carfId).value.flatMap {
             case Right(extractedFileDetails) =>
               for {
                 updatedAnswers <-

@@ -118,7 +118,7 @@ class SubmissionDetailsConnectorISpec
           )
       )
 
-      val result = connector.getSubmissionDetailsByUploadId(testUploadId).value.futureValue
+      val result = connector.getSubmissionDetailsByUploadId(testUploadId, testCarfId).value.futureValue
 
       result mustBe Right(submissionDetailsFailed)
     }
@@ -133,7 +133,7 @@ class SubmissionDetailsConnectorISpec
           )
       )
 
-      val result = connector.getSubmissionDetailsByUploadId(testUploadId).value.futureValue
+      val result = connector.getSubmissionDetailsByUploadId(testUploadId, testCarfId).value.futureValue
 
       result mustBe Left(JsonValidationError)
     }
@@ -147,7 +147,7 @@ class SubmissionDetailsConnectorISpec
           )
       )
 
-      val result = connector.getSubmissionDetailsByUploadId(testUploadId).value.futureValue
+      val result = connector.getSubmissionDetailsByUploadId(testUploadId, testCarfId).value.futureValue
 
       result mustBe Left(NotFoundError)
     }
@@ -161,7 +161,7 @@ class SubmissionDetailsConnectorISpec
           )
       )
 
-      val result = connector.getSubmissionDetailsByUploadId(testUploadId).value.futureValue
+      val result = connector.getSubmissionDetailsByUploadId(testUploadId, testCarfId).value.futureValue
 
       result mustBe Left(InternalServerError)
     }
@@ -175,7 +175,7 @@ class SubmissionDetailsConnectorISpec
           )
       )
 
-      val result = connector.getSubmissionDetailsByUploadId(testUploadId).value.futureValue
+      val result = connector.getSubmissionDetailsByUploadId(testUploadId, testCarfId).value.futureValue
 
       result mustBe Left(InternalServerError)
     }

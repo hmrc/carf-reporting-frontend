@@ -46,7 +46,7 @@ class FileValidationControllerSpec extends SpecBase {
     "must redirect to RcaspAndSubscriptionDetailsController when FileValidationConnector returns extracted file details" in {
       val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
-      when(mockFileValidationConnector.validateAndExtract(any())(any(), any()))
+      when(mockFileValidationConnector.validateAndExtract(any(), any())(any(), any()))
         .thenReturn(ResultT.fromValue(extractedFileDetailsTestData))
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
@@ -64,7 +64,8 @@ class FileValidationControllerSpec extends SpecBase {
         redirectLocation(result).value mustEqual
           controllers.routes.RcaspAndSubscriptionDetailsController.onPageLoad().url
 
-        verify(mockFileValidationConnector, times(1)).validateAndExtract(eqTo(testDownloadUrl))(any(), any())
+        verify(mockFileValidationConnector, times(1))
+          .validateAndExtract(eqTo(testDownloadUrl), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(
           userAnswers.withPage(ExtractedFileDetailsPage, extractedFileDetailsTestData)
         )
@@ -74,7 +75,7 @@ class FileValidationControllerSpec extends SpecBase {
     "must redirect to InvalidXmlController when FileValidationConnector returns InvalidXmlError" in {
       val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
-      when(mockFileValidationConnector.validateAndExtract(any())(any(), any()))
+      when(mockFileValidationConnector.validateAndExtract(any(), any())(any(), any()))
         .thenReturn(ResultT.fromError(InvalidXmlError))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
@@ -90,7 +91,8 @@ class FileValidationControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.problem.routes.InvalidXmlController.onPageLoad().url
 
-        verify(mockFileValidationConnector, times(1)).validateAndExtract(eqTo(testDownloadUrl))(any(), any())
+        verify(mockFileValidationConnector, times(1))
+          .validateAndExtract(eqTo(testDownloadUrl), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(0)).set(any())
       }
     }
@@ -98,7 +100,7 @@ class FileValidationControllerSpec extends SpecBase {
     "must redirect to DataErrorsController when FileValidationConnector returns XML schema errors" in {
       val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
-      when(mockFileValidationConnector.validateAndExtract(any())(any(), any()))
+      when(mockFileValidationConnector.validateAndExtract(any(), any())(any(), any()))
         .thenReturn(ResultT.fromError(XmlErrors(xmlFewErrors)))
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
@@ -115,7 +117,8 @@ class FileValidationControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.problem.routes.DataErrorsController.onPageLoad().url
 
-        verify(mockFileValidationConnector, times(1)).validateAndExtract(eqTo(testDownloadUrl))(any(), any())
+        verify(mockFileValidationConnector, times(1))
+          .validateAndExtract(eqTo(testDownloadUrl), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(1)).set(eqTo(userAnswers.withPage(XmlErrorsPage, xmlFewErrors)))
       }
     }
@@ -123,7 +126,7 @@ class FileValidationControllerSpec extends SpecBase {
     "must redirect to Journey Recovery when FileValidationConnector returns InternalServerError" in {
       val userAnswers = emptyUserAnswers.withPage(UploadDetailsUserAnswers, uploadDetailsUserAnswers)
 
-      when(mockFileValidationConnector.validateAndExtract(any())(any(), any()))
+      when(mockFileValidationConnector.validateAndExtract(any(), any())(any(), any()))
         .thenReturn(ResultT.fromError(InternalServerError))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
@@ -139,7 +142,8 @@ class FileValidationControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockFileValidationConnector, times(1)).validateAndExtract(eqTo(testDownloadUrl))(any(), any())
+        verify(mockFileValidationConnector, times(1))
+          .validateAndExtract(eqTo(testDownloadUrl), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(0)).set(any())
       }
     }
@@ -158,7 +162,7 @@ class FileValidationControllerSpec extends SpecBase {
         status(result)                 mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
-        verify(mockFileValidationConnector, times(0)).validateAndExtract(any())(any(), any())
+        verify(mockFileValidationConnector, times(0)).validateAndExtract(any(), eqTo(testCarfId))(any(), any())
         verify(mockSessionRepository, times(0)).set(any())
       }
     }

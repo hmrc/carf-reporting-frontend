@@ -19,6 +19,7 @@ package queries
 import models.UserAnswers
 import play.api.libs.json.JsPath
 
+import scala.annotation.unused
 import scala.util.{Success, Try}
 
 sealed trait Query {
@@ -30,6 +31,7 @@ trait Gettable[A] extends Query
 
 trait Settable[A] extends Query {
 
+  @unused
   def cleanup(value: A, userAnswers: UserAnswers, hasChanged: Boolean): Try[UserAnswers] =
     Success(userAnswers)
 }

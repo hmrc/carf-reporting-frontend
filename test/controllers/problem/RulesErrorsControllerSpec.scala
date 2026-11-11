@@ -76,7 +76,10 @@ class RulesErrorsControllerSpec extends SpecBase {
   "RulesErrors Controller" - {
 
     "return OK and the correct view when errors and filename are both present, below the max" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any()))
+      when(
+        mockSubmissionDetailsConnector
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
+      )
         .thenReturn(ResultT.fromValue(submissionDetailsFailed))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -98,7 +101,7 @@ class RulesErrorsControllerSpec extends SpecBase {
           ).toString
 
         verify(mockSubmissionDetailsConnector, times(1))
-          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
       }
     }
 
@@ -108,7 +111,10 @@ class RulesErrorsControllerSpec extends SpecBase {
         recordError = Seq(RecordError("UNKNOWN_2", Some("Unknown record detail"), Seq("docRef123")))
       )
 
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any()))
+      when(
+        mockSubmissionDetailsConnector
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
+      )
         .thenReturn(
           ResultT.fromValue(submissionDetailsFailed.copy(businessRuleErrors = unknownErrors))
         )
@@ -141,7 +147,10 @@ class RulesErrorsControllerSpec extends SpecBase {
       val emptyDocRefRecordError = RecordError("17", Some("Details"), Seq.empty)
       val errorsWithEmptyDocRef  = BusinessRuleValidationErrors(Seq.empty, Seq(emptyDocRefRecordError))
 
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any()))
+      when(
+        mockSubmissionDetailsConnector
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
+      )
         .thenReturn(
           ResultT.fromValue(submissionDetailsFailed.copy(businessRuleErrors = errorsWithEmptyDocRef))
         )
@@ -171,7 +180,10 @@ class RulesErrorsControllerSpec extends SpecBase {
     }
 
     "return OK and not show the over-100 message when errors equal the max" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any()))
+      when(
+        mockSubmissionDetailsConnector
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
+      )
         .thenReturn(
           ResultT.fromValue(
             submissionDetailsFailed.copy(businessRuleErrors = businessRuleValidationManyErrors(100))
@@ -197,12 +209,15 @@ class RulesErrorsControllerSpec extends SpecBase {
           ).toString
 
         verify(mockSubmissionDetailsConnector, times(1))
-          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
       }
     }
 
     "return OK and truncate to 100 rows with hasMoreThanMax = true when errors exceed the max" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any()))
+      when(
+        mockSubmissionDetailsConnector
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
+      )
         .thenReturn(
           ResultT.fromValue(
             submissionDetailsFailed.copy(businessRuleErrors = businessRuleValidationManyErrors(150))
@@ -233,12 +248,15 @@ class RulesErrorsControllerSpec extends SpecBase {
           ).toString
 
         verify(mockSubmissionDetailsConnector, times(1))
-          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
       }
     }
 
     "redirect to Journey Recovery when file status is not Failed" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any()))
+      when(
+        mockSubmissionDetailsConnector
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
+      )
         .thenReturn(ResultT.fromValue(submissionDetailsPending))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -253,12 +271,15 @@ class RulesErrorsControllerSpec extends SpecBase {
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
         verify(mockSubmissionDetailsConnector, times(1))
-          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
       }
     }
 
     "redirect to Journey Recovery when businessRuleValidationErrors contains no errors" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any()))
+      when(
+        mockSubmissionDetailsConnector
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
+      )
         .thenReturn(
           ResultT.fromValue(
             submissionDetailsFailed.copy(businessRuleErrors = BusinessRuleValidationErrors.apply())
@@ -277,12 +298,15 @@ class RulesErrorsControllerSpec extends SpecBase {
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
         verify(mockSubmissionDetailsConnector, times(1))
-          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
       }
     }
 
     "redirect to Journey Recovery when SubmissionDetailsConnector returns an error" in {
-      when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any()))
+      when(
+        mockSubmissionDetailsConnector
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
+      )
         .thenReturn(ResultT.fromError(InternalServerError))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -297,7 +321,7 @@ class RulesErrorsControllerSpec extends SpecBase {
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
         verify(mockSubmissionDetailsConnector, times(1))
-          .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+          .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
       }
     }
   }

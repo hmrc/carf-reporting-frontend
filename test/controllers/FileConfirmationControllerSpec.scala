@@ -58,7 +58,7 @@ class FileConfirmationControllerSpec extends SpecBase {
       "must return OK and the correct view when user answers are complete 2 emails" in {
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
-        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
           .thenReturn(ResultT.fromValue(orgSubmissionDetailsPassed))
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -94,7 +94,7 @@ class FileConfirmationControllerSpec extends SpecBase {
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
-            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
           verify(mockFileConfirmationHelper, times(1))
             .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
           verify(mockSessionRepository, times(1)).set(argThat(_.get(UploadCompletionLockPage).contains(true)))
@@ -111,7 +111,7 @@ class FileConfirmationControllerSpec extends SpecBase {
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
-        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
           .thenReturn(ResultT.fromValue(orgFileDetailsOneEmail))
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -148,7 +148,7 @@ class FileConfirmationControllerSpec extends SpecBase {
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
-            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
           verify(mockFileConfirmationHelper, times(1))
             .rows(
               eqTo(
@@ -170,7 +170,7 @@ class FileConfirmationControllerSpec extends SpecBase {
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
-        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
           .thenReturn(ResultT.fromValue(orgFileDetailsFourEmails))
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -207,7 +207,7 @@ class FileConfirmationControllerSpec extends SpecBase {
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
-            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
           verify(mockFileConfirmationHelper, times(1))
             .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
           verify(mockSessionRepository, times(1)).set(argThat(_.get(UploadCompletionLockPage).contains(true)))
@@ -222,7 +222,7 @@ class FileConfirmationControllerSpec extends SpecBase {
 
         when(mockAppConfig.managementUrl) thenReturn "http://localhost/management-url"
         when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
-        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
           .thenReturn(ResultT.fromValue(orgFileDetailsOneEmail))
 
         val datetime = orgSubmissionDetailsPassed.lastStatusUpdateTime.atZone(ZoneOffset.UTC).toLocalDateTime
@@ -256,7 +256,7 @@ class FileConfirmationControllerSpec extends SpecBase {
           )(request, messages(application)).toString
 
           verify(mockSubmissionDetailsConnector, times(1))
-            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
           verify(mockFileConfirmationHelper, times(1))
             .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
           verify(mockSessionRepository, times(0)).set(any())
@@ -264,7 +264,7 @@ class FileConfirmationControllerSpec extends SpecBase {
       }
 
       "must redirect to Journey Recovery when file status is not Passed" in {
-        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
           .thenReturn(ResultT.fromValue(orgSubmissionDetailsPassed.copy(fileStatus = Pending)))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -281,14 +281,14 @@ class FileConfirmationControllerSpec extends SpecBase {
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
           verify(mockSubmissionDetailsConnector, times(1))
-            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
           verify(mockFileConfirmationHelper, times(0)).rows(any(), any())(any())
           verify(mockSessionRepository, times(0)).set(any())
         }
       }
 
       "must redirect to Journey Recovery when SubmissionDetailsConnector returns an error" in {
-        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any())(any(), any()))
+        when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
           .thenReturn(ResultT.fromError(InternalServerError))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -305,7 +305,7 @@ class FileConfirmationControllerSpec extends SpecBase {
           redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
 
           verify(mockSubmissionDetailsConnector, times(1))
-            .getSubmissionDetailsByUploadId(eqTo(testUploadId))(any(), any())
+            .getSubmissionDetailsByUploadId(eqTo(testUploadId), eqTo(testCarfId))(any(), any())
           verify(mockFileConfirmationHelper, times(0)).rows(any(), any())(any())
           verify(mockSessionRepository, times(0)).set(any())
         }

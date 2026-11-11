@@ -34,10 +34,11 @@ import scala.concurrent.ExecutionContext
 class SDESConnector @Inject() (val config: FrontendAppConfig, val http: HttpClientV2) {
 
   def sendSubmission(
-      submissionRequest: SubmissionRequest
+      submissionRequest: SubmissionRequest,
+      carfId: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[Unit] = {
 
-    val baseUrl = url"${config.carfReportingBaseUrl}/submit"
+    val baseUrl = url"${config.carfReportingBaseUrl}/submit/$carfId"
 
     logInfo(
       s"[SDESConnector][sendSubmission] Sending submission uploadId/correlationId: " +

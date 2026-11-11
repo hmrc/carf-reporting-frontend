@@ -56,7 +56,7 @@ class SendYourFileController @Inject() (
       val userAnswers = request.userAnswers
 
       (userAnswers.get(RcaspDetailsPage), userAnswers.get(ExtractedFileDetailsPage))
-        .mapN { (rcaspDetails, extractedFileDetails) =>
+        .mapN { (_, extractedFileDetails) =>
           val maybeWarningMessage =
             ReportType.warningMessageForReportType(extractedFileDetails.getReportType)
           Ok(view(maybeWarningMessage, appConfig.spinnerMaxPollingAttempts))
@@ -88,7 +88,8 @@ class SendYourFileController @Inject() (
             rcaspDetails,
             subscriptionDetails,
             extractedFileDetails
-          )
+          ),
+          request.carfId
         )
     }.fold {
       logWarn("[SendYourFileController][onSubmit] Unable to get needed data from user answers")
@@ -117,7 +118,7 @@ class SendYourFileController @Inject() (
           )
           Future.successful(InternalServerError)
         } { uploadId =>
-          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId).value.map {
+          submissionDetailsConnector.getSubmissionDetailsByUploadId(uploadId, request.carfId).value.map {
             case Right(submissionDetails) =>
               submissionDetails.fileStatus match {
                 case FileStatus.Pending                =>

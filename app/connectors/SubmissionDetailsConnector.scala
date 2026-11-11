@@ -34,9 +34,10 @@ import scala.util.{Failure, Success, Try}
 class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: FrontendAppConfig) {
 
   def getSubmissionDetailsByUploadId(
-      uploadId: UploadId
+      uploadId: UploadId,
+      carfId: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[SubmissionDetails] = {
-    val requestUrl = url"${config.carfReportingBaseUrl}/submission-details/${uploadId.value}"
+    val requestUrl = url"${config.carfReportingBaseUrl}/submission-details/${uploadId.value}/$carfId"
 
     logInfo(
       s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Getting submission details for uploadId ${uploadId.value}"

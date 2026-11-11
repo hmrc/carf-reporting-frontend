@@ -97,18 +97,21 @@ class UploadXmlController @Inject() (
 
     upscanConnector.upscanFormInitiate(uploadId).value.flatMap {
       case Right(upscanInitiateResponse) =>
-        upscanConnector.saveRequestedUpload(uploadId, upscanInitiateResponse.fileReference).value.flatMap {
-          case Right(_)    =>
-            for {
-              answersWithUploadId <- Future.fromTry(userAnswers.set(UploadIdPage, uploadId))
-              updatedAnswers      <-
-                Future.fromTry(answersWithUploadId.set(FileReferencePage, upscanInitiateResponse.fileReference))
-              _                   <- sessionRepository.set(updatedAnswers)
-            } yield Ok(view(preparedForm, upscanInitiateResponse))
-          case Left(error) =>
-            logWarn(s"[UploadXmlController][initialUpscanCall] Error setting initial upload status: $error")
-            Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
-        }
+        upscanConnector
+          .saveRequestedUpload(uploadId, upscanInitiateResponse.fileReference, request.carfId)
+          .value
+          .flatMap {
+            case Right(_)    =>
+              for {
+                answersWithUploadId <- Future.fromTry(userAnswers.set(UploadIdPage, uploadId))
+                updatedAnswers      <-
+                  Future.fromTry(answersWithUploadId.set(FileReferencePage, upscanInitiateResponse.fileReference))
+                _                   <- sessionRepository.set(updatedAnswers)
+              } yield Ok(view(preparedForm, upscanInitiateResponse))
+            case Left(error) =>
+              logWarn(s"[UploadXmlController][initialUpscanCall] Error setting initial upload status: $error")
+              Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+          }
       case Left(error)                   =>
         logWarn(s"[UploadXmlController][initialUpscanCall] Error getting UpscanInitiateResponse: $error")
         Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
@@ -124,7 +127,7 @@ class UploadXmlController @Inject() (
 
       // Delay the call to make sure the backend db has been populated by the upscan callback first
       pekko.pattern.after(config.upscanCallbackDelayInSeconds.seconds, actorSystem.scheduler) {
-        upscanConnector.getUploadStatus(uploadId).value.flatMap {
+        upscanConnector.getUploadStatus(uploadId, request.carfId).value.flatMap {
           case Right(maybeUploadStatus) =>
             maybeUploadStatus match {
               case Some(uploadedSuccessfully: UploadedSuccessfully) =>

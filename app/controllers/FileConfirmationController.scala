@@ -59,7 +59,7 @@ class FileConfirmationController @Inject (
 
   def onPageLoad(uploadId: String): Action[AnyContent] =
     (identify andThen getData()).async { implicit request =>
-      submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId)).value.flatMap {
+      submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId), request.carfId).value.flatMap {
         case Right(fileDetails) if fileDetails.fileStatus == Passed =>
           request.userAnswers.fold(
             Future.successful(prepareView(fileDetails))

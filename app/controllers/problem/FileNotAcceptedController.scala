@@ -42,7 +42,7 @@ class FileNotAcceptedController @Inject() (
     with I18nSupport {
 
   def onPageLoad(uploadId: String): Action[AnyContent] = identify.async { implicit request =>
-    submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId)).value.map {
+    submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId), request.carfId).value.map {
       case Right(submissionDetails) =>
         submissionDetails.fileStatus match {
           case UnprocessableErrorFile =>

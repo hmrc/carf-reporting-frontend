@@ -111,7 +111,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
   }
 
   ".saveRequestedUpload" - {
-    val testUrl = "/carf-reporting/upscan/upload"
+    val testUrl = s"/carf-reporting/upscan/upload/$testCarfId"
 
     "must return Unit when backend returns 200" in {
       stubFor(
@@ -121,7 +121,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.saveRequestedUpload(testUploadId, testReference).value.futureValue
+      val result = connector.saveRequestedUpload(testUploadId, testReference, testCarfId).value.futureValue
       result mustBe Right((): Unit)
     }
 
@@ -139,7 +139,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.saveRequestedUpload(testUploadId, testReference).value.futureValue
+      val result = connector.saveRequestedUpload(testUploadId, testReference, testCarfId).value.futureValue
       result mustBe Left(InternalServerError)
     }
 
@@ -157,13 +157,13 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.saveRequestedUpload(testUploadId, testReference).value.futureValue
+      val result = connector.saveRequestedUpload(testUploadId, testReference, testCarfId).value.futureValue
       result mustBe Left(InternalServerError)
     }
   }
 
   ".getUploadStatus" - {
-    val testUrl = s"/carf-reporting/upscan/status/${testUploadId.value}"
+    val testUrl = s"/carf-reporting/upscan/status/${testUploadId.value}/$testCarfId"
 
     "must return an UploadStatus for a valid UploadId" - {
       "when an UploadedSuccessfully response is returned" in {
@@ -184,7 +184,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
             )
         )
 
-        val result = connector.getUploadStatus(testUploadId).value.futureValue
+        val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
         result mustBe Right(Some(uploadedSuccessfully))
       }
 
@@ -206,7 +206,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
             )
         )
 
-        val result = connector.getUploadStatus(testUploadId).value.futureValue
+        val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
         result mustBe Right(Some(uploadRejected))
       }
 
@@ -220,7 +220,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
             )
         )
 
-        val result = connector.getUploadStatus(testUploadId).value.futureValue
+        val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
         result mustBe Right(Some(NotStarted))
       }
 
@@ -234,7 +234,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
             )
         )
 
-        val result = connector.getUploadStatus(testUploadId).value.futureValue
+        val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
         result mustBe Right(Some(InProgress))
       }
 
@@ -248,7 +248,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
             )
         )
 
-        val result = connector.getUploadStatus(testUploadId).value.futureValue
+        val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
         result mustBe Right(Some(Failed))
       }
 
@@ -262,7 +262,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
             )
         )
 
-        val result = connector.getUploadStatus(testUploadId).value.futureValue
+        val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
         result mustBe Right(Some(Quarantined))
       }
     }
@@ -275,7 +275,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.getUploadStatus(testUploadId).value.futureValue
+      val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
       result mustBe Right(None)
     }
 
@@ -289,7 +289,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.getUploadStatus(testUploadId).value.futureValue
+      val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
       result mustBe Left(JsonValidationError)
     }
 
@@ -307,7 +307,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.getUploadStatus(testUploadId).value.futureValue
+      val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
       result mustBe Left(InternalServerError)
     }
 
@@ -325,7 +325,7 @@ class UpscanConnectorISpec extends ApplicationWithWiremock with Matchers with Sc
           )
       )
 
-      val result = connector.getUploadStatus(testUploadId).value.futureValue
+      val result = connector.getUploadStatus(testUploadId, testCarfId).value.futureValue
       result mustBe Left(InternalServerError)
     }
   }
