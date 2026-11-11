@@ -54,7 +54,7 @@ class SDESConnector @Inject() (val config: FrontendAppConfig, val http: HttpClie
             case NO_CONTENT => Right(())
             case _          =>
               logError(
-                s"[SDESConnector][sendSubmission] Unexpected response. Status code: ${httpResponse.status}, from endpoint: ${baseUrl.toURI}"
+                s"[SDESConnector][sendSubmission] Unexpected response from submission endpoint. Status code: ${httpResponse.status}"
               )
               Left(InternalServerError)
           }
