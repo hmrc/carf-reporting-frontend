@@ -25,11 +25,11 @@ import models.fileSubmission.SubmissionDetails
 import models.responses.{getEmails, getEmailsFromSubscriptionDetails, getName}
 import models.upscan.UploadId
 import pages.UploadCompletionLockPage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.logWarn
 import utils.{DateTimeFormats, FileConfirmationHelper}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.FileConfirmationView
@@ -50,10 +50,11 @@ class FileConfirmationController @Inject (
     val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   private def recovery(message: String) = {
-    logWarn(s"[FileConfirmationController][onPageLoad] $message")
+    logger.warn(s"[FileConfirmationController][onPageLoad] $message")
     Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
   }
 
@@ -84,7 +85,7 @@ class FileConfirmationController @Inject (
     val isOverseas         = submissionDetails.extractedFileDetails.getReportType == NotificationOfReportingOutsideUk
     val rcaspName          = submissionDetails.extractedFileDetails.rcaspName.getOrElse {
       if (isOverseas) {
-        logWarn(
+        logger.warn(
           "[FileConfirmationController][onPageLoad] Failed to retrieve RCASP name from file, fallback default value used instead"
         )
       }

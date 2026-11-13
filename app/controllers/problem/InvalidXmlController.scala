@@ -19,10 +19,11 @@ package controllers.problem
 import config.FrontendAppConfig
 import controllers.actions.*
 import pages.UploadDetailsUserAnswers
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.logWarn
+
 import views.html.problem.InvalidXmlView
 
 import javax.inject.Inject
@@ -37,14 +38,15 @@ class InvalidXmlController @Inject() (
     view: InvalidXmlView,
     appConfig: FrontendAppConfig
 ) extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad: Action[AnyContent] =
     (identify andThen getData() andThen duplicateSubmissionLockAction andThen requireData) { implicit request =>
       request.userAnswers
         .get(UploadDetailsUserAnswers)
         .fold {
-          logWarn("[InvalidXmlController][onPageLoad] Missing file name from user answers")
+          logger.warn("[InvalidXmlController][onPageLoad] Missing file name from user answers")
           Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
         } { uploadSuccessDetails =>
           Ok(view(uploadSuccessDetails.name, appConfig.managementUrl))
