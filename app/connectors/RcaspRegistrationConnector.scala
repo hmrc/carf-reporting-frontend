@@ -19,25 +19,25 @@ package connectors
 import config.FrontendAppConfig
 import models.errors.ApiError.{InternalServerError, JsonValidationError}
 import models.responses.{RcaspDetails, ViewRcaspResponse}
+import play.api.Logging
 import play.api.http.Status.{NOT_FOUND, OK}
 import types.ResultT
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
-import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-class RcaspRegistrationConnector @Inject() (config: FrontendAppConfig, http: HttpClientV2) {
+class RcaspRegistrationConnector @Inject() (config: FrontendAppConfig, http: HttpClientV2) extends Logging {
 
   def viewRcasps(
       carfId: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[List[RcaspDetails]] = {
     val viewRcaspUrl = url"${config.carfAccountBaseUrl}/carf-account/view-rcasp/$carfId/none"
 
-    logInfo(s"[RcaspRegistrationConnector][viewRcasps] Calling endpoint: ${viewRcaspUrl.toString}")
+    logger.info(s"[RcaspRegistrationConnector][viewRcasps] Calling endpoint: ${viewRcaspUrl.toString}")
 
     ResultT.fromFuture {
       http
@@ -50,16 +50,16 @@ class RcaspRegistrationConnector @Inject() (config: FrontendAppConfig, http: Htt
                 case Success(viewRcaspResponse) =>
                   Right(viewRcaspResponse.ViewRCASP.ResponseDetails.RCASPList)
                 case Failure(_)                 =>
-                  logError(
+                  logger.error(
                     s"[RcaspRegistrationConnector][viewRcasps] Error parsing ViewRcaspResponse from $viewRcaspUrl"
                   )
                   Left(JsonValidationError)
               }
             case NOT_FOUND =>
-              logInfo(s"[RcaspRegistrationConnector][viewRcasps] No RCASPs found for carfId: $carfId")
+              logger.info(s"[RcaspRegistrationConnector][viewRcasps] No RCASPs found for carfId: $carfId")
               Right(List.empty)
             case status    =>
-              logError(
+              logger.error(
                 s"[RcaspRegistrationConnector][viewRcasps] Unexpected response: status $status from $viewRcaspUrl"
               )
               Left(InternalServerError)

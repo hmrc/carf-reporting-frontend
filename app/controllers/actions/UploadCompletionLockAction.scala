@@ -18,14 +18,15 @@ package controllers.actions
 
 import models.requests.OptionalDataRequest
 import pages.UploadCompletionLockPage
+import play.api.Logging
 import play.api.mvc.{ActionFilter, Result, Results}
-import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class UploadCompletionLockAction @Inject() (implicit val ec: ExecutionContext)
-    extends ActionFilter[OptionalDataRequest] {
+    extends ActionFilter[OptionalDataRequest]
+    with Logging {
 
   override protected def executionContext: ExecutionContext = ec
 
@@ -35,7 +36,7 @@ class UploadCompletionLockAction @Inject() (implicit val ec: ExecutionContext)
 
     if (submitted) {
 
-      logInfo(
+      logger.info(
         s"[UploadCompletionLockAction][filter] Blocking request after upload completion journey. path=${request.uri}"
       )
 

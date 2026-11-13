@@ -20,11 +20,11 @@ import config.Constants.Pagination.singlePage
 import config.FrontendAppConfig
 import connectors.SubmissionDetailsConnector
 import controllers.actions.*
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.govukfrontend.views.Aliases.Pagination
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.*
 import viewmodels.govuk.pagination.PaginationViewModel
 import views.html.submission.DetailsOfSentFilesView
 
@@ -40,7 +40,8 @@ class DetailsOfSentFilesController @Inject() (
     view: DetailsOfSentFilesView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(page: Int): Action[AnyContent] = identify.async { implicit request =>
     submissionDetailsConnector.getSubmissionDetailsByCarfId(request.carfId, page).value.map {
@@ -58,13 +59,13 @@ class DetailsOfSentFilesController @Inject() (
         Ok(view(detailsOfFilesSent.submissionRecords, maybePagination, appConfig.managementUrl))
       case Right(detailsOfFilesSent)
           if detailsOfFilesSent.submissionRecords.isEmpty && detailsOfFilesSent.totalPages >= singlePage =>
-        logInfo(s"[DetailsOfSentFilesController][onPageLoad] Page $page does not exist, redirecting to first page")
+        logger.info(s"[DetailsOfSentFilesController][onPageLoad] Page $page does not exist, redirecting to first page")
         Redirect(controllers.submission.routes.DetailsOfSentFilesController.onPageLoad())
       case Right(_)                                                                   =>
-        logWarn("[DetailsOfSentFilesController][onPageLoad] No submissions found for details-of-sent-files page.")
+        logger.warn("[DetailsOfSentFilesController][onPageLoad] No submissions found for details-of-sent-files page.")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
       case Left(error)                                                                =>
-        logWarn(
+        logger.warn(
           s"[DetailsOfSentFilesController][onPageLoad] Unable to retrieve submissions for details-of-sent-files page. Error: $error"
         )
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())

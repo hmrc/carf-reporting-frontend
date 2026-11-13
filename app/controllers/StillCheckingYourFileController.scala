@@ -23,10 +23,11 @@ import controllers.actions.*
 import models.fileSubmission.FileStatus
 import models.responses.getName
 import pages.{ExtractedFileDetailsPage, RcaspDetailsPage, UploadIdPage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.logWarn
+
 import utils.StillCheckingYourFileHelper
 import views.html.StillCheckingYourFileView
 
@@ -46,7 +47,8 @@ class StillCheckingYourFileController @Inject() (
     val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(): Action[AnyContent] =
     (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
@@ -80,12 +82,12 @@ class StillCheckingYourFileController @Inject() (
                   Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
               }
             case Left(error)              =>
-              logWarn(s"[StillCheckingYourFileController][onPageLoad] Error getting file status: $error")
+              logger.warn(s"[StillCheckingYourFileController][onPageLoad] Error getting file status: $error")
               Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
           }
         }
         .getOrElse {
-          logWarn(
+          logger.warn(
             "[StillCheckingYourFileController][onPageLoad] Unable to get RCASP details, ExtractedFileDetails or UploadId from user answers"
           )
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))

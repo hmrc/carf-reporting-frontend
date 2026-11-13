@@ -21,10 +21,10 @@ import connectors.SubmissionDetailsConnector
 import controllers.actions.*
 import models.fileSubmission.FileStatus.VirusFound
 import models.upscan.UploadId
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.*
 import views.html.problem.VirusFoundView
 
 import javax.inject.Inject
@@ -39,7 +39,8 @@ class VirusFoundController @Inject() (
     view: VirusFoundView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(uploadId: String): Action[AnyContent] = identify.async { implicit request =>
     submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId), request.carfId).value.map {
@@ -48,11 +49,11 @@ class VirusFoundController @Inject() (
           case VirusFound  =>
             Ok(view(appConfig.managementUrl))
           case otherStatus =>
-            logWarn(s"[VirusFoundController][onPageLoad] File status was: $otherStatus")
+            logger.warn(s"[VirusFoundController][onPageLoad] File status was: $otherStatus")
             Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
         }
       case Left(error)              =>
-        logWarn(s"[VirusFoundController][onPageLoad] Error retrieving file status: $error")
+        logger.warn(s"[VirusFoundController][onPageLoad] Error retrieving file status: $error")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
   }
