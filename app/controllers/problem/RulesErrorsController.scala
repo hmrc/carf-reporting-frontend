@@ -24,11 +24,12 @@ import models.fileSubmission.FileStatus.Failed
 import models.problem.BusinessRuleError
 import models.problem.MessageBlock.Para
 import models.upscan.UploadId
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.ErrorContentMapper.getContentForError
-import utils.LoggerUtil.logWarn
+
 import views.html.problem.RulesErrorsView
 
 import javax.inject.Inject
@@ -44,7 +45,8 @@ class RulesErrorsController @Inject() (
     view: RulesErrorsView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(uploadId: String): Action[AnyContent] = identify.async { implicit request =>
     submissionDetailsConnector.getSubmissionDetailsByUploadId(UploadId(uploadId), request.carfId).value.map {
@@ -61,14 +63,14 @@ class RulesErrorsController @Inject() (
             )
           )
         } else {
-          logWarn(s"[RulesErrorsController][onPageLoad] No business rule errors found in submission details")
+          logger.warn(s"[RulesErrorsController][onPageLoad] No business rule errors found in submission details")
           Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
         }
       case Right(fileDetails)                                     =>
-        logWarn(s"[RulesErrorsController][onPageLoad] Unexpected file status: ${fileDetails.fileStatus}")
+        logger.warn(s"[RulesErrorsController][onPageLoad] Unexpected file status: ${fileDetails.fileStatus}")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
       case Left(error)                                            =>
-        logWarn(s"[RulesErrorsController][onPageLoad] Error retrieving file status: $error")
+        logger.warn(s"[RulesErrorsController][onPageLoad] Error retrieving file status: $error")
         Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
   }

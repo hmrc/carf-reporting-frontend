@@ -19,6 +19,7 @@ package connectors
 import config.FrontendAppConfig
 import models.errors.ApiError.InternalServerError
 import models.requests.sdes.SubmissionRequest
+import play.api.Logging
 import play.api.http.Status.NO_CONTENT
 import play.api.libs.json.Json
 import play.api.libs.ws.JsonBodyWritables.*
@@ -26,12 +27,11 @@ import types.ResultT
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
-import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class SDESConnector @Inject() (val config: FrontendAppConfig, val http: HttpClientV2) {
+class SDESConnector @Inject() (val config: FrontendAppConfig, val http: HttpClientV2) extends Logging {
 
   def sendSubmission(
       submissionRequest: SubmissionRequest,
@@ -40,7 +40,7 @@ class SDESConnector @Inject() (val config: FrontendAppConfig, val http: HttpClie
 
     val baseUrl = url"${config.carfReportingBaseUrl}/submit/$carfId"
 
-    logInfo(
+    logger.info(
       s"[SDESConnector][sendSubmission] Sending submission uploadId/correlationId: " +
         s"${submissionRequest.uploadId.value}"
     )
@@ -54,7 +54,7 @@ class SDESConnector @Inject() (val config: FrontendAppConfig, val http: HttpClie
           httpResponse.status match {
             case NO_CONTENT => Right(())
             case _          =>
-              logError(
+              logger.error(
                 s"[SDESConnector][sendSubmission] Unexpected response. Status code: ${httpResponse.status}, from endpoint: ${baseUrl.toURI}"
               )
               Left(InternalServerError)

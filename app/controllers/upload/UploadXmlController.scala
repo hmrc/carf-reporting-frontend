@@ -30,13 +30,13 @@ import models.{ErrorCode, InvalidArgumentErrorMessage, UserAnswers}
 import org.apache.pekko
 import org.apache.pekko.actor.ActorSystem
 import pages.{FileReferencePage, UploadDetailsUserAnswers, UploadIdPage}
+import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.*
 import views.html.upload.UploadXmlView
 
 import javax.inject.Inject
@@ -57,7 +57,8 @@ class UploadXmlController @Inject() (
     view: UploadXmlView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   val form: Form[String] = formProvider()
 
@@ -81,7 +82,7 @@ class UploadXmlController @Inject() (
             case None                        => form.withError("file-upload", "uploadXml.error.file.select")
           }
         case _                                   =>
-          logWarn(
+          logger.warn(
             s"[UploadXmlController][showError] Upscan error $errorCode: $errorMessage, requestId is $errorRequestId"
           )
           form.withError("file-upload", "uploadXml.error.file.content.unknown")
@@ -109,11 +110,11 @@ class UploadXmlController @Inject() (
                 _                   <- sessionRepository.set(updatedAnswers)
               } yield Ok(view(preparedForm, upscanInitiateResponse))
             case Left(error) =>
-              logWarn(s"[UploadXmlController][initialUpscanCall] Error setting initial upload status: $error")
+              logger.warn(s"[UploadXmlController][initialUpscanCall] Error setting initial upload status: $error")
               Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
           }
       case Left(error)                   =>
-        logWarn(s"[UploadXmlController][initialUpscanCall] Error getting UpscanInitiateResponse: $error")
+        logger.warn(s"[UploadXmlController][initialUpscanCall] Error getting UpscanInitiateResponse: $error")
         Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
     }
   }
@@ -148,35 +149,35 @@ class UploadXmlController @Inject() (
                 }
               case Some(uploadRejected: UploadRejected)             =>
                 if (uploadRejected.details.message.contains("octet-stream")) {
-                  logWarn(
+                  logger.warn(
                     s"[UploadXmlController][getUploadStatusAndRedirect] Upload rejected with 'octet-stream' in message. Error details: ${uploadRejected.details}"
                   )
                   val errorReason = uploadRejected.details.failureReason
                   errorRedirect(OctetStream.code, errorReason.toLowerCase, "")
                 } else {
-                  logWarn(
+                  logger.warn(
                     s"[UploadXmlController][getUploadStatusAndRedirect] Upload rejected. Error details: ${uploadRejected.details}"
                   )
                   errorRedirect(InvalidArgument.code, TypeMismatch.message, "")
                 }
               case Some(Quarantined)                                =>
-                logWarn("[UploadXmlController][getUploadStatusAndRedirect] File upload returned quarantined status")
+                logger.warn("[UploadXmlController][getUploadStatusAndRedirect] File upload returned quarantined status")
                 errorRedirect(VirusFile.code, "", "")
               case Some(Failed)                                     =>
-                logWarn("[UploadXmlController][getUploadStatusAndRedirect] File upload returned failed status")
+                logger.warn("[UploadXmlController][getUploadStatusAndRedirect] File upload returned failed status")
                 errorRedirect("UploadFailed", "", "")
               case Some(_)                                          =>
                 Future.successful(
                   Redirect(controllers.upload.routes.UploadXmlController.getUploadStatusAndRedirect(uploadId).url)
                 )
               case None                                             =>
-                logWarn(
+                logger.warn(
                   s"[UploadXmlController][getUploadStatusAndRedirect] Unable to retrieve a record with uploadId ${uploadId.value}"
                 )
                 errorRedirect("UploadFailed", "", "")
             }
           case Left(error)              =>
-            logWarn(s"[UploadXmlController][getUploadStatusAndRedirect] Error getting upload status: $error")
+            logger.warn(s"[UploadXmlController][getUploadStatusAndRedirect] Error getting upload status: $error")
             Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
       }

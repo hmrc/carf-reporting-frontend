@@ -21,6 +21,7 @@ import models.ExtractedFileDetails
 import models.errors.ApiError.{InternalServerError, JsonValidationError}
 import models.errors.XmlValidationError
 import models.requests.XmlValidationRequest
+import play.api.Logging
 import play.api.http.Status.*
 import play.api.libs.json.Json
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
@@ -28,13 +29,12 @@ import types.ResultT
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
-import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpClientV2) {
+class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpClientV2) extends Logging {
 
   def validateAndExtract(
       downloadUrl: String,
@@ -42,7 +42,7 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[ExtractedFileDetails] = {
     val requestUrl = url"${config.carfReportingBaseUrl}/validate-extract-xml/$carfId"
 
-    logInfo(s"[FileValidationConnector][validateAndExtract] Calling endpoint: ${requestUrl.toURI}")
+    logger.info(s"[FileValidationConnector][validateAndExtract] Calling endpoint: ${requestUrl.toURI}")
 
     ResultT.fromFuture {
       http
@@ -55,7 +55,7 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
               Try(response.json.as[ExtractedFileDetails]) match {
                 case Success(extractedFileDetails) => Right(extractedFileDetails)
                 case Failure(_)                    =>
-                  logError(
+                  logger.error(
                     s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 200) from $requestUrl"
                   )
                   Left(JsonValidationError)
@@ -64,13 +64,13 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
               Try(response.json.as[XmlValidationError]) match {
                 case Success(xmlValidationError) => Left(xmlValidationError)
                 case Failure(_)                  =>
-                  logError(
+                  logger.error(
                     s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 422) from $requestUrl"
                   )
                   Left(JsonValidationError)
               }
             case status               =>
-              logError(
+              logger.error(
                 s"[FileValidationConnector][validateAndExtract] Unexpected response: status $status from $requestUrl"
               )
               Left(InternalServerError)
