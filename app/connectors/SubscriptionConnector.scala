@@ -50,18 +50,18 @@ class SubscriptionConnector @Inject() (val config: FrontendAppConfig, val http: 
                 case Success(data)      => Right(data)
                 case Failure(exception) =>
                   logError(
-                    s"[SubscriptionConnector][displaySubscription] Error parsing DisplaySubscriptionResponse with endpoint: ${baseUrl.toURI}"
+                    s"[SubscriptionConnector][displaySubscription] Error parsing DisplaySubscriptionResponse from subscription lookup"
                   )
                   Left(JsonValidationError)
               }
             case NOT_FOUND =>
               logError(
-                s"[SubscriptionConnector][displaySubscription] No match could be found for carfId $carfId. Status code: ${httpResponse.status}, from endpoint: ${baseUrl.toURI}"
+                s"[SubscriptionConnector][displaySubscription] No match could be found for carfId $carfId. Status code: ${httpResponse.status}"
               )
               Left(NotFoundError)
             case _         =>
               logError(
-                s"[SubscriptionConnector][displaySubscription] Unexpected response. Status code: ${httpResponse.status}, from endpoint: ${baseUrl.toURI}"
+                s"[SubscriptionConnector][displaySubscription] Unexpected response from subscription lookup. Status code: ${httpResponse.status}"
               )
               Left(InternalServerError)
           }
