@@ -20,10 +20,10 @@ import connectors.FileValidationConnector
 import controllers.actions.*
 import models.errors.{InvalidXmlError, XmlErrors}
 import pages.{ExtractedFileDetailsPage, UploadDetailsUserAnswers, XmlErrorsPage}
+import play.api.Logging
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,14 +37,15 @@ class FileValidationController @Inject() (
     fileValidationConnector: FileValidationConnector,
     val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController {
+    extends FrontendBaseController
+    with Logging {
 
   def onPageLoad(): Action[AnyContent] =
     (identify andThen getData() andThen duplicateSubmissionLockAction andThen requireData).async { implicit request =>
       request.userAnswers
         .get(UploadDetailsUserAnswers)
         .fold {
-          logWarn("[FileValidationController][onPageLoad] Missing UploadSuccessDetails from user answers")
+          logger.warn("[FileValidationController][onPageLoad] Missing UploadSuccessDetails from user answers")
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         } { uploadSuccessDetails =>
           fileValidationConnector.validateAndExtract(uploadSuccessDetails.downloadUrl, request.carfId).value.flatMap {
@@ -55,18 +56,19 @@ class FileValidationController @Inject() (
                 _              <- sessionRepository.set(updatedAnswers)
               } yield Redirect(controllers.routes.RcaspAndSubscriptionDetailsController.onPageLoad())
             case Left(InvalidXmlError)       =>
-              logWarn(
+              logger.warn(
                 "[FileValidationController][onPageLoad] Received InvalidXmlError from file validation (fatal XML error due to malformed XML)"
               )
               Future.successful(Redirect(controllers.problem.routes.InvalidXmlController.onPageLoad()))
             case Left(XmlErrors(xmlErrors))  =>
-              logWarn("[FileValidationController][onPageLoad] Received schema validation errors from file validation")
+              logger
+                .warn("[FileValidationController][onPageLoad] Received schema validation errors from file validation")
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(XmlErrorsPage, xmlErrors))
                 _              <- sessionRepository.set(updatedAnswers)
               } yield Redirect(controllers.problem.routes.DataErrorsController.onPageLoad())
             case Left(error)                 =>
-              logWarn(s"[FileValidationController][onPageLoad] Unexpected error from file validation: $error")
+              logger.warn(s"[FileValidationController][onPageLoad] Unexpected error from file validation: $error")
               Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
           }
         }

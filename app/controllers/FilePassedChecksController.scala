@@ -21,11 +21,12 @@ import connectors.SubmissionDetailsConnector
 import controllers.actions.*
 import models.fileSubmission.FileStatus.Passed
 import pages.{ExtractedFileDetailsPage, UploadIdPage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FileCheckResultHelper
-import utils.LoggerUtil.logWarn
+
 import views.html.upload.FilePassedChecksView
 
 import javax.inject.Inject
@@ -43,7 +44,8 @@ class FilePassedChecksController @Inject() (
     view: FilePassedChecksView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(): Action[AnyContent] =
     (identify andThen getData() andThen uploadCompletionLock andThen requireData).async { implicit request =>
@@ -61,16 +63,16 @@ class FilePassedChecksController @Inject() (
                     )
                   Ok(view(summaryList, uploadId.value))
                 case otherStatus =>
-                  logWarn(s"[FilePassedChecksController][onPageLoad] File status was: $otherStatus")
+                  logger.warn(s"[FilePassedChecksController][onPageLoad] File status was: $otherStatus")
                   Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
               }
             case Left(error)              =>
-              logWarn(s"[FilePassedChecksController][onPageLoad] Error retrieving file status: $error")
+              logger.warn(s"[FilePassedChecksController][onPageLoad] Error retrieving file status: $error")
               Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
           }
         }
         .getOrElse {
-          logWarn(
+          logger.warn(
             "[FileFailedChecksController][onPageLoad] ExtractedFileDetailsPage or UploadId missing from UserAnswers"
           )
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))

@@ -20,18 +20,18 @@ import config.FrontendAppConfig
 import models.errors.ApiError.{InternalServerError, JsonValidationError, NotFoundError}
 import models.fileSubmission.{DetailsOfFilesSent, SubmissionDetails}
 import models.upscan.UploadId
+import play.api.Logging
 import play.api.http.Status.{NOT_FOUND, OK}
 import types.ResultT
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
-import utils.LoggerUtil.*
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: FrontendAppConfig) {
+class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: FrontendAppConfig) extends Logging {
 
   def getSubmissionDetailsByUploadId(
       uploadId: UploadId,
@@ -39,7 +39,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[SubmissionDetails] = {
     val requestUrl = url"${config.carfReportingBaseUrl}/submission-details/${uploadId.value}/$carfId"
 
-    logInfo(
+    logger.info(
       s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Getting submission details for uploadId ${uploadId.value}"
     )
 
@@ -53,18 +53,18 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
               Try(response.json.as[SubmissionDetails]) match {
                 case Success(fileDetails) => Right(fileDetails)
                 case Failure(_)           =>
-                  logError(
+                  logger.error(
                     s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Error parsing response body for uploadId ${uploadId.value}"
                   )
                   Left(JsonValidationError)
               }
             case NOT_FOUND =>
-              logWarn(
+              logger.warn(
                 s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] No submission details found for uploadId ${uploadId.value}"
               )
               Left(NotFoundError)
             case status    =>
-              logError(
+              logger.error(
                 s"[SubmissionDetailsConnector][getSubmissionDetailsByUploadId] Unexpected response: status $status, uploadId ${uploadId.value}"
               )
               Left(InternalServerError)
@@ -79,7 +79,7 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[DetailsOfFilesSent] = {
     val requestUrl = url"${config.carfReportingBaseUrl}/user-submission-history/$carfId/$page"
 
-    logInfo(
+    logger.info(
       s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Getting submission details for carfId $carfId, page $page"
     )
 
@@ -93,13 +93,13 @@ class SubmissionDetailsConnector @Inject() (httpClient: HttpClientV2, config: Fr
               Try(response.json.as[DetailsOfFilesSent]) match {
                 case Success(detailsOfFilesSent) => Right(detailsOfFilesSent)
                 case Failure(_)                  =>
-                  logError(
+                  logger.error(
                     s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Error parsing response body for carfId $carfId"
                   )
                   Left(JsonValidationError)
               }
             case status =>
-              logError(
+              logger.error(
                 s"[SubmissionDetailsConnector][getSubmissionDetailsByCarfId] Unexpected response: status $status, carfId $carfId"
               )
               Left(InternalServerError)

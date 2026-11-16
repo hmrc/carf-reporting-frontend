@@ -20,11 +20,11 @@ import config.{Constants, FrontendAppConfig}
 import controllers.actions.*
 import models.problem.SchemaError
 import pages.{UploadDetailsUserAnswers, XmlErrorsPage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.*
 import views.html.problem.DataErrorsView
 
 import javax.inject.Inject
@@ -39,7 +39,8 @@ class DataErrorsController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     view: DataErrorsView
 ) extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(): Action[AnyContent] =
     (identify andThen getData() andThen duplicateSubmissionLockAction andThen requireData) { implicit request =>
@@ -55,7 +56,7 @@ class DataErrorsController @Inject() (
           Ok(view(fileName, schemaErrors.take(Constants.maxErrorsShown), hasMoreThanMax, appConfig.managementUrl))
 
         case (xmlErrors, _) =>
-          logWarn(
+          logger.warn(
             s"[DataErrorsController][onPageLoad] Unable to retrieve data errors or file name for data-errors page. Errors length: ${xmlErrors
                 .map(_.length)}"
           )

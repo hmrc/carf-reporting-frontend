@@ -24,12 +24,13 @@ import models.ReportType
 import models.fileSubmission.{FileStatus, URL}
 import models.requests.sdes.{FileName, SubmissionRequest}
 import pages.*
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.*
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.LoggerUtil.logWarn
+
 import views.html.SendYourFileView
 
 import javax.inject.Inject
@@ -49,7 +50,8 @@ class SendYourFileController @Inject() (
     sdesConnector: SDESConnector
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(): Action[AnyContent] =
     (identify andThen getData() andThen duplicateSubmissionLockAction andThen requireData) { implicit request =>
@@ -62,7 +64,7 @@ class SendYourFileController @Inject() (
           Ok(view(maybeWarningMessage, appConfig.spinnerMaxPollingAttempts))
         }
         .getOrElse {
-          logWarn(
+          logger.warn(
             "[SendYourFileController][onPageLoad] Unable to get RCASP details or ExtractedFileDetails from user answers"
           )
           Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)
@@ -92,7 +94,7 @@ class SendYourFileController @Inject() (
           request.carfId
         )
     }.fold {
-      logWarn("[SendYourFileController][onSubmit] Unable to get needed data from user answers")
+      logger.warn("[SendYourFileController][onSubmit] Unable to get needed data from user answers")
       Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url))
     } {
       _.value.flatMap {
@@ -102,7 +104,7 @@ class SendYourFileController @Inject() (
             _                  <- sessionRepository.set(updatedUserAnswers)
           } yield Redirect(controllers.routes.StillCheckingYourFileController.onPageLoad())
         case Left(error) =>
-          logWarn(s"[SendYourFileController][onSubmit] Error submitting file to FTS: $error")
+          logger.warn(s"[SendYourFileController][onSubmit] Error submitting file to FTS: $error")
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
       }
     }
@@ -113,7 +115,7 @@ class SendYourFileController @Inject() (
       request.userAnswers
         .get(UploadIdPage)
         .fold {
-          logWarn(
+          logger.warn(
             "[SendYourFileController][getFileStatusAndRedirect] UploadId not found in user answers"
           )
           Future.successful(InternalServerError)
@@ -138,7 +140,7 @@ class SendYourFileController @Inject() (
                   Ok(Json.toJson(URL(controllers.routes.JourneyRecoveryController.onPageLoad().url)))
               }
             case Left(error)              =>
-              logWarn(s"[SendYourFileController][getFileStatusAndRedirect] Error getting file status: $error")
+              logger.warn(s"[SendYourFileController][getFileStatusAndRedirect] Error getting file status: $error")
               InternalServerError
           }
         }
