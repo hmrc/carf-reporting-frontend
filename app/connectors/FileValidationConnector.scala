@@ -42,7 +42,7 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[ExtractedFileDetails] = {
     val requestUrl = url"${config.carfReportingBaseUrl}/validate-extract-xml/$carfId"
 
-    logInfo(s"[FileValidationConnector][validateAndExtract] Calling endpoint: ${requestUrl.toURI}")
+    logInfo(s"[FileValidationConnector][validateAndExtract] Calling file validation and extraction endpoint")
 
     ResultT.fromFuture {
       http
@@ -56,7 +56,7 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
                 case Success(extractedFileDetails) => Right(extractedFileDetails)
                 case Failure(_)                    =>
                   logError(
-                    s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 200) from $requestUrl"
+                    s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 200) from file extraction call"
                   )
                   Left(JsonValidationError)
               }
@@ -65,13 +65,13 @@ class FileValidationConnector @Inject() (config: FrontendAppConfig, http: HttpCl
                 case Success(xmlValidationError) => Left(xmlValidationError)
                 case Failure(_)                  =>
                   logError(
-                    s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 422) from $requestUrl"
+                    s"[FileValidationConnector][validateAndExtract] Error parsing response body (status 422) from file extraction call"
                   )
                   Left(JsonValidationError)
               }
             case status               =>
               logError(
-                s"[FileValidationConnector][validateAndExtract] Unexpected response: status $status from $requestUrl"
+                s"[FileValidationConnector][validateAndExtract] Unexpected response: status $status from file extraction call"
               )
               Left(InternalServerError)
           }

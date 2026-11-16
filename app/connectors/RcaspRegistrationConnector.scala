@@ -37,7 +37,7 @@ class RcaspRegistrationConnector @Inject() (config: FrontendAppConfig, http: Htt
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): ResultT[List[RcaspDetails]] = {
     val viewRcaspUrl = url"${config.carfAccountBaseUrl}/carf-account/view-rcasp/$carfId/none"
 
-    logInfo(s"[RcaspRegistrationConnector][viewRcasps] Calling endpoint: ${viewRcaspUrl.toString}")
+    logInfo(s"[RcaspRegistrationConnector][viewRcasps] Calling rcasp lookup endpoint")
 
     ResultT.fromFuture {
       http
@@ -51,7 +51,7 @@ class RcaspRegistrationConnector @Inject() (config: FrontendAppConfig, http: Htt
                   Right(viewRcaspResponse.ViewRCASP.ResponseDetails.RCASPList)
                 case Failure(_)                 =>
                   logError(
-                    s"[RcaspRegistrationConnector][viewRcasps] Error parsing ViewRcaspResponse from $viewRcaspUrl"
+                    s"[RcaspRegistrationConnector][viewRcasps] Error parsing ViewRcaspResponse from rcasp lookup"
                   )
                   Left(JsonValidationError)
               }
@@ -60,7 +60,7 @@ class RcaspRegistrationConnector @Inject() (config: FrontendAppConfig, http: Htt
               Right(List.empty)
             case status    =>
               logError(
-                s"[RcaspRegistrationConnector][viewRcasps] Unexpected response: status $status from $viewRcaspUrl"
+                s"[RcaspRegistrationConnector][viewRcasps] Unexpected response: status $status from rcasp lookup"
               )
               Left(InternalServerError)
           }
