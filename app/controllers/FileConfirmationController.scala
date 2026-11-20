@@ -22,6 +22,7 @@ import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import models.ReportType.NotificationOfReportingOutsideUk
 import models.fileSubmission.FileStatus.Passed
 import models.fileSubmission.SubmissionDetails
+import models.getReportType
 import models.responses.{getEmails, getEmailsFromSubscriptionDetails, getName}
 import models.upscan.UploadId
 import pages.UploadCompletionLockPage
@@ -33,7 +34,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{DateTimeFormats, FileConfirmationHelper}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.FileConfirmationView
-import models.getReportType
 
 import java.time.ZoneOffset
 import javax.inject.Inject
@@ -105,22 +105,23 @@ class FileConfirmationController @Inject (
     Ok(view(summary, formattedDate, config.managementUrl, emailAddressHtml, isOverseas, rcaspName))
   }
 
+  private def normaliseEmail(email: String): String = email.trim.toLowerCase
+
   private def generateEmailAddressHtml(
-      emailAddresses: List[String],
+      userEmailAddresses: List[String],
       isRCASPUser: Boolean,
       rcaspEmailAddresses: List[String]
-  )(implicit messages: Messages): String =
-    emailAddresses match {
-      case primary :: secondary :: Nil if isRCASPUser =>
-        messages("fileConfirmation.2.email.sent", primary, secondary)
-      case primary :: Nil if isRCASPUser              =>
-        messages("fileConfirmation.1.email.sent", primary)
-      case _                                          =>
-        val flEmailAddresses       = rcaspEmailAddresses
-        val completeEmailAddresses = emailAddresses ++ flEmailAddresses
+  )(implicit messages: Messages): String = {
+    val userEmailsNormalised = userEmailAddresses.map(normaliseEmail).toSet
 
-        val emailToApplyComma = completeEmailAddresses.take(completeEmailAddresses.size - 1)
-        val lastEmail         = completeEmailAddresses.last
-        messages("fileConfirmation.2.email.sent", emailToApplyComma.mkString(", "), lastEmail)
+    val rcaspEmailsToShow =
+      if (isRCASPUser) Nil
+      else rcaspEmailAddresses.filterNot(email => userEmailsNormalised.contains(normaliseEmail(email)))
+
+    (userEmailAddresses ++ rcaspEmailsToShow) match {
+      case Nil           => ""
+      case single :: Nil => messages("fileConfirmation.1.email.sent", single)
+      case all           => messages("fileConfirmation.2.email.sent", all.init.mkString(", "), all.last)
     }
+  }
 }
