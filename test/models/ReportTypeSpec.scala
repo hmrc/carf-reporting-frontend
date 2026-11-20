@@ -19,6 +19,7 @@ package models
 import base.SpecBase
 import models.ReportType.*
 import play.api.i18n.Messages
+import play.api.libs.json.*
 
 class ReportTypeSpec extends SpecBase {
 
@@ -87,6 +88,48 @@ class ReportTypeSpec extends SpecBase {
           )
 
         warningMessageForReportType(ReportableInformationFallback) mustBe None
+      }
+    }
+
+    ".reportTypeFormat" - {
+
+      "must write each ReportType as its case name" in {
+        ReportType.values.foreach { reportType =>
+          Json.toJson(reportType) mustBe JsString(reportType.toString)
+        }
+      }
+
+      "must read each ReportType from its case name" in {
+        ReportType.values.foreach { reportType =>
+          JsString(reportType.toString).validate[ReportType] mustBe JsSuccess(reportType)
+        }
+      }
+
+      "must round trip every ReportType through JSON" in {
+        ReportType.values.foreach { reportType =>
+          Json.toJson(reportType).as[ReportType] mustBe reportType
+        }
+      }
+
+      "must use the case names that the backend expects" in {
+        Json.toJson(NewInformation)                                  mustBe JsString("NewInformation")
+        Json.toJson(NilReport)                                       mustBe JsString("NilReport")
+        Json.toJson(CorrectedAndDeletedInformationForExistingReport) mustBe
+          JsString("CorrectedAndDeletedInformationForExistingReport")
+      }
+
+      "must fail to read an unknown ReportType name" in {
+        val result = JsString("NotARealReportType").validate[ReportType]
+
+        result                                                                                      mustBe a[JsError]
+        result.asEither.left.toOption.flatMap(_.headOption).flatMap(_._2.headOption).map(_.message) mustBe
+          Some("Unknown ReportType: NotARealReportType")
+      }
+
+      "must fail to read a value that is not a string" in {
+        JsNumber(1).validate[ReportType]                                mustBe a[JsError]
+        JsNull.validate[ReportType]                                     mustBe a[JsError]
+        Json.obj("reportType" -> "NewInformation").validate[ReportType] mustBe a[JsError]
       }
     }
   }

@@ -60,7 +60,7 @@ class SubmissionDetailsConnectorISpec
         |    "RCASPName" : "Timmy's Turtles",
         |    "PrimaryContactDetails" : {
         |      "ContactName" : "Nemona Champion",
-        |      "EmailAddress" : "john.doe@example.com"
+        |      "EmailAddress" : "rcasp.primary@example.com"
         |    },
         |    "SecondaryContactDetails" : {
         |      "ContactName" : "Clavell",
@@ -210,7 +210,7 @@ class SubmissionDetailsConnectorISpec
         |      "RCASPName" : "Timmy's Turtles",
         |      "PrimaryContactDetails" : {
         |        "ContactName" : "Nemona Champion",
-        |        "EmailAddress" : "john.doe@example.com"
+        |        "EmailAddress" : "rcasp.primary@example.com"
         |      },
         |      "SecondaryContactDetails" : {
         |        "ContactName" : "Clavell",
@@ -279,7 +279,7 @@ class SubmissionDetailsConnectorISpec
         |      "LastName" : "Champion",
         |      "PrimaryContactDetails" : {
         |        "ContactName" : "Nemona Champion",
-        |        "EmailAddress" : "john.doe@example.com"
+        |        "EmailAddress" : "rcasp.primary@example.com"
         |      }
         |    },
         |    "subscriptionDetails" : {

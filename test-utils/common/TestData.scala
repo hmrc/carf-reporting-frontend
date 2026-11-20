@@ -139,6 +139,7 @@ trait TestData extends Generators {
   val testLastName    = "Champion"
   val testContactName = s"$testFirstName $testLastName"
   val testEmail       = "john.doe@example.com"
+  val testRcaspEmail  = "rcasp.primary@example.com"
   val testPhone       = "07123456789"
 
   val organisationRegisteredBusinessRcaspDetails =
@@ -153,7 +154,7 @@ trait TestData extends Generators {
       RCASPID = "ZMCAR0123456786",
       IsRCASPUser = false,
       RCASPName = testRcaspName,
-      PrimaryContactDetails = RcaspContactDetails(ContactName = testContactName, EmailAddress = testEmail),
+      PrimaryContactDetails = RcaspContactDetails(ContactName = testContactName, EmailAddress = testRcaspEmail),
       SecondaryContactDetails = Some(RcaspContactDetails(ContactName = "Clavell", EmailAddress = "clavell@uva.edu.org"))
     )
 
@@ -163,7 +164,7 @@ trait TestData extends Generators {
       IsRCASPUser = false,
       FirstName = testFirstName,
       LastName = testLastName,
-      PrimaryContactDetails = RcaspContactDetails(ContactName = testContactName, EmailAddress = testEmail)
+      PrimaryContactDetails = RcaspContactDetails(ContactName = testContactName, EmailAddress = testRcaspEmail)
     )
 
   val displaySubscriptionIndividual = DisplaySubscriptionIndividual(testFirstName, testLastName)

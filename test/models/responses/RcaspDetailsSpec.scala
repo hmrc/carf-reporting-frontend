@@ -37,7 +37,7 @@ class RcaspDetailsSpec extends SpecBase {
 
     ".getEmails" - {
       "given an IndividualRcaspDetails" in {
-        individualRcaspDetails.getEmails mustBe List(testEmail)
+        individualRcaspDetails.getEmails mustBe List(testRcaspEmail)
       }
 
       "given an OrganisationRcaspDetailsRcaspUser" in {
@@ -46,11 +46,11 @@ class RcaspDetailsSpec extends SpecBase {
 
       "given an OrganisationRcaspDetailsStandard" - {
         "when there are primary and secondary contact details" in {
-          organisationStandardRcaspDetails.getEmails mustBe List(testEmail, "clavell@uva.edu.org")
+          organisationStandardRcaspDetails.getEmails mustBe List(testRcaspEmail, "clavell@uva.edu.org")
         }
 
         "when there are only primary contact details" in {
-          organisationStandardRcaspDetails.copy(SecondaryContactDetails = None).getEmails mustBe List(testEmail)
+          organisationStandardRcaspDetails.copy(SecondaryContactDetails = None).getEmails mustBe List(testRcaspEmail)
         }
       }
     }

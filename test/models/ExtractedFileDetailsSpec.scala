@@ -21,6 +21,7 @@ import models.DocTypeIndic.*
 import models.MessageTypeIndic.*
 import models.ReportType.*
 import org.scalacheck.Gen
+import play.api.libs.json.*
 
 class ExtractedFileDetailsSpec extends SpecBase {
 
@@ -41,7 +42,7 @@ class ExtractedFileDetailsSpec extends SpecBase {
   )
 
   "ExtractedFileDetails" - {
-    ".getReportType" - {
+    ".getReportType (calculated from the raw fields when reportType is not set)" - {
       "when isTestData is true" in {
         val extractedFileDetails = ExtractedFileDetails(
           messageRefId = testMessageRefId,
@@ -231,6 +232,80 @@ class ExtractedFileDetailsSpec extends SpecBase {
           )
 
           extractedFileDetails.getReportType mustBe NilReport
+        }
+      }
+    }
+
+    ".getReportType (when the BE has supplied reportType)" - {
+      val withRawFieldsForNilReport = ExtractedFileDetails(
+        messageRefId = testMessageRefId,
+        sendingEntityIn = testRcaspId,
+        rcaspName = Some(testRcaspName),
+        messageTypeIndic = CARF703,
+        hasOtherNexus = false,
+        hasCryptoUsers = false,
+        docTypeIndic = None,
+        isTestData = false,
+        allCryptoUsersAreCorrections = false,
+        allCryptoUsersAreDeletions = false
+      )
+
+      "must return the supplied reportType instead of calculating it" in {
+        withRawFieldsForNilReport.copy(reportType = Some(NewInformation)).getReportType mustBe NewInformation
+      }
+
+      "must calculate it when reportType is None" in {
+        withRawFieldsForNilReport.copy(reportType = None).getReportType mustBe NilReport
+      }
+    }
+
+    "JSON format" - {
+      val base = ExtractedFileDetails(
+        messageRefId = testMessageRefId,
+        sendingEntityIn = testRcaspId,
+        rcaspName = Some(testRcaspName),
+        messageTypeIndic = CARF701,
+        hasOtherNexus = false,
+        hasCryptoUsers = true,
+        docTypeIndic = Some(OECD1),
+        isTestData = false,
+        allCryptoUsersAreCorrections = false,
+        allCryptoUsersAreDeletions = false
+      )
+
+      "must write reportType as its case name" in {
+        val json = Json.toJson(base.copy(reportType = Some(NewInformation)))
+
+        (json \ "reportType").as[String] mustBe "NewInformation"
+      }
+
+      "must omit reportType when it is None" in {
+        (Json.toJson(base.copy(reportType = None)) \ "reportType").toOption mustBe None
+      }
+
+      "must round trip when reportType is set" in {
+        val original = base.copy(reportType = Some(CorrectedInformationForExistingReport))
+
+        Json.toJson(original).as[ExtractedFileDetails] mustBe original
+      }
+
+      "must read a payload without reportType as None" in {
+        val json = Json.toJson(base.copy(reportType = None))
+
+        json.as[ExtractedFileDetails].reportType mustBe None
+      }
+
+      "must fail to read an unknown reportType" in {
+        val json = Json.toJson(base).as[JsObject] + ("reportType" -> JsString("NotARealType"))
+
+        json.validate[ExtractedFileDetails].isError mustBe true
+      }
+
+      "must read every ReportType case name" in {
+        ReportType.values.foreach { reportType =>
+          val json = Json.toJson(base).as[JsObject] + ("reportType" -> JsString(reportType.toString))
+
+          json.as[ExtractedFileDetails].reportType mustBe Some(reportType)
         }
       }
     }
