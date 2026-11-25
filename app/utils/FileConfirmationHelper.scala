@@ -22,6 +22,7 @@ import uk.gov.hmrc.govukfrontend.views.Aliases.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.all.{SummaryListRowViewModel, ValueViewModel}
 import viewmodels.implicits.*
+import models.getReportType
 
 class FileConfirmationHelper {
 

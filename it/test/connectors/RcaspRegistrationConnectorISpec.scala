@@ -87,7 +87,7 @@ class RcaspRegistrationConnectorISpec
         |          },
         |          "PrimaryContactDetails": {
         |            "ContactName": "Nemona Champion",
-        |            "EmailAddress": "john.doe@example.com"
+        |            "EmailAddress": "rcasp.primary@example.com"
         |          }
         |        },
         |        {
@@ -110,7 +110,7 @@ class RcaspRegistrationConnectorISpec
         |          },
         |          "PrimaryContactDetails": {
         |            "ContactName": "Nemona Champion",
-        |            "EmailAddress": "john.doe@example.com"
+        |            "EmailAddress": "rcasp.primary@example.com"
         |          },
         |          "SecondaryContactDetails": {
         |            "ContactName": "Clavell",

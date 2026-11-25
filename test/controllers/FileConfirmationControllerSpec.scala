@@ -21,6 +21,7 @@ import config.FrontendAppConfig
 import connectors.SubmissionDetailsConnector
 import models.errors.ApiError.InternalServerError
 import models.fileSubmission.FileStatus.Pending
+import models.fileSubmission.SubmissionDetails
 import models.responses.{getEmails, getEmailsFromSubscriptionDetails}
 import org.mockito.ArgumentMatchers.{any, argThat, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -50,6 +51,25 @@ class FileConfirmationControllerSpec extends SpecBase {
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockSubmissionDetailsConnector, mockFileConfirmationHelper)
+  }
+
+  private def confirmationEmailText(submissionDetails: SubmissionDetails): (Int, String) = {
+    when(mockAppConfig.managementUrl) thenReturn managementUrl
+    when(mockFileConfirmationHelper.rows(any(), any())(any())).thenReturn(testSummaryList.rows)
+    when(mockSubmissionDetailsConnector.getSubmissionDetailsByUploadId(any(), any())(any(), any()))
+      .thenReturn(ResultT.fromValue(submissionDetails))
+    when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+    val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      .overrides(bind[FrontendAppConfig].toInstance(mockAppConfig))
+      .overrides(bind[FileConfirmationHelper].toInstance(mockFileConfirmationHelper))
+      .overrides(bind[SubmissionDetailsConnector].toInstance(mockSubmissionDetailsConnector))
+      .build()
+
+    running(application) {
+      val result = route(application, FakeRequest(GET, fileConfirmationRoute)).value
+      (status(result), contentAsString(result))
+    }
   }
 
   "FileConfirmation Controller" - {
@@ -261,6 +281,82 @@ class FileConfirmationControllerSpec extends SpecBase {
             .rows(eqTo(extractedFileDetailsTestData), eqTo(testRcaspName))(any())
           verify(mockSessionRepository, times(0)).set(any())
         }
+      }
+
+      "must list the address once when the only RCASP contact has the same email as the only user contact" in {
+        val userEmail = displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails.head
+
+        val submission = orgSubmissionDetailsPassed.copy(
+          subscriptionDetails = displaySubscriptionDetailsOrg.copy(secondaryContact = None),
+          rcaspDetails = organisationStandardRcaspDetails.copy(
+            IsRCASPUser = false,
+            PrimaryContactDetails =
+              organisationStandardRcaspDetails.PrimaryContactDetails.copy(EmailAddress = userEmail),
+            SecondaryContactDetails = None
+          )
+        )
+
+        val (statusCode, body) = confirmationEmailText(submission)
+
+        statusCode mustEqual OK
+        body            must include(s"We have sent a confirmation email to $userEmail.")
+        body            must not include s"$userEmail and "
+      }
+
+      "must treat RCASP and user emails as the same when they differ only by case or surrounding spaces" in {
+        val userEmail = displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails.head
+
+        val submission = orgSubmissionDetailsPassed.copy(
+          subscriptionDetails = displaySubscriptionDetailsOrg.copy(secondaryContact = None),
+          rcaspDetails = organisationStandardRcaspDetails.copy(
+            IsRCASPUser = false,
+            PrimaryContactDetails = organisationStandardRcaspDetails.PrimaryContactDetails
+              .copy(EmailAddress = s"  ${userEmail.toUpperCase} "),
+            SecondaryContactDetails = None
+          )
+        )
+
+        val (statusCode, body) = confirmationEmailText(submission)
+
+        statusCode mustEqual OK
+        body            must include(s"We have sent a confirmation email to $userEmail.")
+      }
+
+      "must only add the RCASP contacts whose email is not a user email" in {
+        val userEmails = displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails
+        val otherEmail = organisationStandardRcaspDetails.getEmails(1)
+
+        val submission = orgSubmissionDetailsPassed.copy(
+          subscriptionDetails = displaySubscriptionDetailsOrg,
+          rcaspDetails = organisationStandardRcaspDetails.copy(
+            IsRCASPUser = false,
+            PrimaryContactDetails =
+              organisationStandardRcaspDetails.PrimaryContactDetails.copy(EmailAddress = userEmails.head)
+          )
+        )
+
+        val (statusCode, body) = confirmationEmailText(submission)
+
+        statusCode mustEqual OK
+        body            must include(
+          s"We have sent a confirmation email to ${userEmails.head}, ${userEmails(1)} and $otherEmail."
+        )
+      }
+
+      "must only list the user emails when the user is the RCASP" in {
+        val submission = orgSubmissionDetailsPassed.copy(
+          subscriptionDetails = displaySubscriptionDetailsOrg,
+          rcaspDetails = organisationStandardRcaspDetails.copy(IsRCASPUser = true)
+        )
+
+        val userEmails = displaySubscriptionDetailsOrg.getEmailsFromSubscriptionDetails
+
+        val (statusCode, body) = confirmationEmailText(submission)
+
+        statusCode mustEqual OK
+        body            must include(s"We have sent a confirmation email to ${userEmails.head} and ${userEmails(1)}.")
+        body            must not include testRcaspEmail
+        body            must not include organisationStandardRcaspDetails.getEmails(1)
       }
 
       "must redirect to Journey Recovery when file status is not Passed" in {
